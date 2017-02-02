@@ -8,3 +8,6 @@ Read this article: [https://districtdatalabs.silvrback.com/getting-started-with-
   
 * Three data structures in spark
   + [https://databricks.com/blog/2016/07/14/a-tale-of-three-apache-spark-apis-rdds-dataframes-and-datasets.html](https://databricks.com/blog/2016/07/14/a-tale-of-three-apache-spark-apis-rdds-dataframes-and-datasets.html)
+  
+* Link apache-spark with jupyter notebook
+  + [http://www.cloudera.com/documentation/enterprise/5-5-x/topics/spark_ipython.html](http://www.cloudera.com/documentation/enterprise/5-5-x/topics/spark_ipython.html)
