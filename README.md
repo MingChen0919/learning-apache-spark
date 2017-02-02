@@ -11,3 +11,7 @@ Read this article: [https://districtdatalabs.silvrback.com/getting-started-with-
   
 * Link apache-spark with jupyter notebook
   + [http://www.cloudera.com/documentation/enterprise/5-5-x/topics/spark_ipython.html](http://www.cloudera.com/documentation/enterprise/5-5-x/topics/spark_ipython.html)
+
+
+* Examples of machine learning with spark
+  + [https://www.mapr.com/blog/churn-prediction-pyspark-using-mllib-and-ml-packages](https://www.mapr.com/blog/churn-prediction-pyspark-using-mllib-and-ml-packages)
