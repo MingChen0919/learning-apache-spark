@@ -7,7 +7,7 @@ conda install jupyter
 ## Get `jupyter binary executable path`
 
 ```
-ls -l `which jupyter`
+which jupyter
 ```
 
 output
