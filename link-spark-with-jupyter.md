@@ -28,7 +28,7 @@ You can also add the two environmental variables to the `~/.bash_profile` file t
 ## Run jupyter notebook
 
 ```
-pystart
+pyspark
 ```
 
 Then go to [http://127.0.0.1:8880](http://127.0.0.1:8880)
