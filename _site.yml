@@ -12,6 +12,8 @@ navbar:
       menu:
         - text: "Integrate spark with Rodeo"
           href: pyspark-on-rodeo.html
+        - text: "Integrate spark with Jupyter"
+          href: pyspark-on-jupyter.html
   right:
     - icon: fa-github
       href: https://github.com/MingChen0919
