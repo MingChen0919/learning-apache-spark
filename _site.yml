@@ -12,15 +12,6 @@ navbar:
       menu:
         - text: "Integrate spark with Rodeo"
           href: pyspark-on-rodeo.html
-    - text: "Galaxy Workflows"
-      icon: fa-gear
-      href: galaxy-workflows.html
-    - text: "Galaxy Deployment"
-      icon: fa-gear
-      menu:
-        - text: "Galaxy on AWS"
-          href: galaxy-on-aws.html
-        - text: "---------"
   right:
     - icon: fa-github
       href: https://github.com/MingChen0919
