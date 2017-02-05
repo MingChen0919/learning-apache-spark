@@ -1,0 +1,32 @@
+name: "learning-apache-galaxy"
+output_dir: "docs"
+navbar:
+  title: "Learning Apache Spark"
+  type: inverse
+  left:
+    - text: "Home"
+      icon: fa-home
+      href: index.html
+    - text: "Integrate Spark"
+      icon: fa-gear
+      menu:
+        - text: "Integrate spark with Rodeo"
+          href: pyspark-on-rodeo.html
+    - text: "Galaxy Workflows"
+      icon: fa-gear
+      href: galaxy-workflows.html
+    - text: "Galaxy Deployment"
+      icon: fa-gear
+      menu:
+        - text: "Galaxy on AWS"
+          href: galaxy-on-aws.html
+        - text: "---------"
+  right:
+    - icon: fa-github
+      href: https://github.com/MingChen0919
+    - icon: fa-twitter
+      href: https://twitter.com/mingchen0919
+output:
+  html_document:
+    theme: cosmo
+    highlight: textmate
