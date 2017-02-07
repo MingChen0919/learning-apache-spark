@@ -12,7 +12,7 @@
 <meta name="author" content="Ming Chen" />
 
 
-<title>Pyspark On Rodeo</title>
+<title>Aggregate Function</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -238,44 +238,48 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Pyspark On Rodeo</h1>
+<h1 class="title toc-ignore">Aggregate Function</h1>
 <h4 class="author"><em>Ming Chen</em></h4>
-<h4 class="date"><em>2/5/2017</em></h4>
+<h4 class="date"><em>2/7/2017</em></h4>
 
 </div>
 
 
-<div id="install-rodeo-on-mac" class="section level2">
-<h2>Install Rodeo on Mac</h2>
+<div id="pyspark.rdd.aggregate" class="section level2">
+<h2><code>pyspark.RDD.aggregate</code></h2>
+<pre class="python"><code>aggregate(zeroValue, seqOp, combOp)</code></pre>
 <ul>
-<li>Download DMG file <a href="https://www.yhat.com/products/rodeo/" class="uri">https://www.yhat.com/products/rodeo/</a></li>
+<li><code>zeroValue</code> is a variable with user initialed values</li>
+<li><code>seqOp</code> is a function which takes two variables: <code>zeroValue</code> and an RDD record (element). The purpose of function <code>seqOp</code> is to take the initial values and values from an RDD record and then do some calculation. The calculate results will be <strong>added</strong> to the previous <code>zeroValue</code> variable. This process will go through all the RDD elements in a partition.</li>
+<li><code>combOp</code> is a function which takes two <em>dynamic</em> variables: <code>final-zeroValue-in-one-partition</code> and <code>final-zeroValue-in-another-partition</code>. Here I call it dynamic because this process go through all the partitions.</li>
 </ul>
-</div>
-<div id="install-apache-spark-with-homebrew" class="section level2">
-<h2>Install <code>apache-spark</code> with homebrew</h2>
-<pre class="bash"><code>brew install apache-spark</code></pre>
-</div>
-<div id="locate-the-python-directory-within-apache-spark-root-directory" class="section level2">
-<h2>Locate the <code>python</code> directory within apache-spark root directory</h2>
-<pre class="bash"><code>/usr/local/Cellar/apache-spark/2.1.0/libexec/python</code></pre>
-</div>
-<div id="set-environment-variable" class="section level2">
-<h2>Set environment variable</h2>
+<div id="example-of-pyspark.rdd.aggregate-usage" class="section level3">
+<h3>Example of <code>pyspark.RDD.aggregate</code> usage</h3>
 <ul>
-<li>Open Rodeo, go to <strong>settings</strong>-&gt;<strong>ENVIRONMENT VARIABLES</strong></li>
-<li>Add the path <code>/usr/local/Cellar/apache-spark/2.1.0/libexec/python</code> to <code>PYTHONPATH</code></li>
+<li><strong>Data</strong>: my data has 10 elements (rows) and 2 columns. Let’s say, I want to get 3 values.
+<ul>
+<li>value 1: the sum of column 1 - column 2</li>
+<li>value 2: the sum of column 1 + column 2</li>
+<li>value 3: the sum of column 1 * column 2</li>
+</ul></li>
 </ul>
+<pre class="python"><code>myData = sc.parallelize([(1,2), (3,4), (5,6), (7,8), (9,10)])
+myData.collect()</code></pre>
+<ul>
+<li><p><strong>zeroValue</strong>: my <code>zeroValue</code> could be a list or tuple which has three elements to store the three values. Let’s set it as <code>(0, 0, 0)</code></p></li>
+<li><p><strong>seqOp</strong> and <strong>combOp</strong></p></li>
+</ul>
+<pre class="python"><code>seqOp = (lambda z, r: (r[0] - r[1], r[0] + r[1], r[0] * r[1]))
+combOp = (lambda px, py: (px[0] + py[0], px[1] + py[1], px[2] + py[2]))</code></pre>
+<ul>
+<li>Run <code>aggregate</code></li>
+</ul>
+<pre class="python"><code>myData.aggregate((0, 0, 0), seqOp, combOp)</code></pre>
+<ul>
+<li>Output</li>
+</ul>
+<pre class="python"><code>(-5, 55, 190)</code></pre>
 </div>
-<div id="test-pyspark-on-rodeo" class="section level2">
-<h2>Test pyspark on Rodeo</h2>
-<p>Run the following command</p>
-<pre class="bash"><code>from pyspark import SparkConf, SparkContext
-
-conf = SparkConf().setAppName(&quot;myAppName&quot;)
-sc = SparkContext(conf=conf)
-sc</code></pre>
-<p>You should get something this</p>
-<pre class="bash"><code>&lt;pyspark.context.SparkContext at 0x114ee1610&gt;</code></pre>
 </div>
 
 

@@ -1,0 +1,16 @@
+---
+title: "Data Wrangling with Pandas"
+author: "Ming Chen"
+date: "2/7/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{python}
+import os
+dir(os)
+```
+

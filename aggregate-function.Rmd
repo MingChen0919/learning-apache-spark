@@ -1,0 +1,54 @@
+---
+title: "Aggregate Function"
+author: "Ming Chen"
+date: "2/7/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## `pyspark.RDD.aggregate`
+
+```{python eval=FALSE}
+aggregate(zeroValue, seqOp, combOp)
+```
+
+* `zeroValue` is a variable with user initialed values
+* `seqOp` is a function which takes two variables: `zeroValue` and an RDD record (element). The purpose of function `seqOp` is to take the initial values and values from an RDD record and then do some calculation. The calculate results will be **added** to the previous `zeroValue` variable. This process will go through all the RDD elements in a partition.
+* `combOp` is a function which takes two *dynamic* variables: `final-zeroValue-in-one-partition` and `final-zeroValue-in-another-partition`. Here I call it dynamic because this process go through all the partitions.
+
+### Example of `pyspark.RDD.aggregate` usage
+
+* **Data**: my data has 10 elements (rows) and 2 columns. Let's say, I want to get 3 values.
+    + value 1: the sum of column 1 - column 2
+    + value 2: the sum of column 1 + column 2
+    + value 3: the sum of column 1 * column 2
+    
+```{python eval=FALSE}
+myData = sc.parallelize([(1,2), (3,4), (5,6), (7,8), (9,10)])
+myData.collect()
+```
+
+* **zeroValue**: my `zeroValue` could be a list or tuple which has three elements to store the three values. Let's set it as `(0, 0, 0)`
+
+* **seqOp** and **combOp**
+
+```{python eval=FALSE}
+seqOp = (lambda z, r: (r[0] - r[1], r[0] + r[1], r[0] * r[1]))
+combOp = (lambda px, py: (px[0] + py[0], px[1] + py[1], px[2] + py[2]))
+```
+
+* Run `aggregate`
+
+```{python eval=FALSE}
+myData.aggregate((0, 0, 0), seqOp, combOp)
+```
+
+* Output
+
+```{python eval=FALSE}
+(-5, 55, 190)
+```
+
