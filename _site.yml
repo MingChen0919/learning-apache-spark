@@ -17,7 +17,7 @@ navbar:
     - text: "RDD object"
       icon: fa-gear
       menu:
-        - text: "Aggregate Function"
+        - text: "Aggregate Functions"
           href: aggregate-function.html
   right:
     - icon: fa-github

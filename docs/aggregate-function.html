@@ -211,7 +211,7 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="aggregate-function.html">Aggregate Function</a>
+      <a href="aggregate-function.html">Aggregate Functions</a>
     </li>
   </ul>
 </li>
@@ -272,14 +272,66 @@ myData.collect()</code></pre>
 <pre class="python"><code>seqOp = (lambda z, r: (r[0] - r[1], r[0] + r[1], r[0] * r[1]))
 combOp = (lambda px, py: (px[0] + py[0], px[1] + py[1], px[2] + py[2]))</code></pre>
 <ul>
-<li>Run <code>aggregate</code></li>
+<li><strong>Run <code>aggregate</code></strong></li>
 </ul>
 <pre class="python"><code>myData.aggregate((0, 0, 0), seqOp, combOp)</code></pre>
 <ul>
-<li>Output</li>
+<li><strong>Output</strong></li>
 </ul>
 <pre class="python"><code>(-5, 55, 190)</code></pre>
 </div>
+</div>
+<div id="pyspark.rdd.aggregatebykey" class="section level2">
+<h2><code>pyspark.RDD.aggregateByKey</code></h2>
+<ul>
+<li>To use this function, your data should be a <strong>paired RDD</strong>. That means, each element in your RDD should have a key and value, for example, a dictionary or a tuple with two elements.</li>
+</ul>
+<pre class="python"><code>byKeyData = sc.parallelize([(&#39;a&#39;, (1,2)),
+                            (&#39;a&#39;, (2,2)),
+                            (&#39;b&#39;, (3,4)), 
+                            (&#39;c&#39;, (5,6)),
+                            (&#39;c&#39;, (15,6)),
+                            (&#39;d&#39;, (7,8)), 
+                            (&#39;e&#39;, (9,10))])
+
+byKeyData.collect()</code></pre>
+<ul>
+<li>See the data below. Each element is a tuple. The first element can be a key, the second element is the corresponding value which is a tuple with two elements.</li>
+</ul>
+<pre class="python"><code>[(&#39;a&#39;, (1, 2)),
+ (&#39;a&#39;, (2, 2)),
+ (&#39;b&#39;, (3, 4)),
+ (&#39;c&#39;, (5, 6)),
+ (&#39;c&#39;, (15, 6)),
+ (&#39;d&#39;, (7, 8)),
+ (&#39;e&#39;, (9, 10))]</code></pre>
+<ul>
+<li><code>zeroValue</code> is a variable with user initialed values</li>
+<li><code>seqOp</code> is a function which takes two variables: <code>zeroValue</code> and a <strong>variable</strong> which <strong>refers to the value in an RDD record (element)</strong>. You don’t need to care about the <strong>keys</strong> in the element.</li>
+<li><p><code>combOp</code> is a function which takes two <em>dynamic</em> variables: <code>final-zeroValue-in-one-partition</code> and <code>final-zeroValue-in-another-partition</code>. Here I call it dynamic because this process go through all the partitions.</p></li>
+<li><strong>Here I would like to calculate three values:</strong>
+<ul>
+<li>value 1: aggregate the first element in the value by key</li>
+<li>value 2: aggregate the second element in the value by key</li>
+<li>value 5: multiply the second element in the value by 5 and then aggregate the result by key</li>
+</ul></li>
+<li><p><strong>zeroValue</strong>: (0,0,0).</p></li>
+<li><p><strong>seqOp</strong> and <strong>combOp</strong></p></li>
+</ul>
+<pre class="python"><code>seqOp = (lambda z,r: (r[0], r[1], r[1]*5))
+combOp = (lambda px, py: (px[0] + py[0], px[1] + py[1], px[2] + py[2]))</code></pre>
+<ul>
+<li><strong>Run <code>aggregateByKey</code></strong></li>
+</ul>
+<pre class="python"><code>byKeyData.aggregateByKey((0,0,0), seqOp, combOp).collect()</code></pre>
+<ul>
+<li><strong>Output</strong></li>
+</ul>
+<pre class="python"><code>[(&#39;a&#39;, (3, 4, 20)),
+ (&#39;c&#39;, (20, 12, 60)),
+ (&#39;b&#39;, (3, 4, 20)),
+ (&#39;e&#39;, (9, 10, 50)),
+ (&#39;d&#39;, (7, 8, 40))]</code></pre>
 </div>
 
 
