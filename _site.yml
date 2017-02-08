@@ -19,6 +19,8 @@ navbar:
       menu:
         - text: "Aggregate Functions"
           href: aggregate-function.html
+        - text: "Reduce Functions"
+          href: reduce-functions.html
   right:
     - icon: fa-github
       href: https://github.com/MingChen0919
