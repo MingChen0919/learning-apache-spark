@@ -14,13 +14,29 @@ navbar:
           href: pyspark-on-rodeo.html
         - text: "Integrate spark with Jupyter"
           href: pyspark-on-jupyter.html
-    - text: "RDD object"
+    - text: "Data Manipulation"
       icon: fa-gear
       menu:
+        - text: "pyspark.RDD object"
+        - text: "------------"
         - text: "Aggregate Functions"
           href: aggregate-function.html
         - text: "Reduce Functions"
           href: reduce-functions.html
+        - text: "pyspark.sql.DataFrame"
+        - text: "------------"
+        
+    - text: "Machine Learning"
+      icon: fa-gear
+      menu:
+        - text: "Classification"
+        - text: "-----------"
+        - text: "Logistic Regression"
+          href: logistic-regression.html
+        - text: "SVM"
+          href: svm.html
+        - text: "Naive Bayes"
+          href: naive-baye.html
   right:
     - icon: fa-github
       href: https://github.com/MingChen0919
