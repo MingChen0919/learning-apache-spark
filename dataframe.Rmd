@@ -1,0 +1,15 @@
+---
+title: "Dataframe"
+author: "Ming Chen"
+date: "2/13/2017"
+output: html_document
+---
+
+## `pyspark.sql.DataFrame.withColumn`
+
+* `pyspark.sql.DataFrame.withColumn` is very similar to `mutate()` from R package *dplyr*.
+
+```{python eval=FALSE}
+newRawData = rawData.withColumn('count', rawData['count'].cast('integer'))
+newRawData = rawData.withColumn('count', rawData['count'] + 10)
+```
