@@ -24,6 +24,8 @@ navbar:
         - text: "Reduce Functions"
           href: reduce-functions.html
         - text: "pyspark.sql.DataFrame"
+        - text: "------------"
+        - text: "DataFrame"
           href: dataframe.html
         
     - text: "Machine Learning"
