@@ -17,20 +17,22 @@ navbar:
     - text: "Data Manipulation"
       icon: fa-gear
       menu:
-        - text: "pyspark.RDD object"
         - text: "------------"
+        - text: "pyspark.RDD object"
         - text: "Aggregate Functions"
           href: aggregate-function.html
         - text: "Reduce Functions"
           href: reduce-functions.html
-        - text: "pyspark.sql.DataFrame"
         - text: "------------"
+        - text: "pyspark.sql.DataFrame"
         - text: "DataFrame"
           href: dataframe.html
         
     - text: "Machine Learning"
       icon: fa-gear
       menu:
+        - text: "Data Preprocessing Template"
+          href: data-preprocessing-template.html
         - text: "Classification"
         - text: "-----------"
         - text: "Logistic Regression"

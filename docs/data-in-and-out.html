@@ -12,7 +12,7 @@
 <meta name="author" content="Ming Chen" />
 
 
-<title>Pyspark On Rodeo</title>
+<title>Data in/out</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -273,44 +273,31 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Pyspark On Rodeo</h1>
+<h1 class="title toc-ignore">Data in/out</h1>
 <h4 class="author"><em>Ming Chen</em></h4>
-<h4 class="date"><em>2/5/2017</em></h4>
+<h4 class="date"><em>2/13/2017</em></h4>
 
 </div>
 
 
-<div id="install-rodeo-on-mac" class="section level2">
-<h2>Install Rodeo on Mac</h2>
+<div id="create-a-sparksession-instance" class="section level2">
+<h2>Create a <code>SparkSession</code> instance</h2>
+<pre class="python"><code>from pyspark import SparkConf, SparkContext
+conf = SparkConf().setAppName(&quot;myApp&quot;)
+sc = SparkContext(conf = conf)
+sparksession = SparkSession(sc)</code></pre>
+</div>
+<div id="read-data-from-csv-files" class="section level2">
+<h2>Read data from CSV files</h2>
 <ul>
-<li>Download DMG file <a href="https://www.yhat.com/products/rodeo/" class="uri">https://www.yhat.com/products/rodeo/</a></li>
+<li><strong>inferSchema</strong>: infers the input schema (data type) automatically from data. By default, it is <em>false</em>, which will read all data as strings.</li>
 </ul>
+<pre class="python"><code>rawData = sparksession.read.csv(&quot;kddcup.data_10_percent.csv&quot;, inferSchema=True)
+</code></pre>
 </div>
-<div id="install-apache-spark-with-homebrew" class="section level2">
-<h2>Install <code>apache-spark</code> with homebrew</h2>
-<pre class="bash"><code>brew install apache-spark</code></pre>
-</div>
-<div id="locate-the-python-directory-within-apache-spark-root-directory" class="section level2">
-<h2>Locate the <code>python</code> directory within apache-spark root directory</h2>
-<pre class="bash"><code>/usr/local/Cellar/apache-spark/2.1.0/libexec/python</code></pre>
-</div>
-<div id="set-environment-variable" class="section level2">
-<h2>Set environment variable</h2>
-<ul>
-<li>Open Rodeo, go to <strong>settings</strong>-&gt;<strong>ENVIRONMENT VARIABLES</strong></li>
-<li>Add the path <code>/usr/local/Cellar/apache-spark/2.1.0/libexec/python</code> to <code>PYTHONPATH</code></li>
-</ul>
-</div>
-<div id="test-pyspark-on-rodeo" class="section level2">
-<h2>Test pyspark on Rodeo</h2>
-<p>Run the following command</p>
-<pre class="bash"><code>from pyspark import SparkConf, SparkContext
-
-conf = SparkConf().setAppName(&quot;myAppName&quot;)
-sc = SparkContext(conf=conf)
-sc</code></pre>
-<p>You should get something this</p>
-<pre class="bash"><code>&lt;pyspark.context.SparkContext at 0x114ee1610&gt;</code></pre>
+<div id="write-data-into-csv-files" class="section level2">
+<h2>Write data into CSV files</h2>
+<pre class="python"><code></code></pre>
 </div>
 
 

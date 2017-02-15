@@ -1,0 +1,91 @@
+---
+title: "Data Preprocessing Template"
+author: "Ming Chen"
+date: "2/15/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Connect to spark
+
+```{python eval=FALSE}
+from pyspark import SparkConf, SparkContext
+## set up spark context
+conf = SparkConf().setAppName("myApp")
+sc = SparkContext(conf=conf)
+
+# create sparksession object
+from pyspark.sql import SparkSession
+sparksession = SparkSession(sc)
+```
+
+## Import data
+
+```{python eval=FALSE}
+# import data
+# read data from csv
+rawData = sparksession.read.csv("/Users/mingchen/GoogleDrive/course_UTK/course-2017-spring/COSC526/HW1/kddcup.data_10_percent.csv", inferSchema=True)
+```
+
+## Replace column names
+
+```{python eval=FALSE}
+# ==== data manipulation ======
+oldColNames = rawData.columns
+newColNames = ["duration",
+               "protocol_type",
+               "service",
+               "flag",
+               "src_bytes",
+               "dst_bytes",
+               "land",
+               "wrong_fragment",
+               "urgent",
+               "hot",
+               "num_failed_logins",
+               "logged_in",
+               "num_compromised",
+               "root_shell",
+               "su_attempted",
+               "num_root",
+               "num_file_creations",
+               "num_shells",
+               "num_access_files",
+               "num_outbound_cmds",
+               "is_host_login",
+               "is_guest_login",
+               "count",
+               "srv_count",
+               "serror_rate",
+               "srv_serror_rate",
+               "rerror_rate",
+               "srv_rerror_rate",
+               "same_srv_rate",
+               "diff_srv_rate",
+               "srv_diff_host_rate",
+               "dst_host_count",
+               "dst_host_srv_count",
+               "dst_host_same_srv_rate",
+               "dst_host_diff_srv_rate",
+               "dst_host_same_src_port_rate",
+               "dst_host_srv_diff_host_rate",
+               "dst_host_serror_rate",
+               "dst_host_srv_serror_rate",
+               "dst_host_rerror_rate",
+               "dst_host_srv_rerror_rate",
+               "y_label"]
+
+colNames = zip(oldColNames, newColNames)
+for i in range(0, 42):
+    rawData = rawData.withColumnRenamed(colNames[i][0], colNames[i][1])
+```
+
+## Split data set into training set and test set
+
+```{python eval=FALSE}
+# split data approximately into training set (60%) and test set (40%)
+training, test = rawData.randomSplit([0.6, 0.4], seed=1234)
+```
