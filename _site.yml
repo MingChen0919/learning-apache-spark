@@ -1,4 +1,4 @@
-name: "learning-apache-galaxy"
+name: "learning-apache-spark"
 output_dir: "docs"
 navbar:
   title: "Learning Apache Spark"
@@ -7,9 +7,14 @@ navbar:
     - text: "Home"
       icon: fa-home
       href: index.html
-    - text: "Integrate Spark"
+    - text: "Getting Start"
       icon: fa-gear
       menu:
+        - text: "Installations"
+        - text: "Installations"        
+          href:  install.html
+        - text: "------------"            
+        - text: "Integrate Spark"
         - text: "Integrate spark with Rodeo"
           href: pyspark-on-rodeo.html
         - text: "Integrate spark with Jupyter"
@@ -35,6 +40,8 @@ navbar:
           href: data-preprocessing-template.html
         - text: "Classification"
         - text: "-----------"
+        - text: "Kmeans"
+          href:  kmeans.html        
         - text: "Logistic Regression"
           href: logistic-regression.html
         - text: "SVM"

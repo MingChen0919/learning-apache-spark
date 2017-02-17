@@ -1,5 +1,5 @@
 ---
-title: "index"
+title: "Learning Apache Spark"
 author: "Wenqiang Feng & Ming Chen"
 date: "2/5/2017"
 output: html_document

@@ -12,7 +12,7 @@
 <meta name="author" content="Wenqiang Feng &amp; Ming Chen" />
 
 
-<title>Data Preprocessing Template</title>
+<title>Installations</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -296,86 +296,14 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Data Preprocessing Template</h1>
+<h1 class="title toc-ignore">Installations</h1>
 <h4 class="author"><em>Wenqiang Feng &amp; Ming Chen</em></h4>
-<h4 class="date"><em>2/15/2017</em></h4>
+<h4 class="date"><em>2/17/2017</em></h4>
 
 </div>
 
 
-<div id="connect-to-spark" class="section level2">
-<h2>Connect to spark</h2>
-<pre class="python"><code>from pyspark import SparkConf, SparkContext
-## set up spark context
-conf = SparkConf().setAppName(&quot;myApp&quot;)
-sc = SparkContext(conf=conf)
 
-# create sparksession object
-from pyspark.sql import SparkSession
-sparksession = SparkSession(sc)</code></pre>
-</div>
-<div id="import-data" class="section level2">
-<h2>Import data</h2>
-<pre class="python"><code># import data
-# read data from csv
-rawData = sparksession.read.csv(&quot;/Users/mingchen/GoogleDrive/course_UTK/course-2017-spring/COSC526/HW1/kddcup.data_10_percent.csv&quot;, inferSchema=True)</code></pre>
-</div>
-<div id="replace-column-names" class="section level2">
-<h2>Replace column names</h2>
-<pre class="python"><code># ==== data manipulation ======
-oldColNames = rawData.columns
-newColNames = [&quot;duration&quot;,
-               &quot;protocol_type&quot;,
-               &quot;service&quot;,
-               &quot;flag&quot;,
-               &quot;src_bytes&quot;,
-               &quot;dst_bytes&quot;,
-               &quot;land&quot;,
-               &quot;wrong_fragment&quot;,
-               &quot;urgent&quot;,
-               &quot;hot&quot;,
-               &quot;num_failed_logins&quot;,
-               &quot;logged_in&quot;,
-               &quot;num_compromised&quot;,
-               &quot;root_shell&quot;,
-               &quot;su_attempted&quot;,
-               &quot;num_root&quot;,
-               &quot;num_file_creations&quot;,
-               &quot;num_shells&quot;,
-               &quot;num_access_files&quot;,
-               &quot;num_outbound_cmds&quot;,
-               &quot;is_host_login&quot;,
-               &quot;is_guest_login&quot;,
-               &quot;count&quot;,
-               &quot;srv_count&quot;,
-               &quot;serror_rate&quot;,
-               &quot;srv_serror_rate&quot;,
-               &quot;rerror_rate&quot;,
-               &quot;srv_rerror_rate&quot;,
-               &quot;same_srv_rate&quot;,
-               &quot;diff_srv_rate&quot;,
-               &quot;srv_diff_host_rate&quot;,
-               &quot;dst_host_count&quot;,
-               &quot;dst_host_srv_count&quot;,
-               &quot;dst_host_same_srv_rate&quot;,
-               &quot;dst_host_diff_srv_rate&quot;,
-               &quot;dst_host_same_src_port_rate&quot;,
-               &quot;dst_host_srv_diff_host_rate&quot;,
-               &quot;dst_host_serror_rate&quot;,
-               &quot;dst_host_srv_serror_rate&quot;,
-               &quot;dst_host_rerror_rate&quot;,
-               &quot;dst_host_srv_rerror_rate&quot;,
-               &quot;y_label&quot;]
-
-colNames = zip(oldColNames, newColNames)
-for i in range(0, 42):
-    rawData = rawData.withColumnRenamed(colNames[i][0], colNames[i][1])</code></pre>
-</div>
-<div id="split-data-set-into-training-set-and-test-set" class="section level2">
-<h2>Split data set into training set and test set</h2>
-<pre class="python"><code># split data approximately into training set (60%) and test set (40%)
-training, test = rawData.randomSplit([0.6, 0.4], seed=1234)</code></pre>
-</div>
 
 
 
