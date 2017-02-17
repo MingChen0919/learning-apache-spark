@@ -48,7 +48,7 @@ navbar:
           href: pyspark.ml.feature-module.html
   right:
     - icon: fa-github
-      href: https://github.com/MingChen0919
+      href: https://github.com/MingChen0919/learning-apache-spark
     - icon: fa-twitter
       href: https://twitter.com/mingchen0919
 output:
