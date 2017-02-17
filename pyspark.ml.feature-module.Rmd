@@ -1,0 +1,28 @@
+---
+title: "pyspark.ml.feature module"
+author: "Wenqiang Feng & Ming Chen"
+date: "2/15/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+This module provides a set of functions, methods and classes which act on **features**. A feature is like a column from the data frame or table. You can see that most of functions or classes take parameters like `inputCol`, `featuresCol`, `outputCol`, `labelCol`. These parameters specify the names of column (features) that you want to work on.
+
+## class pairs and `fit/transform` functions
+
+I found that there are a lot of class pairs in this module. For example:
+
+* `ChiSqSelector` and `ChiSqSelectorModel`
+* `CountVectorizer` and `CountVectorizerModel`
+* `IDF` and `IDFModel`
+* a lot of other pairs ...
+
+The first class in a pair have functions to build model (instructions about how you want to transform your data). The second class in a pair do the actual data transformation. 
+
+* The `fit` function is from the first class and fit the built model to your data.
+* The `transform` function is from the second class and does the actual data transformation.

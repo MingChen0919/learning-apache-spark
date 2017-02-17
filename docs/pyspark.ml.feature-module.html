@@ -12,7 +12,7 @@
 <meta name="author" content="Wenqiang Feng &amp; Ming Chen" />
 
 
-<title>Spark on Jupyter</title>
+<title>pyspark.ml.feature module</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -287,33 +287,31 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Spark on Jupyter</h1>
+<h1 class="title toc-ignore">pyspark.ml.feature module</h1>
 <h4 class="author"><em>Wenqiang Feng &amp; Ming Chen</em></h4>
-<h4 class="date"><em>2/5/2017</em></h4>
+<h4 class="date"><em>2/15/2017</em></h4>
 
 </div>
 
 
-<div id="install-jupyter-with-conda" class="section level2">
-<h2>Install jupyter with conda</h2>
-<pre><code>conda install jupyter</code></pre>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>This module provides a set of functions, methods and classes which act on <strong>features</strong>. A feature is like a column from the data frame or table. You can see that most of functions or classes take parameters like <code>inputCol</code>, <code>featuresCol</code>, <code>outputCol</code>, <code>labelCol</code>. These parameters specify the names of column (features) that you want to work on.</p>
 </div>
-<div id="get-jupyter-binary-executable-path" class="section level2">
-<h2>Get <code>jupyter binary executable path</code></h2>
-<pre><code>which jupyter</code></pre>
-<p>output</p>
-<pre><code>/Users/mingchen/anaconda2/bin/jupyter</code></pre>
-</div>
-<div id="link-spark-with-jupyter" class="section level2">
-<h2>Link spark with jupyter</h2>
-<pre><code>export PYSPARK_DRIVER_PYTHON=/Users/mingchen/anaconda2/bin/jupyter
-export PYSPARK_DRIVER_PYTHON_OPTS=&quot;notebook --NotebookApp.open_browser=False --NotebookApp.ip=&#39;*&#39; --NotebookApp.port=8880&quot;</code></pre>
-<p>You can also add the two environmental variables to the <code>~/.bash_profile</code> file to permenantly link spark with jupyter</p>
-</div>
-<div id="run-jupyter-notebook" class="section level2">
-<h2>Run jupyter notebook</h2>
-<pre><code>pyspark</code></pre>
-<p>Then go to <a href="http://127.0.0.1:8880" class="uri">http://127.0.0.1:8880</a></p>
+<div id="class-pairs-and-fittransform-functions" class="section level2">
+<h2>class pairs and <code>fit/transform</code> functions</h2>
+<p>I found that there are a lot of class pairs in this module. For example:</p>
+<ul>
+<li><code>ChiSqSelector</code> and <code>ChiSqSelectorModel</code></li>
+<li><code>CountVectorizer</code> and <code>CountVectorizerModel</code></li>
+<li><code>IDF</code> and <code>IDFModel</code></li>
+<li>a lot of other pairs …</li>
+</ul>
+<p>The first class in a pair have functions to build model (instructions about how you want to transform your data). The second class in a pair do the actual data transformation.</p>
+<ul>
+<li>The <code>fit</code> function is from the first class and fit the built model to your data.</li>
+<li>The <code>transform</code> function is from the second class and does the actual data transformation.</li>
+</ul>
 </div>
 
 

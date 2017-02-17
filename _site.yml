@@ -41,6 +41,11 @@ navbar:
           href: svm.html
         - text: "Naive Bayes"
           href: naive-baye.html
+    - text: "Modules"
+      icon: fa-gear
+      menu:
+        - text: "pyspark.ml.feature module"
+          href: pyspark.ml.feature-module.html
   right:
     - icon: fa-github
       href: https://github.com/MingChen0919

@@ -1,6 +1,6 @@
 ---
 title: "Pyspark On Rodeo"
-author: "Ming Chen"
+author: "Wenqiang Feng & Ming Chen"
 date: "2/5/2017"
 output: html_document
 ---
