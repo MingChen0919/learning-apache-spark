@@ -193,6 +193,7 @@ $(document).ready(function () {
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
+    <li class="divider"></li>
     <li class="dropdown-header">Installations</li>
     <li>
       <a href="install.html">Installations</a>
@@ -310,8 +311,12 @@ $(document).ready(function () {
 </div>
 
 
-<div id="you-can-download-the-complete-ipython-notebook-for-the-tutorial-session." class="section level3">
-<h3>You can download the complete <a href="./ipynb/Regression.ipynb">ipython notebook</a> for the tutorial session.</h3>
+<div id="remark" class="section level3">
+<h3>Remark:</h3>
+<ul>
+<li><p>You can download the complete <a href="./ipynb/Regression.ipynb">ipython notebook</a> for the this session.</p></li>
+<li><p>More details can be found on the offical website for <a href="https://spark.apache.org/docs/latest/api/python/pyspark.ml.html#pyspark.ml.regression.LinearRegression">pyspark.ml package</a></p></li>
+</ul>
 </div>
 <div id="set-up-spark-context-and-sparksession" class="section level3">
 <h3>1. Set up spark context and SparkSession</h3>
@@ -490,8 +495,54 @@ result</code></pre>
 <pre class="python"><code># Create scatter plot and two regression models (scaling exponential) using ggplot
 ggplot(result, aes(x=&#39;pop&#39;,y=&#39;pred&#39;,color=&#39;type&#39;)) +\
 geom_point(colors=&#39;blue&#39;) </code></pre>
+<div id="more-features-about-the-model" class="section level4">
+<h4>8. More features about the model</h4>
+<ul>
+<li>build model</li>
+</ul>
+<pre class="python"><code>from pyspark.ml.linalg import Vectors
+df = sqlContext.read.format(&#39;com.databricks.spark.csv&#39;).\
+                               options(header=&#39;true&#39;, \
+                               inferschema=&#39;true&#39;).load(&quot;./data/Advertising.csv&quot;,header=True);</code></pre>
+<pre class="python"><code># convert the data to dense vector
+def transData(row):
+    return Row(label=row[&quot;Sales&quot;],
+               features=Vectors.dense([
+                                       row[&quot;TV&quot;],
+                                       row[&quot;Radio&quot;],
+                                       row[&quot;Newspaper&quot;]]))</code></pre>
+<pre class="python"><code>transformed = df.rdd.map(transData).toDF() 
+#transformed.show()</code></pre>
+<pre class="python"><code>lr = LinearRegression(maxIter=5, regParam=0.0, solver=&quot;normal&quot;)</code></pre>
+<ul>
+<li>fit model</li>
+</ul>
+<pre class="python"><code>model = lr.fit(transformed)</code></pre>
+<ul>
+<li>coefficients</li>
+</ul>
+<pre class="python"><code>model.coefficients</code></pre>
+<pre class="python"><code>DenseVector([0.0458, 0.1885, -0.001])</code></pre>
+<ul>
+<li>coefficients</li>
+</ul>
+<pre class="python"><code>model.intercept</code></pre>
+<pre class="python"><code>2.9388893694594134</code></pre>
+<ul>
+<li>save and extract model</li>
+</ul>
+<pre class="python"><code>temp_path = &#39;temp/Users/wenqiangfeng/Dropbox/Spark/Code/model&#39;
+modelPath = temp_path + &quot;/lr_model&quot;</code></pre>
+<pre class="python"><code>model.save(modelPath)</code></pre>
+<pre class="python"><code>lr2 = model.load(modelPath)</code></pre>
+<ul>
+<li>check the loaded model</li>
+</ul>
+<pre class="python"><code>lr2.coefficients</code></pre>
+<pre class="python"><code>DenseVector([0.0458, 0.1885, -0.001])</code></pre>
+</div>
 <div id="comparsion-with-r" class="section level4">
-<h4>8. Comparsion with R</h4>
+<h4>9. Comparsion with R</h4>
 <pre class="r"><code>data &lt;- read.csv(&quot;./data/Advertising.csv&quot;, header = TRUE)</code></pre>
 <pre class="r"><code>fit1 = lm(Sales~.,data = data)
 summary(fit1)</code></pre>
@@ -518,6 +569,7 @@ summary(fit1)</code></pre>
 </div>
 </div>
 
+<center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>
 
 
 
