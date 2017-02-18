@@ -8,7 +8,9 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-### You can download the complete [ipython notebook](./ipynb/PysparkCluster.ipynb) for this tutorial session.
+### Remark: 
+
+- You can download the complete [ipython notebook](./ipynb/PysparkCluster.ipynb) for this tutorial session.
 
 #### 1. Pyspark cluster Demo from pyspark
 

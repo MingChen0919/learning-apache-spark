@@ -5,7 +5,12 @@ date: "2/17/2017"
 output: html_document
 ---
 
-### You can download the complete [ipython notebook](./ipynb/Regression.ipynb) for the this session.
+### Remark:
+
+- You can download the complete [ipython notebook](./ipynb/Regression.ipynb) for the this session.
+
+- More details can be found on the offical website for [pyspark.ml package](https://spark.apache.org/docs/latest/api/python/pyspark.ml.html#pyspark.ml.regression.LinearRegression) 
+
 
 ### 1. Set up spark context and SparkSession
 
