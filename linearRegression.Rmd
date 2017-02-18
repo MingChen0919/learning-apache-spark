@@ -218,8 +218,74 @@ result
 ggplot(result, aes(x='pop',y='pred',color='type')) +\
 geom_point(colors='blue') 
 ```
+#### 8. More features about the model
 
-#### 8. Comparsion with R
+- build model
+```{python eval=FALSE}
+from pyspark.ml.linalg import Vectors
+df = sqlContext.read.format('com.databricks.spark.csv').\
+                               options(header='true', \
+                               inferschema='true').load("./data/Advertising.csv",header=True);
+```
+```{python eval=FALSE}
+# convert the data to dense vector
+def transData(row):
+    return Row(label=row["Sales"],
+               features=Vectors.dense([
+                                       row["TV"],
+                                       row["Radio"],
+                                       row["Newspaper"]]))
+```
+```{python eval=FALSE}
+transformed = df.rdd.map(transData).toDF() 
+#transformed.show()
+```
+
+```{python eval=FALSE}
+lr = LinearRegression(maxIter=5, regParam=0.0, solver="normal")
+```
+- fit model
+```{python eval=FALSE}
+model = lr.fit(transformed)
+```
+
+- coefficients
+```{python eval=FALSE}
+model.coefficients
+```
+```{python eval=FALSE}
+DenseVector([0.0458, 0.1885, -0.001])
+```
+- coefficients
+```{python eval=FALSE}
+model.intercept
+```
+```{python eval=FALSE}
+2.9388893694594134
+```
+
+- save and extract model
+
+```{python eval=FALSE}
+temp_path = 'temp/Users/wenqiangfeng/Dropbox/Spark/Code/model'
+modelPath = temp_path + "/lr_model"
+```
+```{python eval=FALSE}
+model.save(modelPath)
+```
+```{python eval=FALSE}
+lr2 = model.load(modelPath)
+```
+- check the loaded model
+```{python eval=FALSE}
+lr2.coefficients
+```
+```{python eval=FALSE}
+DenseVector([0.0458, 0.1885, -0.001])
+```
+
+
+#### 9. Comparsion with R
 ```{r}
 data <- read.csv("./data/Advertising.csv", header = TRUE)
 ```
