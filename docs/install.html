@@ -205,6 +205,11 @@ $(document).ready(function () {
     <li>
       <a href="pyspark-on-jupyter.html">Integrate spark with Jupyter</a>
     </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">Data Preprocessing Template</li>
+    <li>
+      <a href="data-preprocessing-template.html">Data Preprocessing Template</a>
+    </li>
   </ul>
 </li>
 <li class="dropdown">
@@ -240,11 +245,13 @@ $(document).ready(function () {
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="data-preprocessing-template.html">Data Preprocessing Template</a>
-    </li>
-    <li class="dropdown-header">Classification</li>
     <li class="divider"></li>
+    <li class="dropdown-header">Regression</li>
+    <li>
+      <a href="linearRegression.html">Linear Regression</a>
+    </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">Classification</li>
     <li>
       <a href="kmeans.html">Kmeans</a>
     </li>
@@ -303,7 +310,42 @@ $(document).ready(function () {
 </div>
 
 
-
+<div id="download-apache-spark-from-the-official-website" class="section level3">
+<h3>1. Download Apache Spark from the official website</h3>
+<p>Weblink: <a href="http://spark.apache.org/downloads.html">Download Apache Spark™</a></p>
+</div>
+<div id="installation" class="section level3">
+<h3>2. Installation</h3>
+<p>Actually, the Pre-build version doesn’t need installation. You can use it when you unpack it.</p>
+</div>
+<div id="set-path-link" class="section level3">
+<h3>3. Set path link</h3>
+<p>This is the most difficult step for the beginner. However, this step can be easily solved via Min RK’s <a href="https://github.com/minrk/findspark"><code>findspark</code></a>.</p>
+<ul>
+<li>install pyspark</li>
+</ul>
+<pre class="python"><code>pip install findspark</code></pre>
+<ul>
+<li>open <code>ipython</code> in terminal and import findspark</li>
+</ul>
+<pre class="python"><code>import findspark
+findspark.init()</code></pre>
+<ul>
+<li>finding spark path</li>
+</ul>
+<pre class="python"><code>findspark.find()</code></pre>
+<pre class="python"><code>Out[3]: &#39;/Users/wenqiangfeng/spark/&#39;</code></pre>
+<ul>
+<li>open <code>ipython --profile=myprofile</code> in terminal then run the following code</li>
+</ul>
+<pre class="python"><code>findspark.init(&#39;/Users/wenqiangfeng/spark/&#39;, edit_profile=True)</code></pre>
+<pre class="python"><code>findspark.init(&#39;/Users/wenqiangfeng/spark/&#39;, edit_rc=True)</code></pre>
+</div>
+<div id="note" class="section level3">
+<h3>Note:</h3>
+<p>This will also help you to set up the <code>ipython notebook</code> or <code>Jupyter</code>. You may run the following code in terminal to double check it:</p>
+<pre class="python"><code>ipython notebook</code></pre>
+</div>
 
 
 

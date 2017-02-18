@@ -19,6 +19,10 @@ navbar:
           href: pyspark-on-rodeo.html
         - text: "Integrate spark with Jupyter"
           href: pyspark-on-jupyter.html
+        - text: "------------" 
+        - text: "Data Preprocessing Template"        
+        - text: "Data Preprocessing Template"
+          href: data-preprocessing-template.html
     - text: "Data Manipulation"
       icon: fa-gear
       menu:
@@ -36,10 +40,12 @@ navbar:
     - text: "Machine Learning"
       icon: fa-gear
       menu:
-        - text: "Data Preprocessing Template"
-          href: data-preprocessing-template.html
+        - text: "------------"
+        - text: "Regression"      
+        - text: "Linear Regression"
+          href:  linearRegression.html
+        - text: "-----------"          
         - text: "Classification"
-        - text: "-----------"
         - text: "Kmeans"
           href:  kmeans.html        
         - text: "Logistic Regression"

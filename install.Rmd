@@ -8,3 +8,45 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+### 1. Download Apache Spark from the official website 
+ Weblink: [Download Apache Spark™](http://spark.apache.org/downloads.html)
+
+### 2. Installation 
+
+Actually, the Pre-build version doesn't need installation. You can
+use it when you unpack it. 
+
+### 3. Set path link
+
+This is the most difficult step for the beginner. However, this step can be easily solved via  Min RK's [`findspark`](https://github.com/minrk/findspark).
+
+- install pyspark
+```{python eval=FALSE}
+pip install findspark
+```
+- open `ipython` in terminal and import findspark
+```{python eval=FALSE}
+import findspark
+findspark.init()
+```
+- finding spark path
+```{python eval=FALSE}
+findspark.find()
+```
+```{python eval=FALSE}
+Out[3]: '/Users/wenqiangfeng/spark/'
+```
+- open `ipython --profile=myprofile` in terminal then run the following code
+```{python eval=FALSE}
+findspark.init('/Users/wenqiangfeng/spark/', edit_profile=True)
+```
+```{python eval=FALSE}
+findspark.init('/Users/wenqiangfeng/spark/', edit_rc=True)
+```
+
+### Note: 
+
+This will also help you to set up the `ipython notebook` or `Jupyter`. You may run the following code in terminal to double check it:
+```{python eval=FALSE}
+ipython notebook
+```
