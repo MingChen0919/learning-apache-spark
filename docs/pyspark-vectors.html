@@ -12,7 +12,7 @@
 <meta name="author" content="Wenqiang Feng &amp; Ming Chen" />
 
 
-<title>Data in/out</title>
+<title>Pyspark Vectors</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -307,31 +307,33 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Data in/out</h1>
+<h1 class="title toc-ignore">Pyspark Vectors</h1>
 <h4 class="author"><em>Wenqiang Feng &amp; Ming Chen</em></h4>
-<h4 class="date"><em>2/13/2017</em></h4>
+<h4 class="date"><em>2/18/2017</em></h4>
 
 </div>
 
 
-<div id="create-a-sparksession-instance" class="section level2">
-<h2>Create a <code>SparkSession</code> instance</h2>
-<pre class="python"><code>from pyspark import SparkConf, SparkContext
-conf = SparkConf().setAppName(&quot;myApp&quot;)
-sc = SparkContext(conf = conf)
-sparksession = SparkSession(sc)</code></pre>
-</div>
-<div id="read-data-from-csv-files" class="section level2">
-<h2>Read data from CSV files</h2>
+<div id="dense-vector-vs.sparse-vector" class="section level2">
+<h2>Dense vector vs. Sparse vector</h2>
 <ul>
-<li><strong>inferSchema</strong>: infers the input schema (data type) automatically from data. By default, it is <em>false</em>, which will read all data as strings.</li>
+<li><p>Both dense vector and sparse vector are homogeneous and can only have numeric data.</p></li>
+<li><code>DenseVector</code> takes one single argument and is very like an R vector.</li>
+<li><p><code>SparseVector</code> only display non-zero values. <code>SparseVector</code> uses three values to achieve this. The non-value entries’ indices (positions) and corresponding values, and the vector size. With this information, you can figure out which entries in a vector have zero values, and therefore, a complete vector.</p></li>
+<li><p>Example:</p></li>
+<li><p>dense vector</p></li>
 </ul>
-<pre class="python"><code>rawData = sparksession.read.csv(&quot;kddcup.data_10_percent.csv&quot;, inferSchema=True)
-</code></pre>
-</div>
-<div id="write-data-into-csv-files" class="section level2">
-<h2>Write data into CSV files</h2>
-<pre class="python"><code></code></pre>
+<pre class="python"><code>densevector = DenseVector([1,3,4,2.5])
+densevector</code></pre>
+<pre class="python"><code># output
+DenseVector([1.0, 3.0, 4.0, 2.5])</code></pre>
+<ul>
+<li>sparse vector = The sparse vector below is a representation of vector [0, 3.0, 0, 4.5]</li>
+</ul>
+<pre class="python"><code>aSparse = SparseVector(4, [1, 3], [3.0, 4.5])
+aSparse.toArray()</code></pre>
+<pre class="python"><code># output
+array([ 0. ,  3. ,  0. ,  4.5])</code></pre>
 </div>
 
 <center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>

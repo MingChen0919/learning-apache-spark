@@ -1,0 +1,44 @@
+---
+title: "Pyspark Vectors"
+author: "Wenqiang Feng & Ming Chen"
+date: "2/18/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Dense vector vs. Sparse vector
+
+* Both dense vector and sparse vector are homogeneous and can only have numeric data.
+
+* `DenseVector` takes one single argument and is very like an R vector.
+* `SparseVector` only display non-zero values. `SparseVector` uses three values to achieve this. The non-value entries' indices (positions) and corresponding values, and the vector size. With this information, you can figure out which entries in a vector have zero values, and therefore, a complete vector.
+
+* Example:
+
+  + dense vector
+  
+```{python eval=FALSE}
+densevector = DenseVector([1,3,4,2.5])
+densevector
+```
+
+```{python eval=FALSE}
+# output
+DenseVector([1.0, 3.0, 4.0, 2.5])
+```
+
+  + sparse vector
+    = The sparse vector below is a representation of vector [0, 3.0, 0, 4.5]
+    
+```{python eval=FALSE}
+aSparse = SparseVector(4, [1, 3], [3.0, 4.5])
+aSparse.toArray()
+```
+
+```{python eval=FALSE}
+# output
+array([ 0. ,  3. ,  0. ,  4.5])
+```

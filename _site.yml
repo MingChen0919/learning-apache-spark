@@ -37,6 +37,8 @@ navbar:
         - text: "pyspark.sql.DataFrame"
         - text: "DataFrame"
           href: dataframe.html
+        - text: "Pyspark Vectors"
+          href: pyspark-vectors.html
         
     - text: "Machine Learning"
       icon: fa-gear
