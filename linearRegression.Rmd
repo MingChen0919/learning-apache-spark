@@ -261,14 +261,48 @@ model.coefficients
 ```{python eval=FALSE}
 DenseVector([0.0458, 0.1885, -0.001])
 ```
-- coefficients
+- intercept
 ```{python eval=FALSE}
 model.intercept
 ```
 ```{python eval=FALSE}
 2.9388893694594134
 ```
-
+- summary
+```{python eval = FALSE}
+def modelsummary(model):
+    import numpy as np
+    print "##","Note: the last rows are the information for Intercept"
+    print "##","-------------------------------------------------"
+    print "##","  Estimate  Std.Error  t Values  P-value"
+    coef = np.append(list(model.coefficients),model.intercept)
+    Summary=model.summary
+    
+    for i in range(len(Summary.pValues)):
+        print "##",'{:10.6f}'.format(coef[i]),\
+        '{:10.6f}'.format(Summary.coefficientStandardErrors[i]),\
+        '{:8.3f}'.format(Summary.tValues[i]),\
+        '{:10.6f}'.format(Summary.pValues[i])
+        
+    print "##",'---'
+    print "##","Mean squared error: % .6f" % Summary.meanSquaredError, ", RMSE: % .6f" % Summary.rootMeanSquaredError 
+    print "##","Multiple R-squared: %f" % Summary.r2, ", Total iterations: %i"% Summary.totalIterations       
+```
+```{python eval =FALSE}
+modelsummary(model)
+```
+```
+## Note: the last rows are the information for Intercept
+## -------------------------------------------------
+##   Estimate  Std.Error  t Values  P-value
+##   0.045765   0.001395   32.809   0.000000
+##   0.188530   0.008611   21.893   0.000000
+##  -0.001037   0.005871   -0.177   0.859915
+##   2.938889   0.311908    9.422   0.000000
+## ---
+## Mean squared error:  2.784126 , RMSE:  1.668570
+## Multiple R-squared: 0.897211 , Total iterations: 1
+```
 - save and extract model
 
 ```{python eval=FALSE}

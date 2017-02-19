@@ -527,10 +527,41 @@ def transData(row):
 <pre class="python"><code>model.coefficients</code></pre>
 <pre class="python"><code>DenseVector([0.0458, 0.1885, -0.001])</code></pre>
 <ul>
-<li>coefficients</li>
+<li>intercept</li>
 </ul>
 <pre class="python"><code>model.intercept</code></pre>
 <pre class="python"><code>2.9388893694594134</code></pre>
+<ul>
+<li>summary</li>
+</ul>
+<pre class="python"><code>def modelsummary(model):
+    import numpy as np
+    print &quot;##&quot;,&quot;Note: the last rows are the information for Intercept&quot;
+    print &quot;##&quot;,&quot;-------------------------------------------------&quot;
+    print &quot;##&quot;,&quot;  Estimate  Std.Error  t Values  P-value&quot;
+    coef = np.append(list(model.coefficients),model.intercept)
+    Summary=model.summary
+    
+    for i in range(len(Summary.pValues)):
+        print &quot;##&quot;,&#39;{:10.6f}&#39;.format(coef[i]),\
+        &#39;{:10.6f}&#39;.format(Summary.coefficientStandardErrors[i]),\
+        &#39;{:8.3f}&#39;.format(Summary.tValues[i]),\
+        &#39;{:10.6f}&#39;.format(Summary.pValues[i])
+        
+    print &quot;##&quot;,&#39;---&#39;
+    print &quot;##&quot;,&quot;Mean squared error: % .6f&quot; % Summary.meanSquaredError, &quot;, RMSE: % .6f&quot; % Summary.rootMeanSquaredError 
+    print &quot;##&quot;,&quot;Multiple R-squared: %f&quot; % Summary.r2, &quot;, Total iterations: %i&quot;% Summary.totalIterations       </code></pre>
+<pre class="python"><code>modelsummary(model)</code></pre>
+<pre><code>## Note: the last rows are the information for Intercept
+## -------------------------------------------------
+##   Estimate  Std.Error  t Values  P-value
+##   0.045765   0.001395   32.809   0.000000
+##   0.188530   0.008611   21.893   0.000000
+##  -0.001037   0.005871   -0.177   0.859915
+##   2.938889   0.311908    9.422   0.000000
+## ---
+## Mean squared error:  2.784126 , RMSE:  1.668570
+## Multiple R-squared: 0.897211 , Total iterations: 1</code></pre>
 <ul>
 <li>save and extract model</li>
 </ul>
