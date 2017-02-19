@@ -28,7 +28,7 @@ navbar:
       icon: fa-gear
       menu:
         - text: "Data Manipulation"
-        - href: data-manipulation.html
+          href: data-manipulation.html
         - text: "------------"
         - text: "pyspark.RDD object"
         - text: "Aggregate Functions"
