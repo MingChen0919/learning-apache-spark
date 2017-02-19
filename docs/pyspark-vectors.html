@@ -314,26 +314,59 @@ $(document).ready(function () {
 </div>
 
 
+<div id="remark" class="section level2">
+<h2>Remark:</h2>
+<ul>
+<li>You can download the complete <a href="./ipynb/vector.ipynb">ipython notebook</a> for the this session.</li>
+</ul>
+</div>
 <div id="dense-vector-vs.sparse-vector" class="section level2">
 <h2>Dense vector vs. Sparse vector</h2>
 <ul>
 <li><p>Both dense vector and sparse vector are homogeneous and can only have numeric data.</p></li>
 <li><code>DenseVector</code> takes one single argument and is very like an R vector.</li>
 <li><p><code>SparseVector</code> only display non-zero values. <code>SparseVector</code> uses three values to achieve this. The non-value entries’ indices (positions) and corresponding values, and the vector size. With this information, you can figure out which entries in a vector have zero values, and therefore, a complete vector.</p></li>
-<li><p>Example:</p></li>
-<li><p>dense vector</p></li>
 </ul>
-<pre class="python"><code>densevector = DenseVector([1,3,4,2.5])
+</div>
+<div id="example" class="section level2">
+<h2>Example:</h2>
+<ul>
+<li>set up spark context and SparkSession</li>
+</ul>
+<pre class="python"><code>from pyspark import SparkConf, SparkContext
+## set up spark context
+from pyspark.sql import SQLContext
+sc = SparkContext()
+sqlContext = SQLContext(sc)
+## set up  SparkSession
+from pyspark.sql import SparkSession
+
+spark = SparkSession \
+    .builder \
+    .appName(&quot;Python Spark SQL basic example&quot;) \
+    .config(&quot;spark.some.config.option&quot;, &quot;some-value&quot;) \
+    .getOrCreate()</code></pre>
+<ul>
+<li>import <code>Vectors</code> from pyspark library</li>
+</ul>
+<pre class="python"><code>from pyspark.ml.linalg import Vectors</code></pre>
+<ul>
+<li>dense vector</li>
+</ul>
+<pre class="python"><code>densevector = Vectors.dense([1,3,4,2.5])
 densevector</code></pre>
 <pre class="python"><code># output
 DenseVector([1.0, 3.0, 4.0, 2.5])</code></pre>
-<ul>
-<li>sparse vector = The sparse vector below is a representation of vector [0, 3.0, 0, 4.5]</li>
-</ul>
-<pre class="python"><code>aSparse = SparseVector(4, [1, 3], [3.0, 4.5])
-aSparse.toArray()</code></pre>
+<pre class="python"><code>densevector.toArray()</code></pre>
 <pre class="python"><code># output
-array([ 0. ,  3. ,  0. ,  4.5])</code></pre>
+array([ 1. ,  3. ,  4. ,  2.5])</code></pre>
+<ul>
+<li>sparse vector = The sparse vector below is a representation of vector [ 0. , 3. , 0. , 4.5, 0. , 0. , 0. , 0. , 0. , 0. ]</li>
+</ul>
+<pre class="python"><code>sparseVector = Vectors.sparse(10, [1, 3], [3.0, 4.5])
+sparseVector.toArray()</code></pre>
+<pre class="python"><code># output
+array([ 0. ,  3. ,  0. ,  4.5,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ])</code></pre>
 </div>
 
 <center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>
