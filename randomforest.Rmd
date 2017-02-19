@@ -1,6 +1,6 @@
 ---
 title: "Random Forest Regression"
-author: "Wenqiang Feng"
+author: "Wenqiang Feng & Ming Chen"
 date: "February 19, 2017"
 output: html_document
 ---
