@@ -1,11 +1,171 @@
 ---
 title: "Data Manipulation"
-author: "Ming Chen"
+author: "Wenqiang Feng & Ming Chen"
 date: "2/19/2017"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, eval=FALSE)
+```
+
+## Set up sparkContext and sparkSession
+
+```{python}
+# connecting to spark
+from pyspark import SparkConf, SparkContext
+## set up spark context
+conf = SparkConf().setAppName("myApp")
+sc = SparkContext(conf=conf)
+
+# create sparksession object
+from pyspark.sql import SparkSession
+sparksession = SparkSession(sc)
+```
+
+## Import data
+
+```{python}
+# import data
+# read data from csv
+# iris = sparksession.read.csv("data/iris.csv", inferSchema=True, header=True)
+mtcars = sparksession.read.csv("data/mtcars.csv", inferSchema=True, header=True)
+mtcars.show(n=5)
+```
+
+```{python}
++-----------------+----+---+-----+---+----+-----+-----+---+---+----+----+
+|              _c0| mpg|cyl| disp| hp|drat|   wt| qsec| vs| am|gear|carb|
++-----------------+----+---+-----+---+----+-----+-----+---+---+----+----+
+|        Mazda RX4|21.0|  6|160.0|110| 3.9| 2.62|16.46|  0|  1|   4|   4|
+|    Mazda RX4 Wag|21.0|  6|160.0|110| 3.9|2.875|17.02|  0|  1|   4|   4|
+|       Datsun 710|22.8|  4|108.0| 93|3.85| 2.32|18.61|  1|  1|   4|   1|
+|   Hornet 4 Drive|21.4|  6|258.0|110|3.08|3.215|19.44|  1|  0|   3|   1|
+|Hornet Sportabout|18.7|  8|360.0|175|3.15| 3.44|17.02|  0|  0|   3|   2|
++-----------------+----+---+-----+---+----+-----+-----+---+---+----+----+
+```
+
+
+## Select columns
+
+* **Select columns by column names**
+
+```{python}
+mtcars.select(['mpg', 'cyl']).show(n=5)
+```
+
+```{python}
++----+---+
+| mpg|cyl|
++----+---+
+|21.0|  6|
+|21.0|  6|
+|22.8|  4|
+|21.4|  6|
+|18.7|  8|
++----+---+
+only showing top 5 rows
+```
+
+* **Select columns by indices**
+
+```{python}
+mtcars.rdd.map(lambda x: [x[i] for i in range(1,6)]).toDF().show(n=5)
+```
+
+```{python}
++----+---+-----+---+----+
+|  _1| _2|   _3| _4|  _5|
++----+---+-----+---+----+
+|21.0|  6|160.0|110| 3.9|
+|21.0|  6|160.0|110| 3.9|
+|22.8|  4|108.0| 93|3.85|
+|21.4|  6|258.0|110|3.08|
+|18.7|  8|360.0|175|3.15|
++----+---+-----+---+----+
+only showing top 5 rows
+```
+
+```{python}
+mtcars.rdd.map(lambda x: [x[i] for i in (1,3,6,7)]).toDF().show(n=5)
+```
+
+```{python}
++----+-----+-----+-----+
+|  _1|   _2|   _3|   _4|
++----+-----+-----+-----+
+|21.0|160.0| 2.62|16.46|
+|21.0|160.0|2.875|17.02|
+|22.8|108.0| 2.32|18.61|
+|21.4|258.0|3.215|19.44|
+|18.7|360.0| 3.44|17.02|
++----+-----+-----+-----+
+only showing top 5 rows
+```
+
+## Rename columns
+
+* **Rename single column**
+
+```{python}
+mtcars.withColumnRenamed('mpg', 'new_mpg')
+```
+
+```{python}
++-----------------+-------+---+-----+---+----+-----+-----+---+---+----+----+
+|              _c0|new_mpg|cyl| disp| hp|drat|   wt| qsec| vs| am|gear|carb|
++-----------------+-------+---+-----+---+----+-----+-----+---+---+----+----+
+|        Mazda RX4|   21.0|  6|160.0|110| 3.9| 2.62|16.46|  0|  1|   4|   4|
+|    Mazda RX4 Wag|   21.0|  6|160.0|110| 3.9|2.875|17.02|  0|  1|   4|   4|
+|       Datsun 710|   22.8|  4|108.0| 93|3.85| 2.32|18.61|  1|  1|   4|   1|
+|   Hornet 4 Drive|   21.4|  6|258.0|110|3.08|3.215|19.44|  1|  0|   3|   1|
+|Hornet Sportabout|   18.7|  8|360.0|175|3.15| 3.44|17.02|  0|  0|   3|   2|
++-----------------+-------+---+-----+---+----+-----+-----+---+---+----+----+
+```
+
+* **Rename multiple columns**
+
+```{python}
+new_mtcars = mtcars.rdd.map(lambda x: [x[i] for i in range(1,6)]).toDF()
+new_mtcars.show(5)
+```
+
+```{python}
++----+---+-----+---+----+
+|  _1| _2|   _3| _4|  _5|
++----+---+-----+---+----+
+|21.0|  6|160.0|110| 3.9|
+|21.0|  6|160.0|110| 3.9|
+|22.8|  4|108.0| 93|3.85|
+|21.4|  6|258.0|110|3.08|
+|18.7|  8|360.0|175|3.15|
++----+---+-----+---+----+
+only showing top 5 rows
+```
+
+```{python}
+## reset column names
+new_column_names = [mtcars.columns[i] for i in range(1, 6)]
+ori_column_names = new_mtcars.columns
+column_names = zip(ori_column_names, new_column_names)
+for i in range(0, len(new_mtcars.columns)):
+    new_mtcars = new_mtcars.withColumnRenamed(column_names[i][0], column_names[i][1])
+```
+
+```{python}
+new_mtcars.show(n=5)
+```
+
+```{python}
++----+---+-----+---+----+
+| mpg|cyl| disp| hp|drat|
++----+---+-----+---+----+
+|21.0|  6|160.0|110| 3.9|
+|21.0|  6|160.0|110| 3.9|
+|22.8|  4|108.0| 93|3.85|
+|21.4|  6|258.0|110|3.08|
+|18.7|  8|360.0|175|3.15|
++----+---+-----+---+----+
+only showing top 5 rows
 ```
 
