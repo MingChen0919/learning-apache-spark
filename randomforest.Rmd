@@ -1,0 +1,13 @@
+---
+title: "Random Forest Regression"
+author: "Wenqiang Feng"
+date: "February 19, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+### Remark: 
+
+- You can download the complete [ipython notebook](./ipynb/RandomForest.ipynb) for this tutorial session.

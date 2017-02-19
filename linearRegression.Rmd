@@ -1,6 +1,6 @@
 ---
 title: "Linear Regression"
-author: "Wenqiang Feng"
+author: "Wenqiang Feng & Ming Chen"
 date: "2/17/2017"
 output: html_document
 ---

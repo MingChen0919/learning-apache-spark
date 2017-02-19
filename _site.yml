@@ -49,6 +49,8 @@ navbar:
         - text: "Regression"      
         - text: "Linear Regression"
           href:  linearRegression.html
+        - text: "Random Forest Regression"
+          href:  randomforest.html          
         - text: "-----------"          
         - text: "Classification"
         - text: "Kmeans"
