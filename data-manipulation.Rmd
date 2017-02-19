@@ -1,0 +1,11 @@
+---
+title: "Data Manipulation"
+author: "Ming Chen"
+date: "2/19/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
