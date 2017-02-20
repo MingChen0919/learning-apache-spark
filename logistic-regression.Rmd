@@ -6,6 +6,151 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
 ```
+
+## Set up sparkContext and sparkSession
+
+```{python}
+# connecting to spark
+from pyspark import SparkConf, SparkContext
+## set up spark context
+conf = SparkConf().setAppName("myApp")
+sc = SparkContext(conf=conf)
+
+# create sparksession object
+from pyspark.sql import SparkSession
+sparksession = SparkSession(sc)
+```
+
+## Import data
+```{python}
+horseshoe_crab = sparksession.read.csv("data/horseshoe_crab.csv", inferSchema=True, header=True)
+horseshoe_crab.show(n=5)
+```
+
+## Data preprocessing
+
+* Convert column *Sa* to binary variable
+
+```{python}
+bool_horseshoe_crab = horseshoe_crab.withColumn('boolean_Sa', horseshoe_crab['Sa'].cast('boolean'))
+bool_horseshoe_crab.show(n=5)
+```
+
+```{python}
++---+---+----+----+---+----------+
+|  C|  S|   W|  Wt| Sa|boolean_Sa|
++---+---+----+----+---+----------+
+|  2|  3|28.3|3.05|  8|      true|
+|  3|  3|26.0| 2.6|  4|      true|
+|  3|  3|25.6|2.15|  0|     false|
+|  4|  2|21.0|1.85|  0|     false|
+|  2|  3|29.0| 3.0|  1|      true|
++---+---+----+----+---+----------+
+```
+
+```{python}
+new_horseshoe_crab = bool_horseshoe_crab.withColumn('binary_Sa', bool_horseshoe_crab['boolean_Sa'].cast('integer'))
+new_horseshoe_crab.show(n=5)
+```
+
+```{python}
++---+---+----+----+---+----------+---------+
+|  C|  S|   W|  Wt| Sa|boolean_Sa|binary_Sa|
++---+---+----+----+---+----------+---------+
+|  2|  3|28.3|3.05|  8|      true|        1|
+|  3|  3|26.0| 2.6|  4|      true|        1|
+|  3|  3|25.6|2.15|  0|     false|        0|
+|  4|  2|21.0|1.85|  0|     false|        0|
+|  2|  3|29.0| 3.0|  1|      true|        1|
++---+---+----+----+---+----------+---------+
+```
+
+* Transform data into **featuresCol** and **labelCol** structure
+
+```{python}
+lor_horseshoe_crab = new_horseshoe_crab.rdd.map(lambda row: Row(label=row['binary_Sa'], 
+                                                                features=Vectors.dense([
+                                                                    row['C'],
+                                                                    row['S'],
+                                                                    row['W'],
+                                                                    row['Sa']
+                                                                ]))).toDF()
+lor_horseshoe_crab.show(n=5)
+```
+
+```{python}
++------------------+-----+
+|          features|label|
++------------------+-----+
+|[2.0,3.0,28.3,8.0]|    1|
+|[3.0,3.0,26.0,4.0]|    1|
+|[3.0,3.0,25.6,0.0]|    0|
+|[4.0,2.0,21.0,0.0]|    0|
+|[2.0,3.0,29.0,1.0]|    1|
++------------------+-----+
+```
+
+* Index categorical predictors from the *featuresCol* column
+
+```{python}
+from pyspark.ml.feature import VectorIndexer
+indexer = VectorIndexer(maxCategories=4, inputCol='features', outputCol='indexed_features')
+model = indexer.fit(lor_horseshoe_crab)
+lor_horseshoe_crab = model.transform(lor_horseshoe_crab)
+lor_horseshoe_crab.show(n=5)
+```
+
+```{python}
++------------------+-----+------------------+
+|          features|label|  indexed_features|
++------------------+-----+------------------+
+|[2.0,3.0,28.3,8.0]|    1|[1.0,2.0,28.3,8.0]|
+|[3.0,3.0,26.0,4.0]|    1|[2.0,2.0,26.0,4.0]|
+|[3.0,3.0,25.6,0.0]|    0|[2.0,2.0,25.6,0.0]|
+|[4.0,2.0,21.0,0.0]|    0|[3.0,1.0,21.0,0.0]|
+|[2.0,3.0,29.0,1.0]|    1|[1.0,2.0,29.0,1.0]|
++------------------+-----+------------------+
+```
+
+## Fitting a logistic regression model
+
+```{python}
+from pyspark.ml.classification import LogisticRegression
+blor = LogisticRegression(featuresCol='indexed_features', labelCol='label', family='binomial')
+model = blor.fit(lor_horseshoe_crab)
+fitted_horseshoe_crab = model.transform(lor_horseshoe_crab)
+fitted_horseshoe_crab.show(n=10)
+```
+
+```{python}
++------------------+-----+------------------+--------------------+--------------------+----------+
+|          features|label|  indexed_features|       rawPrediction|         probability|prediction|
++------------------+-----+------------------+--------------------+--------------------+----------+
+|[2.0,3.0,28.3,8.0]|    1|[1.0,2.0,28.3,8.0]|[-288.25535638928...|[6.49066718846447...|       1.0|
+|[3.0,3.0,26.0,4.0]|    1|[2.0,2.0,26.0,4.0]|[-132.90802117966...|[1.90011462630290...|       1.0|
+|[3.0,3.0,25.6,0.0]|    0|[2.0,2.0,25.6,0.0]|[20.7797895174584...|[0.99999999905495...|       0.0|
+|[4.0,2.0,21.0,0.0]|    0|[3.0,1.0,21.0,0.0]|[22.7896797464345...|[0.99999999987336...|       0.0|
+|[2.0,3.0,29.0,1.0]|    1|[1.0,2.0,29.0,1.0]|[-18.704534716372...|[7.52876571755532...|       1.0|
+|[1.0,2.0,25.0,3.0]|    1|[0.0,1.0,25.0,3.0]|[-98.307827460914...|[2.02047278868102...|       1.0|
+|[4.0,3.0,26.2,0.0]|    0|[3.0,2.0,26.2,0.0]|[23.5056585887557...|[0.99999999993810...|       0.0|
+|[2.0,3.0,24.9,0.0]|    0|[1.0,2.0,24.9,0.0]|[18.0112666638085...|[0.99999998494064...|       0.0|
+|[2.0,1.0,25.7,8.0]|    1|[1.0,0.0,25.7,8.0]|[-286.36031905042...|[4.31810899519184...|       1.0|
+|[2.0,3.0,27.5,6.0]|    1|[1.0,2.0,27.5,6.0]|[-211.66737373483...|[1.18584407502355...|       1.0|
++------------------+-----+------------------+--------------------+--------------------+----------+
+```
+
+## Model evaluation
+
+```{python}
+from pyspark.ml.evaluation import BinaryClassificationEvaluator
+evaluator = BinaryClassificationEvaluator(rawPredictionCol='rawPrediction')
+evaluator.evaluate(fitted_horseshoe_crab)
+```
+
+```{python}
+1.0
+```
+
 

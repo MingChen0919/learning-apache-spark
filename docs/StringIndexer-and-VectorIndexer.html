@@ -385,7 +385,9 @@ hsb2.show(n=5)</code></pre>
 </div>
 <div id="transform-data-into-featurescol-and-labelcol-structure" class="section level2">
 <h2>Transform data into <code>featuresCol</code> and <code>labelCol</code> structure</h2>
-<pre class="python"><code>new_hsb2 = hsb2.rdd.map(lambda row: Row(label=row[&#39;socst&#39;],
+<pre class="python"><code>from pyspark.ml.linalg import Vectors
+from pyspark.sql import Row
+new_hsb2 = hsb2.rdd.map(lambda row: Row(label=row[&#39;socst&#39;],
                                         features=Vectors.dense([
                                             row[&#39;indexed_gender&#39;],
                                             row[&#39;race&#39;],

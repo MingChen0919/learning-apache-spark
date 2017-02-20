@@ -79,6 +79,8 @@ hsb2.show(n=5)
 ## Transform data into `featuresCol` and `labelCol` structure
 
 ```{python}
+from pyspark.ml.linalg import Vectors
+from pyspark.sql import Row
 new_hsb2 = hsb2.rdd.map(lambda row: Row(label=row['socst'],
                                         features=Vectors.dense([
                                             row['indexed_gender'],

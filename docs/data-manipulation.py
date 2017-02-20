@@ -151,4 +151,34 @@ new_hsb2 = hsb2.rdd.map(lambda row: Row(label=row['socst'],
                                             row['write'],
                                             row['math'],
                                             row['science']])
-                                        )).toDF().show(n=5)
+                                        )).toDF()
+new_hsb2.show(n=5)
+
+from pyspark.ml.feature import VectorIndexer
+indexer = VectorIndexer(maxCategories=4, inputCol='features', outputCol='indexed_features')
+model = indexer.fit(new_hsb2)
+indexed_new_hsb2 = model.transform(new_hsb2)
+indexed_new_hsb2.show(n=5)
+
+
+from pyspark.ml.regression import LinearRegression
+lr = LinearRegression(featuresCol='indexed_features', labelCol='label')
+model = lr.fit(indexed_new_hsb2)
+model.transform(indexed_new_hsb2).show()
+
+
+
+
+horseshoe_crab = sparksession.read.csv("data/horseshoe_crab.csv", inferSchema=True, header=True)
+horseshoe_crab.show(n=5)
+
+def binary_converter(x):
+    if x > 0:
+        x = 1
+    else:
+        x = 0
+    return x
+    
+horseshoe_crab.withColumn('new_Sa', bool(horseshoe_crab.Sa)).show(n=5)
+
+dir(horseshoe_crab.Sa)
