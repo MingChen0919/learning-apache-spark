@@ -1,0 +1,39 @@
+---
+title: "Regularization"
+author: "Wenqiang Feng & Ming Chen"
+date: "2/20/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+## Regularization
+
+Regularization is the technique used to solve the overfitting problem. An overfitted model means that the model can predict very well with the training data, but perform poorly with independent validation data.
+
+When we add more predictors to our model, we will almost neccessarily decrease the **Residual Sum of Squares** (RSS; smaller RSS indicates better model). This increases the complexity of our model and makes our model only perform well on the training data (overfitting).
+
+To balance the RSS and model overfitting, we introduce penalty for adding new predictors (coefficient $\beta \neq 0$) to the model.
+
+## LASSO regularization and Ridge regularization
+
+* **LASSO**: $min \{RSS + \lambda\sum_{j=1}^{p}|\beta|\}$
+* **Ridge**: $min \{RSS + \lambda\sum_{j=1}^{p}\beta^2_j\}$
+
+## Elastic Net regularization
+
+Elastic net is a regularized method that linearly combines penalities of the lasso and ridge methods.
+
+* **elastic net**: $min \{RSS + \lambda_1\sum_{j=1}^{p}|\beta| + \lambda_2\sum_{j=1}^{p}\beta^2_j\}$
+
+## *regParam* and *elasticNetParam* parameters in regression models
+
+* **regParam**: regularization parameter $\lambda$
+* **elasticNetParam**: $\lambda_2$ ridge penalty
+* **Scenarios**:
+    + *regParam* = $0$, *elasticNetParam* = $0$: no regularization applied, $\lambda = 0$
+    + *regParam* = $\neq 0$, *elasticNetParam* = $1$: lasso regularization applied
+    + *regParam* = $\neq 0$, *elasticNetParam* = $0$: ridge regularization applied
+    + *regParam* = $\neq 0$, $0 < elasticNetParam < 1$: elastic net regularization applied

@@ -12,7 +12,7 @@
 <meta name="author" content="Wenqiang Feng &amp; Ming Chen" />
 
 
-<title>Data in/out</title>
+<title>K-folds Cross Validation</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -294,6 +294,9 @@ $(document).ready(function () {
     <li>
       <a href="regularization.html">Regularization</a>
     </li>
+    <li>
+      <a href="k-folds-cross-validation.html">K-folds Cross Validation</a>
+    </li>
   </ul>
 </li>
       </ul>
@@ -319,31 +322,69 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Data in/out</h1>
+<h1 class="title toc-ignore">K-folds Cross Validation</h1>
 <h4 class="author"><em>Wenqiang Feng &amp; Ming Chen</em></h4>
-<h4 class="date"><em>2/13/2017</em></h4>
+<h4 class="date"><em>2/20/2017</em></h4>
 
 </div>
 
 
-<div id="create-a-sparksession-instance" class="section level2">
-<h2>Create a <code>SparkSession</code> instance</h2>
-<pre class="python"><code>from pyspark import SparkConf, SparkContext
-conf = SparkConf().setAppName(&quot;myApp&quot;)
-sc = SparkContext(conf = conf)
-sparksession = SparkSession(sc)</code></pre>
-</div>
-<div id="read-data-from-csv-files" class="section level2">
-<h2>Read data from CSV files</h2>
+<div id="trainingvalidationtest-data-sets" class="section level2">
+<h2>Training/validation/test data sets</h2>
 <ul>
-<li><strong>inferSchema</strong>: infers the input schema (data type) automatically from data. By default, it is <em>false</em>, which will read all data as strings.</li>
+<li><strong>Training set</strong>: the data set for training your models.</li>
+<li><strong>Validation set</strong>: The data set used for testing the performance of your models you have built with training sets. Based on the performance, you choose the best model (final).</li>
+<li><strong>Test set</strong>: use this data set to test the performance of your final model.</li>
 </ul>
-<pre class="python"><code>rawData = sparksession.read.csv(&quot;kddcup.data_10_percent.csv&quot;, inferSchema=True)
-</code></pre>
 </div>
-<div id="write-data-into-csv-files" class="section level2">
-<h2>Write data into CSV files</h2>
-<pre class="python"><code></code></pre>
+<div id="k-folds-cross-validation-steps-k4-as-an-example." class="section level2">
+<h2>K-folds cross validation steps (k=4 as an example).</h2>
+<ul>
+<li>step 1: split your data into training set and test set (for example 80% training and 20% test). Test set will never be used in model training and selection.</li>
+<li>step 2: split training set into k (k=4) eqaul subsets: 3 subsets for traing + 1 subset for validation.</li>
+<li>step 3: training your models with the 3 subsets and calculate a performance score with the remaining 1 subset.</li>
+<li>step 4: choose a different subset for validation and then repeat step 3 until every subset has been used as a validation subset.</li>
+<li>step 5: for a k=4 fold cross validation, each trained model should have been validated by 4 subsets and therefore has 4 performance scores. Calculate the average of these 4 perfermance scores for each model. Use the average score to select the best, final model.</li>
+<li>step 6: apply your final model to the <strong>untouched</strong> test data and see how it performs.</li>
+</ul>
+</div>
+<div id="example-of-k-folds-cross-validation" class="section level2">
+<h2>Example of k-folds cross validation</h2>
+<ul>
+<li><strong>Build parameter grids</strong>
+<ul>
+<li>parameter grid: a combination of all variable parameters in your model.</li>
+<li>example: If I want to train a logistic regression model on 3 different <em>regParam</em> and 4 different <em>elasticNetParam</em>, I will have 3 x 4 = 12 models to train and validate.</li>
+</ul></li>
+</ul>
+<pre class="python"><code>from pyspark.ml.classification import LogisticRegression
+blor = LogisticRegression(featuresCol=&#39;indexed_features&#39;, labelCol=&#39;label&#39;, family=&#39;binomial&#39;)
+
+from pyspark.ml.tuning import ParamGridBuilder
+param_grid = ParamGridBuilder().\
+    addGrid(blor.regParam, [0, 0.5, 1, 2]).\
+    addGrid(blor.elasticNetParam, [0, 0.5, 1]).\
+    build()</code></pre>
+<pre class="python"><code># the first 2 elements in param_grid
+[{Param(parent=u&#39;LogisticRegression_41fe9f7454164180f433&#39;, name=&#39;elasticNetParam&#39;, doc=&#39;the ElasticNet mixing parameter, in range [0, 1]. For alpha = 0, the penalty is an L2 penalty. For alpha = 1, it is an L1 penalty.&#39;): 0,
+  Param(parent=u&#39;LogisticRegression_41fe9f7454164180f433&#39;, name=&#39;regParam&#39;, doc=&#39;regularization parameter (&gt;= 0).&#39;): 0},
+ {Param(parent=u&#39;LogisticRegression_41fe9f7454164180f433&#39;, name=&#39;elasticNetParam&#39;, doc=&#39;the ElasticNet mixing parameter, in range [0, 1]. For alpha = 0, the penalty is an L2 penalty. For alpha = 1, it is an L1 penalty.&#39;): 0.5,
+  Param(parent=u&#39;LogisticRegression_41fe9f7454164180f433&#39;, name=&#39;regParam&#39;, doc=&#39;regularization parameter (&gt;= 0).&#39;): 0}]</code></pre>
+<ul>
+<li><strong>Split data into training and test sets</strong>
+<ul>
+<li>Refer to the <a href="logistic-regression.html">logistic regression page</a> to see what data we used and how the training and test sets were generated.</li>
+</ul></li>
+<li>**Run k (k=4) folds cross validation</li>
+</ul>
+<pre class="python"><code>from pyspark.ml.evaluation import BinaryClassificationEvaluator
+evaluator = BinaryClassificationEvaluator()
+
+from pyspark.ml.tuning import CrossValidator
+cv = CrossValidator(estimator=blor, estimatorParamMaps=param_grid, evaluator=evaluator, numFolds=4)
+
+cvModel = cv.fit(training)
+evaluator.evaluate(cvModel.transform(training))</code></pre>
 </div>
 
 <center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>

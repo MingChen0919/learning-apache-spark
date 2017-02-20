@@ -1,0 +1,67 @@
+---
+title: "K-folds Cross Validation"
+author: "Wenqiang Feng & Ming Chen"
+date: "2/20/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+## Training/validation/test data sets
+
+* **Training set**: the data set for training your models.
+* **Validation set**: The data set used for testing the performance of your models you have built with training sets. Based on the performance, you choose the best model (final).
+* **Test set**: use this data set to test the performance of your final model.
+
+## K-folds cross validation steps (k=4 as an example).
+
+* step 1: split your data into training set and test set (for example 80% training and 20% test). Test set will never be used in model training and selection. 
+* step 2: split training set into k (k=4) eqaul subsets: 3 subsets for traing + 1 subset for validation.
+* step 3: training your models with the 3 subsets and calculate a performance score with the remaining 1 subset.
+* step 4: choose a different subset for validation and then repeat step 3 until every subset has been used as a validation subset.
+* step 5: for a k=4 fold cross validation, each trained model should have been validated by 4 subsets and therefore has 4 performance scores. Calculate the average of these 4 perfermance scores for each model. Use the average score to select the best, final model.
+* step 6: apply your final model to the **untouched** test data and see how it performs.
+
+## Example of k-folds cross validation
+
+* **Build parameter grids**
+    + parameter grid: a combination of all variable parameters in your model.
+    + example: If I want to train a logistic regression model on 3 different *regParam* and 4 different *elasticNetParam*, I will have 3 x 4 = 12 models to train and validate.
+    
+```{python}
+from pyspark.ml.classification import LogisticRegression
+blor = LogisticRegression(featuresCol='indexed_features', labelCol='label', family='binomial')
+
+from pyspark.ml.tuning import ParamGridBuilder
+param_grid = ParamGridBuilder().\
+    addGrid(blor.regParam, [0, 0.5, 1, 2]).\
+    addGrid(blor.elasticNetParam, [0, 0.5, 1]).\
+    build()
+```
+
+```{python}
+# the first 2 elements in param_grid
+[{Param(parent=u'LogisticRegression_41fe9f7454164180f433', name='elasticNetParam', doc='the ElasticNet mixing parameter, in range [0, 1]. For alpha = 0, the penalty is an L2 penalty. For alpha = 1, it is an L1 penalty.'): 0,
+  Param(parent=u'LogisticRegression_41fe9f7454164180f433', name='regParam', doc='regularization parameter (>= 0).'): 0},
+ {Param(parent=u'LogisticRegression_41fe9f7454164180f433', name='elasticNetParam', doc='the ElasticNet mixing parameter, in range [0, 1]. For alpha = 0, the penalty is an L2 penalty. For alpha = 1, it is an L1 penalty.'): 0.5,
+  Param(parent=u'LogisticRegression_41fe9f7454164180f433', name='regParam', doc='regularization parameter (>= 0).'): 0}]
+```
+
+* **Split data into training and test sets**
+    + Refer to the [logistic regression page](logistic-regression.html) to see what data we used and how the training and test sets were generated.
+
+* **Run k (k=4) folds cross validation
+```{python}
+from pyspark.ml.evaluation import BinaryClassificationEvaluator
+evaluator = BinaryClassificationEvaluator()
+
+from pyspark.ml.tuning import CrossValidator
+cv = CrossValidator(estimator=blor, estimatorParamMaps=param_grid, evaluator=evaluator, numFolds=4)
+
+cvModel = cv.fit(training)
+evaluator.evaluate(cvModel.transform(training))
+```
+
+ 

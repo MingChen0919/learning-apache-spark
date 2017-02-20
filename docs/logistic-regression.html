@@ -284,13 +284,18 @@ $(document).ready(function () {
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
     <span class="fa fa-gear"></span>
      
-    Modules
+    Module Tuning and Evaluation
      
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
+    <li class="divider"></li>
+    <li class="dropdown-header">Module Tuning</li>
     <li>
-      <a href="pyspark.ml.feature-module.html">pyspark.ml.feature module</a>
+      <a href="regularization.html">Regularization</a>
+    </li>
+    <li>
+      <a href="k-folds-cross-validation.html">K-folds Cross Validation</a>
     </li>
   </ul>
 </li>
@@ -371,7 +376,8 @@ new_horseshoe_crab.show(n=5)</code></pre>
 <ul>
 <li>Transform data into <strong>featuresCol</strong> and <strong>labelCol</strong> structure</li>
 </ul>
-<pre class="python"><code>lor_horseshoe_crab = new_horseshoe_crab.rdd.map(lambda r: [Vectors.dense(r[0:3]), r[-1]]).toDF([&#39;features&#39;, &#39;label&#39;])
+<pre class="python"><code>from pyspark.ml.linalg import Vectors
+lor_horseshoe_crab = new_horseshoe_crab.rdd.map(lambda r: [Vectors.dense(r[0:3]), r[-1]]).toDF([&#39;features&#39;, &#39;label&#39;])
 lor_horseshoe_crab.show(n=5)</code></pre>
 <pre class="python"><code>+------------------+-----+
 |          features|label|

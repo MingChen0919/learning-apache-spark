@@ -12,7 +12,7 @@
 <meta name="author" content="Wenqiang Feng &amp; Ming Chen" />
 
 
-<title>Data in/out</title>
+<title>Regularization</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -294,6 +294,9 @@ $(document).ready(function () {
     <li>
       <a href="regularization.html">Regularization</a>
     </li>
+    <li>
+      <a href="k-folds-cross-validation.html">K-folds Cross Validation</a>
+    </li>
   </ul>
 </li>
       </ul>
@@ -319,31 +322,46 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Data in/out</h1>
+<h1 class="title toc-ignore">Regularization</h1>
 <h4 class="author"><em>Wenqiang Feng &amp; Ming Chen</em></h4>
-<h4 class="date"><em>2/13/2017</em></h4>
+<h4 class="date"><em>2/20/2017</em></h4>
 
 </div>
 
 
-<div id="create-a-sparksession-instance" class="section level2">
-<h2>Create a <code>SparkSession</code> instance</h2>
-<pre class="python"><code>from pyspark import SparkConf, SparkContext
-conf = SparkConf().setAppName(&quot;myApp&quot;)
-sc = SparkContext(conf = conf)
-sparksession = SparkSession(sc)</code></pre>
+<div id="regularization" class="section level2">
+<h2>Regularization</h2>
+<p>Regularization is the technique used to solve the overfitting problem. An overfitted model means that the model can predict very well with the training data, but perform poorly with independent validation data.</p>
+<p>When we add more predictors to our model, we will almost neccessarily decrease the <strong>Residual Sum of Squares</strong> (RSS; smaller RSS indicates better model). This increases the complexity of our model and makes our model only perform well on the training data (overfitting).</p>
+<p>To balance the RSS and model overfitting, we introduce penalty for adding new predictors (coefficient <span class="math inline">\(\beta \neq 0\)</span>) to the model.</p>
 </div>
-<div id="read-data-from-csv-files" class="section level2">
-<h2>Read data from CSV files</h2>
+<div id="lasso-regularization-and-ridge-regularization" class="section level2">
+<h2>LASSO regularization and Ridge regularization</h2>
 <ul>
-<li><strong>inferSchema</strong>: infers the input schema (data type) automatically from data. By default, it is <em>false</em>, which will read all data as strings.</li>
+<li><strong>LASSO</strong>: <span class="math inline">\(min \{RSS + \lambda\sum_{j=1}^{p}|\beta|\}\)</span></li>
+<li><strong>Ridge</strong>: <span class="math inline">\(min \{RSS + \lambda\sum_{j=1}^{p}\beta^2_j\}\)</span></li>
 </ul>
-<pre class="python"><code>rawData = sparksession.read.csv(&quot;kddcup.data_10_percent.csv&quot;, inferSchema=True)
-</code></pre>
 </div>
-<div id="write-data-into-csv-files" class="section level2">
-<h2>Write data into CSV files</h2>
-<pre class="python"><code></code></pre>
+<div id="elastic-net-regularization" class="section level2">
+<h2>Elastic Net regularization</h2>
+<p>Elastic net is a regularized method that linearly combines penalities of the lasso and ridge methods.</p>
+<ul>
+<li><strong>elastic net</strong>: <span class="math inline">\(min \{RSS + \lambda_1\sum_{j=1}^{p}|\beta| + \lambda_2\sum_{j=1}^{p}\beta^2_j\}\)</span></li>
+</ul>
+</div>
+<div id="regparam-and-elasticnetparam-parameters-in-regression-models" class="section level2">
+<h2><em>regParam</em> and <em>elasticNetParam</em> parameters in regression models</h2>
+<ul>
+<li><strong>regParam</strong>: regularization parameter <span class="math inline">\(\lambda\)</span></li>
+<li><strong>elasticNetParam</strong>: <span class="math inline">\(\lambda_2\)</span> ridge penalty</li>
+<li><strong>Scenarios</strong>:
+<ul>
+<li><em>regParam</em> = 0, <em>elasticNetParam</em> = 0: no regularization applied, <span class="math inline">\(\lambda = 0\)</span></li>
+<li><em>regParam</em> = <span class="math inline">\(\neq 0\)</span>, <em>elasticNetParam</em> = 1: lasso regularization applied</li>
+<li><em>regParam</em> = <span class="math inline">\(\neq 0\)</span>, <em>elasticNetParam</em> = 0: ridge regularization applied</li>
+<li><em>regParam</em> = <span class="math inline">\(\neq 0\)</span>, <span class="math inline">\(0 &lt; elasticNetParam &lt; 1\)</span>: elastic net regularization applied</li>
+</ul></li>
+</ul>
 </div>
 
 <center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>

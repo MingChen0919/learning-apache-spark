@@ -70,6 +70,7 @@ new_horseshoe_crab.show(n=5)
 * Transform data into **featuresCol** and **labelCol** structure
 
 ```{python}
+from pyspark.ml.linalg import Vectors
 lor_horseshoe_crab = new_horseshoe_crab.rdd.map(lambda r: [Vectors.dense(r[0:3]), r[-1]]).toDF(['features', 'label'])
 lor_horseshoe_crab.show(n=5)
 ```
