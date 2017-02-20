@@ -32,7 +32,7 @@ navbar:
         - text: "Pyspark Vectors"
           href: pyspark-vectors.html
         - text: "featuresCol & labelCol"
-          href: featuresCol-and-labelcol.html
+          href: featuresCol-and-labelCol.html
         - text: "StringIndexer & VectorIndexer"
           href: StringIndexer-and-VectorIndexer.html
         - text: "------------"
