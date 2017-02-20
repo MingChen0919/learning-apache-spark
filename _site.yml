@@ -24,10 +24,12 @@ navbar:
         - text: "Data Preprocessing Template"        
         - text: "Data Preprocessing Template"
           href: data-preprocessing-template.html
-    - text: "Data Manipulation"
+    - text: "Data Wrangling"
       icon: fa-gear
       menu:
-        - text: "Data Manipulation"
+        - text: "------------"
+        - text: "Data Wrangling"      
+        - text: "Data Wrangling"
           href: data-manipulation.html
         - text: "------------"
         - text: "pyspark.RDD object"
@@ -53,6 +55,8 @@ navbar:
         - text: "Regression"      
         - text: "Linear Regression"
           href:  linearRegression.html
+        - text: "Random Forest Regression"
+          href:  randomforest.html          
         - text: "-----------"          
         - text: "Classification"
         - text: "Kmeans"
