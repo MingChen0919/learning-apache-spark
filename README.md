@@ -1,6 +1,6 @@
 # Learning apache spark
 
-* Github repository: [https://mingchen0919.github.io/learning-apache-spark/](https://mingchen0919.github.io/learning-apache-spark/)
+* Github website: [https://mingchen0919.github.io/learning-apache-spark/](https://mingchen0919.github.io/learning-apache-spark/)
 
 ### About
 
