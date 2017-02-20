@@ -9,10 +9,10 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="author" content="Wenqiang Feng &amp; Ming Chen" />
+<meta name="author" content="Ming Chen" />
 
 
-<title>Reduce Functions</title>
+<title>FeaturesCol &amp; labelCol</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -316,88 +316,71 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Reduce Functions</h1>
-<h4 class="author"><em>Wenqiang Feng &amp; Ming Chen</em></h4>
-<h4 class="date"><em>2/7/2017</em></h4>
+<h1 class="title toc-ignore">FeaturesCol &amp; labelCol</h1>
+<h4 class="author"><em>Ming Chen</em></h4>
+<h4 class="date"><em>2/19/2017</em></h4>
 
 </div>
 
 
-<div id="pyspark.rdd.reduce" class="section level2">
-<h2><code>pyspark.RDD.reduce</code></h2>
-<pre class="python"><code>reduce(f)</code></pre>
+<div id="featurescol-and-labelcol" class="section level2">
+<h2><strong>featuresCol</strong> and <strong>labelCol</strong></h2>
+<p>You may have noticed that all model building functions have parameter <strong>featuresCol</strong>, and model building functions for supervised learning have parameter <strong>labelCol</strong>.</p>
 <ul>
-<li>The function <code>f</code> has two parameters: <strong>x</strong> and <strong>y</strong>:
+<li><strong>featuresCol</strong>
 <ul>
-<li>x: the current element in the RDD object</li>
-<li>y: the next element in the RDD object</li>
+<li>a <strong>single</strong> column which contains <strong>all features</strong> (predictors) that you want to fit in your model.</li>
+<li>each row is a <strong>vector</strong> which consists of values from all predictors.</li>
 </ul></li>
-<li>The <code>reduce(f)</code> goes through all elements in the RDD object.</li>
-<li>Function <code>f</code> have to return the result that has exactly the same data structure as x and y, because the output is an update to x, and then y, and then next element till the last one.</li>
-</ul>
-<div id="example" class="section level3">
-<h3>Example</h3>
-<pre class="python"><code>myData = sc.parallelize([(1,2), (3,4), (5,6), (7,8), (9,10)])
-myData.collect()</code></pre>
+<li><strong>labelCol</strong>
 <ul>
-<li><strong>RDD data</strong></li>
-</ul>
-<pre class="python"><code>[(1, 2), (3, 4), (5, 6), (7, 8), (9, 10)]</code></pre>
-<ul>
-<li><strong>Run <code>reduce</code></strong></li>
-<li>first round
-<ul>
-<li>x = (1, 2)</li>
-<li>y = (3, 4)</li>
+<li>a <strong>single</strong> column which contains the response variable(s).</li>
 </ul></li>
-<li>second round
-<ul>
-<li>x = (1+3, 2+4)</li>
-<li>y = (5, 6)</li>
-</ul></li>
-<li>next round</li>
 </ul>
-<pre class="python"><code>myData.reduce(lambda x,y: (x[0]+y[0], x[1]+y[1]))</code></pre>
-<ul>
-<li><strong>Output</strong></li>
-</ul>
-<pre class="python"><code>(25, 30)</code></pre>
 </div>
-</div>
-<div id="pyspark.rdd.reducebykey" class="section level2">
-<h2><code>pyspark.RDD.reduceByKey</code></h2>
+<div id="example-data-structure-for-linear-regression-model" class="section level2">
+<h2><strong>Example: data structure for linear regression model</strong></h2>
+<pre class="python"><code>advertising = sparksession.read.csv(&quot;data/Advertising.csv&quot;, inferSchema=True, header=True)</code></pre>
+<pre class="python"><code>from pyspark.ml.linalg import Vectors
+from pyspark.sql import Row
+# convert the data to dense vector
+def transData(row):
+    return Row(label=row[&quot;Sales&quot;],
+               features=Vectors.dense([
+                                       row[&quot;TV&quot;],
+                                       row[&quot;Radio&quot;],
+                                       row[&quot;Newspaper&quot;]]))
+transformed = advertising.rdd.map(transData).toDF()                                     </code></pre>
 <ul>
-<li><code>reduceByKey</code> is similar to <code>reduce</code>. It first split the data by keys, and then applies <code>reduce</code> to each block.</li>
-<li>Your RDD data should be a pair RDD object.</li>
+<li><strong>Original data</strong> vs. <strong>transformed data</strong></li>
 </ul>
-<div id="example-1" class="section level3">
-<h3>Example</h3>
+<pre class="python"><code># original data                   # transformed data
++-----+-----+---------+-----+     +-----------------+-----+
+|   TV|Radio|Newspaper|Sales|     |         features|label|
++-----+-----+---------+-----+     +-----------------+-----+
+|230.1| 37.8|     69.2| 22.1|     |[230.1,37.8,69.2]| 22.1|
+| 44.5| 39.3|     45.1| 10.4|     | [44.5,39.3,45.1]| 10.4|
+| 17.2| 45.9|     69.3|  9.3|     | [17.2,45.9,69.3]|  9.3|
+|151.5| 41.3|     58.5| 18.5|     |[151.5,41.3,58.5]| 18.5|
+|180.8| 10.8|     58.4| 12.9|     |[180.8,10.8,58.4]| 12.9|
++-----+-----+---------+-----+     +-----------------+-----+</code></pre>
 <ul>
-<li><strong>RDD object</strong></li>
+<li><strong>Fitting a linear model</strong></li>
 </ul>
-<pre class="python"><code>byKeyData = sc.parallelize([(&#39;a&#39;, (1,2)),
-                            (&#39;a&#39;, (2,2)),
-                            (&#39;b&#39;, (3,4)), 
-                            (&#39;c&#39;, (5,6)),
-                            (&#39;c&#39;, (15,6)),
-                            (&#39;d&#39;, (7,8)), 
-                            (&#39;e&#39;, (9,10))])</code></pre>
-<pre class="python"><code>[(&#39;a&#39;, (1, 2)),
- (&#39;a&#39;, (2, 2)),
- (&#39;b&#39;, (3, 4)),
- (&#39;c&#39;, (5, 6)),
- (&#39;c&#39;, (15, 6)),
- (&#39;d&#39;, (7, 8)),
- (&#39;e&#39;, (9, 10))]</code></pre>
-<ul>
-<li><strong>Run <code>reduceByKey</code></strong></li>
-</ul>
-<pre class="python"><code>byKeyData.reduceByKey(lambda x, y: (x[0]+y[0], 0)).collect()</code></pre>
-<ul>
-<li><strong>Output</strong></li>
-</ul>
-<pre class="python"><code>[(&#39;a&#39;, (3, 0)), (&#39;c&#39;, (20, 0)), (&#39;b&#39;, (3, 4)), (&#39;e&#39;, (9, 10)), (&#39;d&#39;, (7, 8))]</code></pre>
-</div>
+<pre class="python"><code>from pyspark.ml.regression import LinearRegression
+lr = LinearRegression()
+model = lr.fit(transformed)
+model.transform(transformed).show(n=5)</code></pre>
+<pre class="python"><code>+-----------------+-----+------------------+
+|         features|label|        prediction|
++-----------------+-----+------------------+
+|[230.1,37.8,69.2]| 22.1| 20.52397440971517|
+| [44.5,39.3,45.1]| 10.4|12.337854820894362|
+| [17.2,45.9,69.3]|  9.3|12.307670779994238|
+|[151.5,41.3,58.5]| 18.5| 17.59782951168913|
+|[180.8,10.8,58.4]| 12.9|13.188671856831299|
++-----------------+-----+------------------+</code></pre>
+<p>A detailed linear regression model example can be found <a href="linearRegression.html">here</a></p>
 </div>
 
 <center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>

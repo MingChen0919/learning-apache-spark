@@ -1,0 +1,78 @@
+---
+title: "FeaturesCol & labelCol"
+author: "Ming Chen"
+date: "2/19/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval=FALSE)
+```
+
+## **featuresCol** and **labelCol**
+
+You may have noticed that all model building functions have parameter **featuresCol**, and model building functions for supervised learning have parameter **labelCol**.
+
+* **featuresCol**
+    + a **single** column which contains **all features** (predictors) that you want to fit in your model.
+    + each row is a **vector** which consists of values from all predictors.
+  
+* **labelCol**
+    + a **single** column which contains the response variable(s).
+
+## **Example: data structure for linear regression model**
+
+```{python}
+advertising = sparksession.read.csv("data/Advertising.csv", inferSchema=True, header=True)
+```
+
+```{python}
+from pyspark.ml.linalg import Vectors
+from pyspark.sql import Row
+# convert the data to dense vector
+def transData(row):
+    return Row(label=row["Sales"],
+               features=Vectors.dense([
+                                       row["TV"],
+                                       row["Radio"],
+                                       row["Newspaper"]]))
+transformed = advertising.rdd.map(transData).toDF()                                     
+```
+
+* **Original data** vs. **transformed data**
+
+```{python}
+# original data                   # transformed data
++-----+-----+---------+-----+     +-----------------+-----+
+|   TV|Radio|Newspaper|Sales|     |         features|label|
++-----+-----+---------+-----+     +-----------------+-----+
+|230.1| 37.8|     69.2| 22.1|     |[230.1,37.8,69.2]| 22.1|
+| 44.5| 39.3|     45.1| 10.4|     | [44.5,39.3,45.1]| 10.4|
+| 17.2| 45.9|     69.3|  9.3|     | [17.2,45.9,69.3]|  9.3|
+|151.5| 41.3|     58.5| 18.5|     |[151.5,41.3,58.5]| 18.5|
+|180.8| 10.8|     58.4| 12.9|     |[180.8,10.8,58.4]| 12.9|
++-----+-----+---------+-----+     +-----------------+-----+
+```
+
+* **Fitting a linear model**
+
+```{python}
+from pyspark.ml.regression import LinearRegression
+lr = LinearRegression()
+model = lr.fit(transformed)
+model.transform(transformed).show(n=5)
+```
+
+```{python}
++-----------------+-----+------------------+
+|         features|label|        prediction|
++-----------------+-----+------------------+
+|[230.1,37.8,69.2]| 22.1| 20.52397440971517|
+| [44.5,39.3,45.1]| 10.4|12.337854820894362|
+| [17.2,45.9,69.3]|  9.3|12.307670779994238|
+|[151.5,41.3,58.5]| 18.5| 17.59782951168913|
+|[180.8,10.8,58.4]| 12.9|13.188671856831299|
++-----------------+-----+------------------+
+```
+
+A detailed linear regression model example can be found [here](linearRegression.html)

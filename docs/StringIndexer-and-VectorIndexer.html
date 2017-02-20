@@ -12,7 +12,7 @@
 <meta name="author" content="Wenqiang Feng &amp; Ming Chen" />
 
 
-<title>Data Preprocessing Template</title>
+<title>StringIndexer and VectorIndexer</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -316,16 +316,35 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Data Preprocessing Template</h1>
+<h1 class="title toc-ignore">StringIndexer and VectorIndexer</h1>
 <h4 class="author"><em>Wenqiang Feng &amp; Ming Chen</em></h4>
-<h4 class="date"><em>2/15/2017</em></h4>
+<h4 class="date"><em>2/19/2017</em></h4>
 
 </div>
 
 
-<div id="connect-to-spark" class="section level2">
-<h2>Connect to spark</h2>
-<pre class="python"><code>from pyspark import SparkConf, SparkContext
+<div id="stringindexer-and-vectorindexer" class="section level2">
+<h2><strong>StringIndexer</strong> and <strong>VectorIndexer</strong></h2>
+<ul>
+<li><strong>StringIndexer</strong>
+<ul>
+<li>converts a single column to an <em>index column</em> (similar to a factor column in R)</li>
+</ul></li>
+<li><strong>VectorIndexer</strong>
+<ul>
+<li>is used to index categorical predictors in a <strong>featuresCol</strong> column. Remember that <strong>featuresCol</strong> is a single column consisting of vectors (refer to <a href="featuresCol-and-labelCol.html">featuresCol and labelCol</a>). Each row is a vector which contains values from each predictors.</li>
+<li>if you have string type predictors, you will first need to use index those columns with <strong>StringIndexer</strong>. <strong>featuresCol</strong> contains vectors, and vectors does not contain string values.</li>
+</ul></li>
+</ul>
+</div>
+<div id="example" class="section level2">
+<h2>Example</h2>
+<p>Data resource: <a href="http://www.ats.ucla.edu/stat/r/modules/dummy_vars.htm" class="uri">http://www.ats.ucla.edu/stat/r/modules/dummy_vars.htm</a>. I modified that <em>female</em> column and generate a new dataset called <em>hsb2_modified.csv</em>.</p>
+</div>
+<div id="set-up-sparkcontext-and-sparksession" class="section level2">
+<h2>Set up sparkContext and sparkSession</h2>
+<pre class="python"><code># connecting to spark
+from pyspark import SparkConf, SparkContext
 ## set up spark context
 conf = SparkConf().setAppName(&quot;myApp&quot;)
 sc = SparkContext(conf=conf)
@@ -336,65 +355,109 @@ sparksession = SparkSession(sc)</code></pre>
 </div>
 <div id="import-data" class="section level2">
 <h2>Import data</h2>
-<pre class="python"><code># import data
-# read data from csv
-rawData = sparksession.read.csv(&quot;/Users/mingchen/GoogleDrive/course_UTK/course-2017-spring/COSC526/HW1/kddcup.data_10_percent.csv&quot;, inferSchema=True)</code></pre>
+<pre class="python"><code>hsb2 = sparksession.read.csv(&quot;data/hsb2_modified.csv&quot;, inferSchema=True, header=True)
+hsb2.show(n=5)</code></pre>
+<pre class="python"><code>+---+------+----+---+------+----+----+-----+----+-------+-----+
+| id|gender|race|ses|schtyp|prog|read|write|math|science|socst|
++---+------+----+---+------+----+----+-----+----+-------+-----+
+| 70|  male|   4|  1|     1|   1|  57|   52|  41|     47|   57|
+|121|female|   4|  2|     1|   3|  68|   59|  53|     63|   61|
+| 86|  male|   4|  3|     1|   1|  44|   33|  54|     58|   31|
+|141|  male|   4|  3|     1|   3|  63|   44|  47|     53|   56|
+|172|  male|   4|  2|     1|   2|  47|   52|  57|     53|   61|
++---+------+----+---+------+----+----+-----+----+-------+-----+</code></pre>
 </div>
-<div id="replace-column-names" class="section level2">
-<h2>Replace column names</h2>
-<pre class="python"><code># ==== data manipulation ======
-oldColNames = rawData.columns
-newColNames = [&quot;duration&quot;,
-               &quot;protocol_type&quot;,
-               &quot;service&quot;,
-               &quot;flag&quot;,
-               &quot;src_bytes&quot;,
-               &quot;dst_bytes&quot;,
-               &quot;land&quot;,
-               &quot;wrong_fragment&quot;,
-               &quot;urgent&quot;,
-               &quot;hot&quot;,
-               &quot;num_failed_logins&quot;,
-               &quot;logged_in&quot;,
-               &quot;num_compromised&quot;,
-               &quot;root_shell&quot;,
-               &quot;su_attempted&quot;,
-               &quot;num_root&quot;,
-               &quot;num_file_creations&quot;,
-               &quot;num_shells&quot;,
-               &quot;num_access_files&quot;,
-               &quot;num_outbound_cmds&quot;,
-               &quot;is_host_login&quot;,
-               &quot;is_guest_login&quot;,
-               &quot;count&quot;,
-               &quot;srv_count&quot;,
-               &quot;serror_rate&quot;,
-               &quot;srv_serror_rate&quot;,
-               &quot;rerror_rate&quot;,
-               &quot;srv_rerror_rate&quot;,
-               &quot;same_srv_rate&quot;,
-               &quot;diff_srv_rate&quot;,
-               &quot;srv_diff_host_rate&quot;,
-               &quot;dst_host_count&quot;,
-               &quot;dst_host_srv_count&quot;,
-               &quot;dst_host_same_srv_rate&quot;,
-               &quot;dst_host_diff_srv_rate&quot;,
-               &quot;dst_host_same_src_port_rate&quot;,
-               &quot;dst_host_srv_diff_host_rate&quot;,
-               &quot;dst_host_serror_rate&quot;,
-               &quot;dst_host_srv_serror_rate&quot;,
-               &quot;dst_host_rerror_rate&quot;,
-               &quot;dst_host_srv_rerror_rate&quot;,
-               &quot;y_label&quot;]
-
-colNames = zip(oldColNames, newColNames)
-for i in range(0, 42):
-    rawData = rawData.withColumnRenamed(colNames[i][0], colNames[i][1])</code></pre>
+<div id="use-stringindexer-to-index-string-column" class="section level2">
+<h2>Use <code>StringIndexer</code> to index string column</h2>
+<pre class="python"><code>from pyspark.ml.feature import StringIndexer
+indexer = StringIndexer(inputCol=&#39;gender&#39;, outputCol=&#39;indexed_gender&#39;)
+model = indexer.fit(hsb2)
+hsb2 = model.transform(hsb2)
+hsb2.show(n=5)</code></pre>
+<pre class="python"><code>## see indexed_gender column
++---+------+----+---+------+----+----+-----+----+-------+-----+--------------+
+| id|gender|race|ses|schtyp|prog|read|write|math|science|socst|indexed_gender|
++---+------+----+---+------+----+----+-----+----+-------+-----+--------------+
+| 70|  male|   4|  1|     1|   1|  57|   52|  41|     47|   57|           1.0|
+|121|female|   4|  2|     1|   3|  68|   59|  53|     63|   61|           0.0|
+| 86|  male|   4|  3|     1|   1|  44|   33|  54|     58|   31|           1.0|
+|141|  male|   4|  3|     1|   3|  63|   44|  47|     53|   56|           1.0|
+|172|  male|   4|  2|     1|   2|  47|   52|  57|     53|   61|           1.0|
++---+------+----+---+------+----+----+-----+----+-------+-----+--------------+</code></pre>
 </div>
-<div id="split-data-set-into-training-set-and-test-set" class="section level2">
-<h2>Split data set into training set and test set</h2>
-<pre class="python"><code># split data approximately into training set (60%) and test set (40%)
-training, test = rawData.randomSplit([0.6, 0.4], seed=1234)</code></pre>
+<div id="transform-data-into-featurescol-and-labelcol-structure" class="section level2">
+<h2>Transform data into <code>featuresCol</code> and <code>labelCol</code> structure</h2>
+<pre class="python"><code>new_hsb2 = hsb2.rdd.map(lambda row: Row(label=row[&#39;socst&#39;],
+                                        features=Vectors.dense([
+                                            row[&#39;indexed_gender&#39;],
+                                            row[&#39;race&#39;],
+                                            row[&#39;ses&#39;],
+                                            row[&#39;schtyp&#39;],
+                                            row[&#39;prog&#39;],
+                                            row[&#39;read&#39;],
+                                            row[&#39;write&#39;],
+                                            row[&#39;math&#39;],
+                                            row[&#39;science&#39;]])
+                                        )).toDF()
+new_hsb2.show(n=5)</code></pre>
+<pre class="python"><code>+--------------------+-----+
+|            features|label|
++--------------------+-----+
+|[1.0,4.0,1.0,1.0,...|   57|
+|[0.0,4.0,2.0,1.0,...|   61|
+|[1.0,4.0,3.0,1.0,...|   31|
+|[1.0,4.0,3.0,1.0,...|   56|
+|[1.0,4.0,2.0,1.0,...|   61|
++--------------------+-----+</code></pre>
+</div>
+<div id="use-vectorindexer-to-index-categorical-predictors-in-featurescol" class="section level2">
+<h2>Use <code>VectorIndexer</code> to index categorical predictors in <code>featuresCol</code></h2>
+<pre class="python"><code>from pyspark.ml.feature import VectorIndexer
+indexer = VectorIndexer(maxCategories=4, inputCol=&#39;features&#39;, outputCol=&#39;indexed_features&#39;)
+model = indexer.fit(new_hsb2)
+indexed_new_hsb2 = model.transform(new_hsb2)
+indexed_new_hsb2.take(2)</code></pre>
+<pre class="python"><code># before indexing featuresCol  # after indexing featuresCol
++--------------------+-----+  +--------------------+-----+--------------------+
+|            features|label|  |            features|label|    indexed_features|
++--------------------+-----+  +--------------------+-----+--------------------+
+|[1.0,4.0,1.0,1.0,...|   57|  |[1.0,4.0,1.0,1.0,...|   57|[1.0,3.0,0.0,0.0,...|
+|[0.0,4.0,2.0,1.0,...|   61|  |[0.0,4.0,2.0,1.0,...|   61|[0.0,3.0,1.0,0.0,...|
+|[1.0,4.0,3.0,1.0,...|   31|  |[1.0,4.0,3.0,1.0,...|   31|[1.0,3.0,2.0,0.0,...|
+|[1.0,4.0,3.0,1.0,...|   56|  |[1.0,4.0,3.0,1.0,...|   56|[1.0,3.0,2.0,0.0,...|
+|[1.0,4.0,2.0,1.0,...|   61|  |[1.0,4.0,2.0,1.0,...|   61|[1.0,3.0,1.0,0.0,...|
++--------------------+-----+  +--------------------+-----+--------------------+</code></pre>
+<ul>
+<li><strong>Fitting a linear model</strong></li>
+</ul>
+<pre class="python"><code>from pyspark.ml.regression import LinearRegression
+lr = LinearRegression(featuresCol=&#39;indexed_features&#39;, labelCol=&#39;label&#39;)
+model = lr.fit(indexed_new_hsb2)
+model.transform(indexed_new_hsb2).show()</code></pre>
+<pre class="python"><code>+--------------------+-----+--------------------+------------------+
+|            features|label|    indexed_features|        prediction|
++--------------------+-----+--------------------+------------------+
+|[1.0,4.0,1.0,1.0,...|   57|[1.0,3.0,0.0,0.0,...| 51.80048015803359|
+|[0.0,4.0,2.0,1.0,...|   61|[0.0,3.0,1.0,0.0,...|58.243471181988404|
+|[1.0,4.0,3.0,1.0,...|   31|[1.0,3.0,2.0,0.0,...| 45.60938102700539|
+|[1.0,4.0,3.0,1.0,...|   56|[1.0,3.0,2.0,0.0,...| 53.16002885219301|
+|[1.0,4.0,2.0,1.0,...|   61|[1.0,3.0,1.0,0.0,...| 50.59419095464209|
+|[1.0,4.0,2.0,1.0,...|   61|[1.0,3.0,1.0,0.0,...|48.200748866519014|
+|[1.0,3.0,2.0,1.0,...|   61|[1.0,2.0,1.0,0.0,...| 53.93023551618455|
+|[1.0,1.0,2.0,1.0,...|   36|[1.0,0.0,1.0,0.0,...|43.258280997139416|
+|[1.0,4.0,2.0,1.0,...|   51|[1.0,3.0,1.0,0.0,...| 58.89692949834014|
+|[1.0,3.0,2.0,1.0,...|   51|[1.0,2.0,1.0,0.0,...|  54.8926363226898|
+|[1.0,4.0,2.0,1.0,...|   61|[1.0,3.0,1.0,0.0,...|   50.950400342767|
+|[1.0,4.0,2.0,1.0,...|   61|[1.0,3.0,1.0,0.0,...|  57.6279630554164|
+|[1.0,4.0,3.0,1.0,...|   71|[1.0,3.0,2.0,0.0,...| 66.25089147947871|
+|[1.0,4.0,3.0,1.0,...|   46|[1.0,3.0,2.0,0.0,...|59.341701186507144|
+|[1.0,3.0,1.0,1.0,...|   56|[1.0,2.0,0.0,0.0,...| 49.98714372879461|
+|[1.0,4.0,1.0,1.0,...|   56|[1.0,3.0,0.0,0.0,...|45.370862024502635|
+|[1.0,4.0,3.0,1.0,...|   56|[1.0,3.0,2.0,0.0,...| 52.42836867774257|
+|[1.0,4.0,2.0,2.0,...|   56|[1.0,3.0,1.0,1.0,...| 57.14432439272428|
+|[1.0,4.0,3.0,1.0,...|   61|[1.0,3.0,2.0,0.0,...|  65.6544475938724|
+|[1.0,4.0,2.0,1.0,...|   46|[1.0,3.0,1.0,0.0,...|50.080534041206725|
++--------------------+-----+--------------------+------------------+</code></pre>
 </div>
 
 <center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>
