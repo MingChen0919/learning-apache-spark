@@ -59,17 +59,13 @@ from pyspark.ml.linalg import Vectors
 
 ```{python eval=FALSE}
 # convert the data to dense vector
-def transData(row):
-    return Row(label=row["Sales"],
-               features=Vectors.dense([
-                                       row["TV"],
-                                       row["Radio"],
-                                       row["Newspaper"]]))
+def transData(data):
+    return data.rdd.map(lambda r: [Vectors.dense(r[:-1]),r[-1]]).toDF(['features','label'])
 ```
 
 ### 4. Transform the dataset to DataFrame
 ```{python eval=FALSE}
-transformed = df.rdd.map(transData).toDF() 
+transformed= transData(df)
 transformed.show()
 ```
 ```{python eval=FALSE}
@@ -234,15 +230,11 @@ df = sqlContext.read.format('com.databricks.spark.csv').\
 ```
 ```{python eval=FALSE}
 # convert the data to dense vector
-def transData(row):
-    return Row(label=row["Sales"],
-               features=Vectors.dense([
-                                       row["TV"],
-                                       row["Radio"],
-                                       row["Newspaper"]]))
+def transData(data):
+    return data.rdd.map(lambda r: [Vectors.dense(r[:-1]),r[-1]]).toDF(['features','label'])
 ```
 ```{python eval=FALSE}
-transformed = df.rdd.map(transData).toDF() 
+transformed= transData(df)
 #transformed.show()
 ```
 
