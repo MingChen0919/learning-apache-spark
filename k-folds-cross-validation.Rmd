@@ -28,7 +28,7 @@ knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
 
 * **Build parameter grids**
     + parameter grid: a combination of all variable parameters in your model.
-    + example: If I want to train a logistic regression model on 3 different *regParam* and 4 different *elasticNetParam*, I will have 3 x 4 = 12 models to train and validate.
+    + example: If I want to train a logistic regression model on 4 different *regParam* and 3 different *elasticNetParam*, I will have 3 x 4 = 12 models to train and validate.
     
 ```{python}
 from pyspark.ml.classification import LogisticRegression
@@ -52,7 +52,7 @@ param_grid = ParamGridBuilder().\
 * **Split data into training and test sets**
     + Refer to the [logistic regression page](logistic-regression.html) to see what data we used and how the training and test sets were generated.
 
-* **Run k (k=4) folds cross validation
+* **Run k (k=4) folds cross validation**
 ```{python}
 from pyspark.ml.evaluation import BinaryClassificationEvaluator
 evaluator = BinaryClassificationEvaluator()
@@ -61,7 +61,63 @@ from pyspark.ml.tuning import CrossValidator
 cv = CrossValidator(estimator=blor, estimatorParamMaps=param_grid, evaluator=evaluator, numFolds=4)
 
 cvModel = cv.fit(training)
-evaluator.evaluate(cvModel.transform(training))
 ```
 
- 
+* **Find the best model**
+    + best model ID
+        
+    ```{python}
+    cvModel.bestModel
+    ```
+    
+    ```{python}
+    LogisticRegression_41fe9f7454164180f433
+    ```
+    
+    + average cross-validation metrics
+        + the 10th model has highest score and is the best model
+        + *regParam* = 2 and *elasticNetParam* = 0. It is a ridge regularization method.
+            
+    ```{python}
+    cvModel.avgMetrics
+    ```
+    
+    ```{python}
+    [0.8191225353777875,
+     0.8191225353777875,
+     0.8191225353777875,
+     0.8243105196624104,
+     0.5,
+     0.5,
+     0.8247709310997127,
+     0.5,
+     0.5,
+     0.8259072947360763,
+     0.5,
+     0.5]
+    ```
+    
+    
+    ```{python}
+    param_grid[9]
+    ```
+    
+    ```{python}
+{Param(parent=u'LogisticRegression_41fe9f7454164180f433', name='elasticNetParam', doc='the ElasticNet mixing parameter, in range [0, 1]. For alpha = 0, the penalty is an L2 penalty. For alpha = 1, it is an L1 penalty.'): 0, Param(parent=u'LogisticRegression_41fe9f7454164180f433', name='regParam', doc='regularization parameter (>= 0).'): 2}    
+    ```
+
+    + Model comparison (not finished)
+    
+        
+    ```{python}
+    # new model
+    blor = LogisticRegression(featuresCol='indexed_features', labelCol='label', family='binomial')
+    model = blor.fit(training)
+    evaluator.evaluate(model.transform(training))
+    evaluator.evaluate(model.transform(test))
+    
+    new_blor = LogisticRegression(featuresCol='indexed_features', labelCol='label', family='binomial', regParam=0.5, elasticNetParam=0)
+    new_model = new_blor.fit(training)
+    evaluator.evaluate(new_model.transform(training))
+    evaluator.evaluate(new_model.transform(test))
+    ```

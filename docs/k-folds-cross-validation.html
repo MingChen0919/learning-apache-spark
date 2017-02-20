@@ -354,7 +354,7 @@ $(document).ready(function () {
 <li><strong>Build parameter grids</strong>
 <ul>
 <li>parameter grid: a combination of all variable parameters in your model.</li>
-<li>example: If I want to train a logistic regression model on 3 different <em>regParam</em> and 4 different <em>elasticNetParam</em>, I will have 3 x 4 = 12 models to train and validate.</li>
+<li>example: If I want to train a logistic regression model on 4 different <em>regParam</em> and 3 different <em>elasticNetParam</em>, I will have 3 x 4 = 12 models to train and validate.</li>
 </ul></li>
 </ul>
 <pre class="python"><code>from pyspark.ml.classification import LogisticRegression
@@ -375,7 +375,7 @@ param_grid = ParamGridBuilder().\
 <ul>
 <li>Refer to the <a href="logistic-regression.html">logistic regression page</a> to see what data we used and how the training and test sets were generated.</li>
 </ul></li>
-<li>**Run k (k=4) folds cross validation</li>
+<li><strong>Run k (k=4) folds cross validation</strong></li>
 </ul>
 <pre class="python"><code>from pyspark.ml.evaluation import BinaryClassificationEvaluator
 evaluator = BinaryClassificationEvaluator()
@@ -383,8 +383,50 @@ evaluator = BinaryClassificationEvaluator()
 from pyspark.ml.tuning import CrossValidator
 cv = CrossValidator(estimator=blor, estimatorParamMaps=param_grid, evaluator=evaluator, numFolds=4)
 
-cvModel = cv.fit(training)
-evaluator.evaluate(cvModel.transform(training))</code></pre>
+cvModel = cv.fit(training)</code></pre>
+<ul>
+<li><strong>Find the best model</strong>
+<ul>
+<li>best model ID</li>
+</ul>
+<pre class="python"><code>cvModel.bestModel</code></pre>
+<pre class="python"><code>LogisticRegression_41fe9f7454164180f433</code></pre>
+<ul>
+<li>average cross-validation metrics
+<ul>
+<li>the 10th model has highest score and is the best model</li>
+<li><em>regParam</em> = 2 and <em>elasticNetParam</em> = 0. It is a ridge regularization method.</li>
+</ul></li>
+</ul>
+<pre class="python"><code>cvModel.avgMetrics</code></pre>
+<pre class="python"><code>[0.8191225353777875,
+ 0.8191225353777875,
+ 0.8191225353777875,
+ 0.8243105196624104,
+ 0.5,
+ 0.5,
+ 0.8247709310997127,
+ 0.5,
+ 0.5,
+ 0.8259072947360763,
+ 0.5,
+ 0.5]</code></pre>
+<pre class="python"><code>param_grid[9]</code></pre>
+<pre class="python"><code>{Param(parent=u&#39;LogisticRegression_41fe9f7454164180f433&#39;, name=&#39;elasticNetParam&#39;, doc=&#39;the ElasticNet mixing parameter, in range [0, 1]. For alpha = 0, the penalty is an L2 penalty. For alpha = 1, it is an L1 penalty.&#39;): 0, Param(parent=u&#39;LogisticRegression_41fe9f7454164180f433&#39;, name=&#39;regParam&#39;, doc=&#39;regularization parameter (&gt;= 0).&#39;): 2}    </code></pre>
+<ul>
+<li>Model comparison (not finished)</li>
+</ul>
+<pre class="python"><code># new model
+blor = LogisticRegression(featuresCol=&#39;indexed_features&#39;, labelCol=&#39;label&#39;, family=&#39;binomial&#39;)
+model = blor.fit(training)
+evaluator.evaluate(model.transform(training))
+evaluator.evaluate(model.transform(test))
+
+new_blor = LogisticRegression(featuresCol=&#39;indexed_features&#39;, labelCol=&#39;label&#39;, family=&#39;binomial&#39;, regParam=0.5, elasticNetParam=0)
+new_model = new_blor.fit(training)
+evaluator.evaluate(new_model.transform(training))
+evaluator.evaluate(new_model.transform(test))</code></pre></li>
+</ul>
 </div>
 
 <center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>
