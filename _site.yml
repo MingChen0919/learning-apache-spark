@@ -27,22 +27,20 @@ navbar:
     - text: "Data Wrangling"
       icon: fa-gear
       menu:
-        - text: "------------"
-        - text: "Data Wrangling"      
-        - text: "Data Wrangling"
+        - text: "Basic DataFrame Manipulation"
           href: data-manipulation.html
+        - text: "Pyspark Vectors"
+          href: pyspark-vectors.html
+        - text: "featuresCol & labelCol"
+          href: featuresCol-and-labelcol.html
+        - text: "StringIndexer & VectorIndexer"
+          href: StringIndexer-and-VectorIndexer.html
         - text: "------------"
         - text: "pyspark.RDD object"
         - text: "Aggregate Functions"
           href: aggregate-function.html
         - text: "Reduce Functions"
           href: reduce-functions.html
-        - text: "------------"
-        - text: "pyspark.sql.DataFrame"
-        - text: "DataFrame"
-          href: dataframe.html
-        - text: "Pyspark Vectors"
-          href: pyspark-vectors.html
         
     - text: "Machine Learning"
       icon: fa-gear
