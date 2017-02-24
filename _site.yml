@@ -63,6 +63,10 @@ navbar:
           href: svm.html
         - text: "Naive Bayes"
           href: naive-baye.html
+        - text: "-----------"          
+        - text: "Neural Network"
+        - text: "Feedforward Neural Network" 
+          href:  fnn.html
     - text: "Module Tuning and Evaluation"
       icon: fa-gear
       menu:
