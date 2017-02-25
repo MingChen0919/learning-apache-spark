@@ -11,60 +11,49 @@ sparksession = SparkSession(sc)
 
 
 
-
-
-
-
 ## Import Data
+
 wine_data = sparksession.read.csv("./data/WineData.csv", inferSchema=True, header=True)
+wine_data.printSchema()
 wine_data.show(5)
 
-## deal with categorical data
-# Convert to float format
-def string_to_float(x):
-    return float(x)
 
-def condition(r):
-    if (0<= r <= 4):
-        label = "low" 
-    elif(4< r <= 6):
-        label = "medium"
-    else: 
-        label = "high" 
-    return label
-    
-from pyspark.sql.functions import udf
-from pyspark.sql.types import StringType, DoubleType
-string_to_float_udf = udf(string_to_float, DoubleType())
-quality_udf = udf(lambda x: condition(x), StringType())
 
-wine_data = wine_data.withColumn("quality", quality_udf("quality"))
-wine_data.show(5)
+
+
+## # process categorical columns
+## from pyspark.ml.feature import StringIndexer
+## indexer = StringIndexer(inputCol="quality", outputCol="indexed_label")
+## model = indexer.fit(wine_data)
+## wine_data_label_indexed = model.transform(wine_data)
+## wine_data_label_indexed.show(5)
+## #wine_data = wine_data.withColumn('string_quality', wine_data.quality.cast('string'))
+## 
+## 
+## from pyspark.ml.feature import StringIndexer
+## indexer = StringIndexer(inputCol="label", outputCol="indexed_label")
+## model = indexer.fit(ml_wine_data)
+## wine_data_label_indexed = model.transform(ml_wine_data)
+## wine_data_label_indexed.show(5)
+
 
 # convert data into featuresCol and labelCol structre
 from pyspark.sql import Row
 from pyspark.ml.linalg import Vectors
 ml_wine_data = wine_data.rdd.map(lambda r: [Vectors.dense(r[:-1]), r[-1]]).toDF(['featuresCol', 'label'])
-
 ml_wine_data.show(5)
 
 
 
-
-from pyspark.ml.feature import StringIndexer
-indexer = StringIndexer(inputCol="label", outputCol="indexed_label")
-model = indexer.fit(ml_wine_data)
-wine_data_label_indexed = model.transform(ml_wine_data)
-wine_data_label_indexed.show(5)
-
-from pyspark.ml.feature import VectorIndexer
-indexer = VectorIndexer(maxCategories=4, inputCol='featuresCol', outputCol='indexed_features')
-model = indexer.fit(wine_data_label_indexed)
-wine_data_feature_indexed  = model.transform(wine_data_label_indexed)
+## from pyspark.ml.feature import VectorIndexer
+## indexer = VectorIndexer(maxCategories=4, inputCol='featuresCol', outputCol='indexed_features')
+## model = indexer.fit(wine_data_label_indexed)
+## wine_data_feature_indexed  = model.transform(wine_data_label_indexed)
 
 ## splitting data into training and test sets
-training, test = wine_data_feature_indexed.randomSplit(weights=[0.7, 0.3], seed=123)
+training, test = ml_wine_data.randomSplit(weights=[0.7, 0.3], seed=123)
 training.show(5)
+
 
 ## naive bayes classifier
 ## logistic regression classifier
@@ -75,13 +64,17 @@ from pyspark.ml.classification import RandomForestClassifier
 from pyspark.ml.classification import GBTClassifier
 from pyspark.ml.classification import MultilayerPerceptronClassifier
 
-nb = NaiveBayes(featuresCol="featuresCol", labelCol="indexed_label")
-mlor = LogisticRegression(featuresCol='indexed_features', labelCol='indexed_label')
-dt = DecisionTreeClassifier(featuresCol="indexed_features", labelCol="indexed_label")
-rf = RandomForestClassifier(featuresCol="indexed_features", labelCol="indexed_label")
-gbt = GBTClassifier(featuresCol="indexed_features", labelCol="indexed_label")
-mpnn = MultilayerPerceptronClassifier(featuresCol="indexed_features", labelCol="indexed_label")
+nb = NaiveBayes(featuresCol="featuresCol", labelCol="label")
+mlor = LogisticRegression(featuresCol='indexed_features', labelCol='label')
+dt = DecisionTreeClassifier(featuresCol="indexed_features", labelCol="label")
+rf = RandomForestClassifier(featuresCol="indexed_features", labelCol="label")
+gbt = GBTClassifier(featuresCol="indexed_features", labelCol="label")
+mpnn = MultilayerPerceptronClassifier(featuresCol="indexed_features", labelCol="label")
 
+
+nb.fit(training).transform(training).select(['prediction']).distinct().show()
+dt.fit(training).transform(training).select(['prediction']).distinct().show()
+evaluator.evaluate(nb.fit(training).transform(training))
 
 
 # build parameter grid
@@ -139,20 +132,22 @@ new_training = training.drop('label')
 new_training = new_training.withColumnRenamed('indexed_label', 'label')
 new_training = new_training.withColumn('indexed_label', new_training.label)
 new_training.show(5)
+
 # fit model
-nb_cv_model = nb_cv.fit(new_training)
-mlor_cv_model = mlor_cv.fit(new_training)
-dt_cv_model = dt_cv.fit(new_training)
-rf_cv_model = rf_cv.fit(new_training)
-#gbt_cv_model = gbt_cv.fit(new_training)
-mpnn_cv_model = mpnn_cv.fit(new_training)
+nb_cv_model = nb_cv.fit(training)
+mlor_cv_model = mlor_cv.fit(training)
+dt_cv_model = dt_cv.fit(training)
+rf_cv_model = rf_cv.fit(training)
+#gbt_cv_model = gbt_cv.fit(training)
+mpnn_cv_model = mpnn_cv.fit(training)
 
 
-evaluator.evaluate(nb_cv_model.transform(new_training))
-evaluator.evaluate(mlor_cv_model.transform(new_training))
-evaluator.evaluate(dt_cv_model.transform(new_training))
-evaluator.evaluate(rf_cv_model.transform(new_training))
-evaluator.evaluate(mpnn_cv_model.transform(new_training))
+evaluator.evaluate(nb_cv_model.transform(training))
+evaluator.evaluate(nb_cv_model.transform(training))
+evaluator.evaluate(mlor_cv_model.transform(training))
+evaluator.evaluate(dt_cv_model.transform(training))
+evaluator.evaluate(rf_cv_model.transform(training))
+evaluator.evaluate(mpnn_cv_model.transform(training))
 
 
 evaluator.evaluate(nb_cv_model.transform(new_test))
