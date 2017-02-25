@@ -12,7 +12,7 @@
 <meta name="author" content="Wenqiang Feng &amp; Ming Chen" />
 
 
-<title>pyspark.ml.feature module</title>
+<title>Decision tree Regression</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -333,30 +333,18 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">pyspark.ml.feature module</h1>
+<h1 class="title toc-ignore">Decision tree Regression</h1>
 <h4 class="author"><em>Wenqiang Feng &amp; Ming Chen</em></h4>
-<h4 class="date"><em>2/15/2017</em></h4>
+<h4 class="date"><em>2/17/2017</em></h4>
 
 </div>
 
 
-<div id="introduction" class="section level2">
-<h2>Introduction</h2>
-<p>This module provides a set of functions, methods and classes which act on <strong>features</strong>. A feature is like a column from the data frame or table. You can see that most of functions or classes take parameters like <code>inputCol</code>, <code>featuresCol</code>, <code>outputCol</code>, <code>labelCol</code>. These parameters specify the names of column (features) that you want to work on.</p>
-</div>
-<div id="class-pairs-and-fittransform-functions" class="section level2">
-<h2>class pairs and <code>fit/transform</code> functions</h2>
-<p>I found that there are a lot of class pairs in this module. For example:</p>
+<div id="remark" class="section level3">
+<h3>Remark:</h3>
 <ul>
-<li><code>ChiSqSelector</code> and <code>ChiSqSelectorModel</code></li>
-<li><code>CountVectorizer</code> and <code>CountVectorizerModel</code></li>
-<li><code>IDF</code> and <code>IDFModel</code></li>
-<li>a lot of other pairs …</li>
-</ul>
-<p>The first class in a pair have functions to build model (instructions about how you want to transform your data). The second class in a pair do the actual data transformation.</p>
-<ul>
-<li>The <code>fit</code> function is from the first class and fit the built model to your data.</li>
-<li>The <code>transform</code> function is from the second class and does the actual data transformation.</li>
+<li><p>You can download the complete <a href="./ipynb/DecisionTreeC3.ipynb">ipython notebook (3 classes)</a> and <a href="./ipynb/DecisionTreeC7.ipynb">ipython notebook (7 classes)</a> for the this session.</p></li>
+<li><p>More details can be found on the offical website for <a href="https://spark.apache.org/docs/latest/ml-classification-regression.html">pyspark.ml package</a></p></li>
 </ul>
 </div>
 

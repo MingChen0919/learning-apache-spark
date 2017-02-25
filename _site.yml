@@ -49,17 +49,21 @@ navbar:
         - text: "Regression"      
         - text: "Linear Regression"
           href:  linearRegression.html
+        - text: "Decision tree Regression"
+          href:  dttreeR.html            
         - text: "Random Forest Regression"
           href:  randomforest.html          
         - text: "-----------"          
         - text: "Classification"
         - text: "Kmeans Classification"
           href:  kmeans.html
+        - text: "Decision tree Classification"
+          href:  dttreeC.html            
         - text: "Random Forest Classification"
           href:  randomforestC.html             
         - text: "Logistic Regression"
           href: logistic-regression.html
-        - text: "SVM"
+        - text: "Support Vector Machine"
           href: svm.html
         - text: "Naive Bayes"
           href: naive-baye.html

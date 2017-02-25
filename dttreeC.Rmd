@@ -1,0 +1,13 @@
+---
+title: "Decision tree Regression"
+author: "Wenqiang Feng & Ming Chen"
+date: "2/17/2017"
+output: html_document
+---
+
+
+### Remark:
+
+- You can download the complete [ipython notebook (3 classes)](./ipynb/DecisionTreeC3.ipynb) and [ipython notebook (7 classes)](./ipynb/DecisionTreeC7.ipynb) for the this session.
+
+- More details can be found on the offical website for [pyspark.ml package](https://spark.apache.org/docs/latest/ml-classification-regression.html) 
