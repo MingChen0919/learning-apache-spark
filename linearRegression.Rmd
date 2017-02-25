@@ -7,7 +7,7 @@ output: html_document
 
 ### Remark:
 
-- You can download the complete [ipython notebook](./ipynb/Regression.ipynb) for the this session.
+- You can download the complete [ipython notebook](./ipynb/Regression.ipynb) and [ipython notebook (pipline version)](./ipynb/LinearRegression.ipynb) for the this session.
 
 - More details can be found on the offical website for [pyspark.ml package](https://spark.apache.org/docs/latest/api/python/pyspark.ml.html#pyspark.ml.regression.LinearRegression) 
 
