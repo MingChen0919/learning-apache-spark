@@ -9,10 +9,10 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="author" content="Wenqiang Feng &amp; Ming Chen" />
+<meta name="author" content="Wenqiang Feng" />
 
 
-<title>Data in/out</title>
+<title>Natural Language Processing</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -338,31 +338,18 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Data in/out</h1>
-<h4 class="author"><em>Wenqiang Feng &amp; Ming Chen</em></h4>
-<h4 class="date"><em>2/13/2017</em></h4>
+<h1 class="title toc-ignore">Natural Language Processing</h1>
+<h4 class="author"><em>Wenqiang Feng</em></h4>
+<h4 class="date"><em>3/2/2017</em></h4>
 
 </div>
 
 
-<div id="create-a-sparksession-instance" class="section level2">
-<h2>Create a <code>SparkSession</code> instance</h2>
-<pre class="python"><code>from pyspark import SparkConf, SparkContext
-conf = SparkConf().setAppName(&quot;myApp&quot;)
-sc = SparkContext(conf = conf)
-sparksession = SparkSession(sc)</code></pre>
-</div>
-<div id="read-data-from-csv-files" class="section level2">
-<h2>Read data from CSV files</h2>
+<div id="remark" class="section level3">
+<h3>Remark:</h3>
 <ul>
-<li><strong>inferSchema</strong>: infers the input schema (data type) automatically from data. By default, it is <em>false</em>, which will read all data as strings.</li>
+<li>You can download the complete <a href="./ipynb/Natural%20Language%20Processing%20nb.ipynb">ipython notebook</a> for this tutorial session.</li>
 </ul>
-<pre class="python"><code>rawData = sparksession.read.csv(&quot;kddcup.data_10_percent.csv&quot;, inferSchema=True)
-</code></pre>
-</div>
-<div id="write-data-into-csv-files" class="section level2">
-<h2>Write data into CSV files</h2>
-<pre class="python"><code></code></pre>
 </div>
 
 <center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>

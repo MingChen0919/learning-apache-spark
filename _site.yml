@@ -71,6 +71,10 @@ navbar:
         - text: "Neural Network"
         - text: "Feedforward Neural Network" 
           href:  fnn.html
+        - text: "-----------"          
+        - text: "Natural Language Processing"
+        - text: "Natural Language Processing" 
+          href:  fnn.html          
     - text: "Module Tuning and Evaluation"
       icon: fa-gear
       menu:
