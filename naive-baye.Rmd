@@ -1,0 +1,14 @@
+---
+title: "Naive Bayes"
+author: "Wenqiang Feng"
+date: "3/2/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Remark: 
+
+- You can download the complete [ipython notebook](./ipynb/Natural Language Processing nb.ipynb) for this tutorial session.
