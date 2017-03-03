@@ -349,7 +349,59 @@ $(document).ready(function () {
 <h3>Remark:</h3>
 <ul>
 <li>You can download the complete <a href="./ipynb/Natural%20Language%20Processing%20nb.ipynb">ipython notebook</a> for this tutorial session.</li>
+<li>The <a href="https://www.youtube.com/watch?v=AsW0QzbYVow">YouTube video</a> should be useful for understanding this seesion.</li>
+<li>The online textbook <a href="http://www.nltk.org/book/">Natural Language Processing with Python</a> is also useful.</li>
 </ul>
+<div id="preprocessing" class="section level4">
+<h4>Preprocessing</h4>
+<p>I always believe that better data often beats better algorithm.</p>
+<ul>
+<li>Determine whether the language of the text content is english or not</li>
+</ul>
+<pre class="python"><code>def check_lang(data_str):
+    predict_lang = langid.classify(data_str)
+    if predict_lang[1] &gt;= .9:
+        language = predict_lang[0]
+    else:
+        language = &#39;NA&#39;
+    return language</code></pre>
+<ul>
+<li>Remove features</li>
+</ul>
+<pre class="python"><code>def remove_features(data_str):
+    # compile regex
+    url_re = re.compile(&#39;https?://(www.)?\w+\.\w+(/\w+)*/?&#39;)
+    punc_re = re.compile(&#39;[%s]&#39; % re.escape(string.punctuation))
+    num_re = re.compile(&#39;(\\d+)&#39;)
+    mention_re = re.compile(&#39;@(\w+)&#39;)
+    alpha_num_re = re.compile(&quot;^[a-z0-9_.]+$&quot;)
+    # convert to lowercase
+    data_str = data_str.lower()
+    # remove hyperlinks
+    data_str = url_re.sub(&#39; &#39;, data_str)
+    # remove @mentions
+    data_str = mention_re.sub(&#39; &#39;, data_str)
+    # remove puncuation
+    data_str = punc_re.sub(&#39; &#39;, data_str)
+    # remove numeric &#39;words&#39;
+    data_str = num_re.sub(&#39; &#39;, data_str)
+    # remove non a-z 0-9 characters and words shorter than 3 characters
+    list_pos = 0
+    cleaned_str = &#39;&#39;
+    for word in data_str.split():
+        if list_pos == 0:
+            if alpha_num_re.match(word) and len(word) &gt; 2:
+                cleaned_str = word
+            else:
+                cleaned_str = &#39; &#39;
+        else:
+            if alpha_num_re.match(word) and len(word) &gt; 2:
+                cleaned_str = cleaned_str + &#39; &#39; + word
+            else:
+                cleaned_str += &#39; &#39;
+        list_pos += 1
+    return cleaned_str</code></pre>
+</div>
 </div>
 
 <center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>

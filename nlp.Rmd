@@ -11,3 +11,58 @@ knitr::opts_chunk$set(echo = TRUE)
 ### Remark: 
 
 - You can download the complete [ipython notebook](./ipynb/Natural Language Processing nb.ipynb) for this tutorial session.
+- The [YouTube video](https://www.youtube.com/watch?v=AsW0QzbYVow) should be useful for understanding this seesion. 
+- The online textbook [Natural Language Processing with Python](http://www.nltk.org/book/) is also useful.
+
+
+#### Preprocessing 
+
+I always believe that better data often beats better algorithm.
+
+- Determine whether the language of the text content is english or not
+```{python eval = FALSE}
+def check_lang(data_str):
+    predict_lang = langid.classify(data_str)
+    if predict_lang[1] >= .9:
+        language = predict_lang[0]
+    else:
+        language = 'NA'
+    return language
+```
+
+- Remove features 
+```{python eval = FALSE}
+def remove_features(data_str):
+    # compile regex
+    url_re = re.compile('https?://(www.)?\w+\.\w+(/\w+)*/?')
+    punc_re = re.compile('[%s]' % re.escape(string.punctuation))
+    num_re = re.compile('(\\d+)')
+    mention_re = re.compile('@(\w+)')
+    alpha_num_re = re.compile("^[a-z0-9_.]+$")
+    # convert to lowercase
+    data_str = data_str.lower()
+    # remove hyperlinks
+    data_str = url_re.sub(' ', data_str)
+    # remove @mentions
+    data_str = mention_re.sub(' ', data_str)
+    # remove puncuation
+    data_str = punc_re.sub(' ', data_str)
+    # remove numeric 'words'
+    data_str = num_re.sub(' ', data_str)
+    # remove non a-z 0-9 characters and words shorter than 3 characters
+    list_pos = 0
+    cleaned_str = ''
+    for word in data_str.split():
+        if list_pos == 0:
+            if alpha_num_re.match(word) and len(word) > 2:
+                cleaned_str = word
+            else:
+                cleaned_str = ' '
+        else:
+            if alpha_num_re.match(word) and len(word) > 2:
+                cleaned_str = cleaned_str + ' ' + word
+            else:
+                cleaned_str += ' '
+        list_pos += 1
+    return cleaned_str
+```    
