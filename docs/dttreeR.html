@@ -351,6 +351,203 @@ $(document).ready(function () {
 <li><p>You can download the complete <a href="./ipynb/DecisionTreeR.ipynb">ipython notebook</a> for the this session.</p></li>
 <li><p>More details can be found on the offical website for <a href="https://spark.apache.org/docs/latest/ml-classification-regression.html">pyspark.ml package</a></p></li>
 </ul>
+<p><a href="https://en.wikipedia.org/wiki/Decision_tree">Wikipedia</a>: A decision tree is a decision support tool that uses a tree-like graph or model of decisions and their possible consequences, including chance event outcomes, resource costs, and utility. It is one way to display an algorithm.</p>
+<p>Decision trees are commonly used in operations research, specifically in decision analysis, to help identify a strategy most likely to reach a goal, but are also a popular tool in machine learning.</p>
+<p>Decision tree learning is a method commonly used in data mining.[1] The goal is to create a model that predicts the value of a target variable based on several input variables.It can be used to do the regression and classfication.</p>
+</div>
+<div id="set-up-spark-context-and-sparksession" class="section level3">
+<h3>1. Set up spark context and SparkSession</h3>
+<pre class="r"><code>from pyspark.sql import SparkSession
+
+spark = SparkSession \
+    .builder \
+    .appName(&quot;Python Spark Random Forest Regression&quot;) \
+    .config(&quot;spark.some.config.option&quot;, &quot;some-value&quot;) \
+    .getOrCreate()</code></pre>
+</div>
+<div id="load-dataset" class="section level3">
+<h3>2. Load dataset</h3>
+<pre class="r"><code>df = spark.read.format(&#39;com.databricks.spark.csv&#39;).\
+                               options(header=&#39;true&#39;, \
+                            inferschema=&#39;true&#39;).\
+                  load(&quot;./data/Advertising.csv&quot;,header=True);</code></pre>
+<ul>
+<li>Check the schema of the dataset</li>
+</ul>
+<pre class="r"><code>df.printSchema()</code></pre>
+<pre class="r"><code># output
+root
+ |-- _c0: integer (nullable = true)
+ |-- TV: double (nullable = true)
+ |-- Radio: double (nullable = true)
+ |-- Newspaper: double (nullable = true)
+ |-- Sales: double (nullable = true)</code></pre>
+<ul>
+<li>preview the dataset</li>
+</ul>
+<pre class="r"><code>df.show(6)</code></pre>
+<pre class="r"><code>+---+-----+-----+---------+-----+
+|_c0|   TV|Radio|Newspaper|Sales|
++---+-----+-----+---------+-----+
+|  1|230.1| 37.8|     69.2| 22.1|
+|  2| 44.5| 39.3|     45.1| 10.4|
+|  3| 17.2| 45.9|     69.3|  9.3|
+|  4|151.5| 41.3|     58.5| 18.5|
+|  5|180.8| 10.8|     58.4| 12.9|
+|  6|  8.7| 48.9|     75.0|  7.2|
++---+-----+-----+---------+-----+
+only showing top 6 rows</code></pre>
+</div>
+<div id="convert-the-data-to-pysaprk-ml-data-framework-features-dense-vector-and-label" class="section level3">
+<h3>3. Convert the data to Pysaprk ML data framework (features (dense vector) and label)</h3>
+<ul>
+<li>load required library</li>
+</ul>
+<pre class="r"><code>from pyspark.sql import Row
+from pyspark.ml.linalg import Vectors</code></pre>
+<ul>
+<li>convert data.</li>
+</ul>
+<pre class="r"><code># convert the data to dense vector
+#def transData(row):
+#    return Row(label=row[&quot;Sales&quot;],
+#               features=Vectors.dense([row[&quot;TV&quot;],
+#                                       row[&quot;Radio&quot;],
+#                                       row[&quot;Newspaper&quot;]]))
+def transData(data):
+    return data.rdd.map(lambda r: [Vectors.dense(r[:-1]),r[-1]]).toDF([&#39;features&#39;,&#39;label&#39;])</code></pre>
+<p><strong>Remark:</strong> I presented two methods at here, each of them has advantage and drawback.</p>
+<ul>
+<li>Transform the dataset to DataFrame</li>
+</ul>
+<pre class="r"><code>data = transData(df)
+data.show(6)</code></pre>
+<pre class="r"><code># output
++--------------------+-----+
+|            features|label|
++--------------------+-----+
+|[1.0,230.1,37.8,6...| 22.1|
+|[2.0,44.5,39.3,45.1]| 10.4|
+|[3.0,17.2,45.9,69.3]|  9.3|
+|[4.0,151.5,41.3,5...| 18.5|
+|[5.0,180.8,10.8,5...| 12.9|
+| [6.0,8.7,48.9,75.0]|  7.2|
++--------------------+-----+
+only showing top 6 rows</code></pre>
+</div>
+<div id="convert-features-data-format-and-set-up-training-and-test-data-sets" class="section level3">
+<h3>4. Convert features data format and set up training and test data sets</h3>
+<ul>
+<li>load required library</li>
+</ul>
+<pre class="r"><code>from pyspark.ml import Pipeline
+from pyspark.ml.regression import DecisionTreeRegressor
+from pyspark.ml.feature import VectorIndexer
+from pyspark.ml.evaluation import RegressionEvaluator</code></pre>
+<ul>
+<li>convert the <code>features</code>: this is a main step for treating categorical variables.</li>
+</ul>
+<pre class="r"><code>featureIndexer = VectorIndexer(inputCol=&quot;features&quot;, \
+                               outputCol=&quot;indexedFeatures&quot;, maxCategories=4).fit(data)</code></pre>
+<ul>
+<li>Split the data into training and test sets (40% held out for testing)</li>
+</ul>
+<pre class="r"><code># Split the data into training and test sets (40% held out for testing)
+(trainingData, testData) = data.randomSplit([0.6, 0.4])</code></pre>
+</div>
+<div id="train-model" class="section level3">
+<h3>5. Train model</h3>
+<pre class="r"><code># Train a DecisionTree model.
+dt = DecisionTreeRegressor(featuresCol=&quot;indexedFeatures&quot;)</code></pre>
+<pre class="r"><code># Chain indexer and tree in a Pipeline
+pipeline = Pipeline(stages=[featureIndexer, dt])</code></pre>
+<pre class="r"><code># Train model.  This also runs the indexer.
+model = pipeline.fit(trainingData)</code></pre>
+<p><strong>Remark:</strong> I prefer to use pipline method.</p>
+</div>
+<div id="make-predictions" class="section level3">
+<h3>6. Make predictions</h3>
+<ul>
+<li>Make predictions</li>
+</ul>
+<pre class="r"><code># Make predictions.
+predictions = model.transform(testData)</code></pre>
+<ul>
+<li>Select example rows to display</li>
+</ul>
+<pre class="r"><code># Select example rows to display.
+predictions.select(&quot;prediction&quot;, &quot;label&quot;, &quot;features&quot;).show(5)</code></pre>
+<pre class="r"><code># output
++------------------+-----+--------------------+
+|        prediction|label|            features|
++------------------+-----+--------------------+
+| 8.600000000000001|  9.3|[3.0,17.2,45.9,69.3]|
+|1.6000000000000014|  7.2| [6.0,8.7,48.9,75.0]|
+|              7.25|  5.6|[23.0,13.2,15.9,4...|
+|15.300000000000002| 15.5|[24.0,228.3,16.9,...|
+|            17.875| 15.0|[27.0,142.9,29.3,...|
++------------------+-----+--------------------+
+only showing top 5 rows</code></pre>
+</div>
+<div id="evaluation" class="section level3">
+<h3>7. Evaluation</h3>
+<pre class="r"><code># Select (prediction, true label) and compute test error
+evaluator = RegressionEvaluator(
+    labelCol=&quot;label&quot;, predictionCol=&quot;prediction&quot;, metricName=&quot;rmse&quot;)
+rmse = evaluator.evaluate(predictions)
+print(&quot;Root Mean Squared Error (RMSE) on test data = %g&quot; % rmse)</code></pre>
+<pre class="r"><code># output
+Root Mean Squared Error (RMSE) on test data = 1.63981</code></pre>
+</div>
+<div id="compared-with-r" class="section level3">
+<h3>8. Compared with R</h3>
+<ul>
+<li>required library</li>
+</ul>
+<pre class="r"><code>library(rpart)
+library(caret)
+library(ggplot2)
+#install.packages(&#39;rattle&#39;)
+#install.packages(&#39;rpart.plot&#39;)
+#install.packages(&#39;RColorBrewer&#39;)
+library(rattle)
+library(rpart.plot)
+library(RColorBrewer)</code></pre>
+<ul>
+<li>load dataset</li>
+</ul>
+<pre class="r"><code>df &lt;- read.csv(&quot;./data/Advertising.csv&quot;, header = TRUE)</code></pre>
+<ul>
+<li>splitting the data to training and test datasets</li>
+</ul>
+<pre class="r"><code>randomSplit &lt;- function(data,ratio)
+  {
+    mx = dim(data)[1]
+    index = createDataPartition(1:mx,p=0.7,list=FALSE)
+    train = data[index,]
+    test = data[-index,]
+    list(train=train,test=test)
+  }</code></pre>
+<pre class="r"><code>splited  = randomSplit(df,0.7) 
+train = splited$train
+test  = splited$test</code></pre>
+<ul>
+<li>train model</li>
+</ul>
+<pre class="r"><code>fit &lt;- rpart(Sales ~ TV + Radio + Newspaper,
+               data=train,
+               method=&quot;anova&quot;)</code></pre>
+<ul>
+<li>Visulize the tree</li>
+</ul>
+<pre class="r"><code>#plot(fit)
+#text(fit)</code></pre>
+<pre class="r"><code>fancyRpartPlot(fit)</code></pre>
+<p><img src="dttreeR_files/figure-html/unnamed-chunk-28-1.png" width="672" /></p>
+<ul>
+<li>prediction</li>
+</ul>
+<pre class="r"><code>Prediction &lt;- predict(fit, test, method=&quot;anova&quot;)</code></pre>
 </div>
 
 <center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>
