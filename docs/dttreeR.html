@@ -548,6 +548,12 @@ test  = splited$test</code></pre>
 <li>prediction</li>
 </ul>
 <pre class="r"><code>Prediction &lt;- predict(fit, test, method=&quot;anova&quot;)</code></pre>
+<ul>
+<li>evaluation</li>
+</ul>
+<pre class="r"><code>RMSE &lt;- sqrt(mean((test$Sales-Prediction )^2))
+RMSE</code></pre>
+<pre><code>## [1] 1.768054</code></pre>
 </div>
 
 <center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>

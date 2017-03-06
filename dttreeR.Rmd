@@ -250,5 +250,10 @@ fancyRpartPlot(fit)
 Prediction <- predict(fit, test, method="anova")
 ```
 
+- evaluation 
+```{r}
+RMSE <- sqrt(mean((test$Sales-Prediction )^2))
+RMSE
+```
 
 
