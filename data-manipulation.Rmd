@@ -283,3 +283,169 @@ df3.count()
 df4.count()
 ```
 
+###  Data Stack 
+
+- spread dense data into columns
+```{python eval=FALSE}
+df = spark.sparkContext.parallelize([
+    ("assert", Vectors.dense([1, 2, 3]))
+]).toDF(["word", "vector"])
+```
+```{python eval=FALSE}
+df.show()
+```
+
+```{python eval=FALSE}
++------+-------------+
+|  word|       vector|
++------+-------------+
+|assert|[1.0,2.0,3.0]|
++------+-------------+
+```
+
+- main function
+```{python eval=FALSE}
+from pyspark.ml.linalg import Vectors
+def extract(row):
+    return (row.word, ) + tuple(float(x) for x in row.vector.values)
+```
+
+
+```{python eval=FALSE}
+df_new = df.rdd.map(extract).toDF(["word"]) 
+```
+```{python eval=FALSE}
+df_new.show()
+```
+
+```{python eval=FALSE}
+#ouput 
++------+---+---+---+
+|  word| _2| _3| _4|
++------+---+---+---+
+|assert|1.0|2.0|3.0|
++------+---+---+---+
+```
+
+
+- spread dense data into rows
+
+```{python eval=FALSE}
+df = spark.sparkContext.parallelize([(1, 2, 3, 'a b c'),
+                     (4, 5, 6, 'd e f'),
+                     (7, 8, 9, 'g h i')]).toDF(['col1', 'col2', 'col3','col4'])
+```
+```{python eval=FALSE}
+df.show()
+```
+
+```{python eval=FALSE}
+# output
++----+----+----+-----+
+|col1|col2|col3| col4|
++----+----+----+-----+
+|   1|   2|   3|a b c|
+|   4|   5|   6|d e f|
+|   7|   8|   9|g h i|
++----+----+----+-----+
+```
+```{python eval=FALSE}
+df.printSchema()
+```
+```{python eval=FALSE}
+# output
+root
+ |-- col1: long (nullable = true)
+ |-- col2: long (nullable = true)
+ |-- col3: long (nullable = true)
+ |-- col4: string (nullable = true)
+```
+
+- main function 
+```{python eval=FALSE}
+from pyspark.sql.functions import split, explode
+new = df.withColumn('col4',explode(split('col4',' ')))
+```
+
+```{python eval=FALSE}
+new.show()
+```
+
+```{python eval=FALSE}
++----+----+----+----+
+|col1|col2|col3|col4|
++----+----+----+----+
+|   1|   2|   3|   a|
+|   1|   2|   3|   b|
+|   1|   2|   3|   c|
+|   4|   5|   6|   d|
+|   4|   5|   6|   e|
+|   4|   5|   6|   f|
+|   7|   8|   9|   g|
+|   7|   8|   9|   h|
+|   7|   8|   9|   i|
++----+----+----+----+
+```
+
+### Dataframes joint
+
+- demo dataframes 
+```{python eval=FALSE}
+a = spark.sparkContext.\
+    parallelize([['a', 'foo'], ['b', 'hem'], ['c', 'haw']]).toDF(['a_id', 'extra'])
+```
+```{python eval=FALSE}
+a.show()
+```
+
+
+```{python eval=FALSE}
+# output 
++----+-----+
+|a_id|extra|
++----+-----+
+|   a|  foo|
+|   b|  hem|
+|   c|  haw|
++----+-----+
+```
+
+
+```{python eval=FALSE}
+b = spark.sparkContext.parallelize([['p1', 'a'], ['p2', 'b'], ['p3', 'c']]).toDF(["other", "b_id"])
+```
+
+```{python eval=FALSE}
+b.show()
+```
+
+```{python eval=FALSE}
+# output 
++-----+----+
+|other|b_id|
++-----+----+
+|   p1|   a|
+|   p2|   b|
+|   p3|   c|
++-----+----+
+```
+
+```{python eval=FALSE}
+c = a.join(b, a.a_id == b.b_id,'outer')
+```
+
+```{python eval=FALSE}
+c.show()
+```
+
+```{python eval=FALSE}
+# output
++----+-----+-----+----+
+|a_id|extra|other|b_id|
++----+-----+-----+----+
+|   c|  haw|   p3|   c|
+|   b|  hem|   p2|   b|
+|   a|  foo|   p1|   a|
++----+-----+-----+----+
+```
+
