@@ -367,15 +367,15 @@ spark = SparkSession \
 </div>
 <div id="load-dataset" class="section level3">
 <h3>2. Load dataset</h3>
-<pre class="r"><code>df = spark.read.format(&#39;com.databricks.spark.csv&#39;).\
+<pre class="python"><code>df = spark.read.format(&#39;com.databricks.spark.csv&#39;).\
                                options(header=&#39;true&#39;, \
                             inferschema=&#39;true&#39;).\
                   load(&quot;./data/Advertising.csv&quot;,header=True);</code></pre>
 <ul>
 <li>Check the schema of the dataset</li>
 </ul>
-<pre class="r"><code>df.printSchema()</code></pre>
-<pre class="r"><code># output
+<pre class="python"><code>df.printSchema()</code></pre>
+<pre class="python"><code># output
 root
  |-- _c0: integer (nullable = true)
  |-- TV: double (nullable = true)
@@ -385,8 +385,8 @@ root
 <ul>
 <li>preview the dataset</li>
 </ul>
-<pre class="r"><code>df.show(6)</code></pre>
-<pre class="r"><code>+---+-----+-----+---------+-----+
+<pre class="python"><code>df.show(6)</code></pre>
+<pre class="python"><code>+---+-----+-----+---------+-----+
 |_c0|   TV|Radio|Newspaper|Sales|
 +---+-----+-----+---------+-----+
 |  1|230.1| 37.8|     69.2| 22.1|
@@ -403,12 +403,12 @@ only showing top 6 rows</code></pre>
 <ul>
 <li>load required library</li>
 </ul>
-<pre class="r"><code>from pyspark.sql import Row
+<pre class="python"><code>from pyspark.sql import Row
 from pyspark.ml.linalg import Vectors</code></pre>
 <ul>
 <li>convert data.</li>
 </ul>
-<pre class="r"><code># convert the data to dense vector
+<pre class="python"><code># convert the data to dense vector
 #def transData(row):
 #    return Row(label=row[&quot;Sales&quot;],
 #               features=Vectors.dense([row[&quot;TV&quot;],
@@ -420,9 +420,9 @@ def transData(data):
 <ul>
 <li>Transform the dataset to DataFrame</li>
 </ul>
-<pre class="r"><code>data = transData(df)
+<pre class="python"><code>data = transData(df)
 data.show(6)</code></pre>
-<pre class="r"><code># output
+<pre class="python"><code># output
 +--------------------+-----+
 |            features|label|
 +--------------------+-----+
@@ -440,28 +440,28 @@ only showing top 6 rows</code></pre>
 <ul>
 <li>load required library</li>
 </ul>
-<pre class="r"><code>from pyspark.ml import Pipeline
+<pre class="python"><code>from pyspark.ml import Pipeline
 from pyspark.ml.regression import DecisionTreeRegressor
 from pyspark.ml.feature import VectorIndexer
 from pyspark.ml.evaluation import RegressionEvaluator</code></pre>
 <ul>
 <li>convert the <code>features</code>: this is a main step for treating categorical variables.</li>
 </ul>
-<pre class="r"><code>featureIndexer = VectorIndexer(inputCol=&quot;features&quot;, \
+<pre class="python"><code>featureIndexer = VectorIndexer(inputCol=&quot;features&quot;, \
                                outputCol=&quot;indexedFeatures&quot;, maxCategories=4).fit(data)</code></pre>
 <ul>
 <li>Split the data into training and test sets (40% held out for testing)</li>
 </ul>
-<pre class="r"><code># Split the data into training and test sets (40% held out for testing)
+<pre class="python"><code># Split the data into training and test sets (40% held out for testing)
 (trainingData, testData) = data.randomSplit([0.6, 0.4])</code></pre>
 </div>
 <div id="train-model" class="section level3">
 <h3>5. Train model</h3>
-<pre class="r"><code># Train a DecisionTree model.
+<pre class="python"><code># Train a DecisionTree model.
 dt = DecisionTreeRegressor(featuresCol=&quot;indexedFeatures&quot;)</code></pre>
-<pre class="r"><code># Chain indexer and tree in a Pipeline
+<pre class="python"><code># Chain indexer and tree in a Pipeline
 pipeline = Pipeline(stages=[featureIndexer, dt])</code></pre>
-<pre class="r"><code># Train model.  This also runs the indexer.
+<pre class="python"><code># Train model.  This also runs the indexer.
 model = pipeline.fit(trainingData)</code></pre>
 <p><strong>Remark:</strong> I prefer to use pipline method.</p>
 </div>
@@ -470,14 +470,14 @@ model = pipeline.fit(trainingData)</code></pre>
 <ul>
 <li>Make predictions</li>
 </ul>
-<pre class="r"><code># Make predictions.
+<pre class="python"><code># Make predictions.
 predictions = model.transform(testData)</code></pre>
 <ul>
 <li>Select example rows to display</li>
 </ul>
-<pre class="r"><code># Select example rows to display.
+<pre class="python"><code># Select example rows to display.
 predictions.select(&quot;prediction&quot;, &quot;label&quot;, &quot;features&quot;).show(5)</code></pre>
-<pre class="r"><code># output
+<pre class="python"><code># output
 +------------------+-----+--------------------+
 |        prediction|label|            features|
 +------------------+-----+--------------------+
@@ -491,12 +491,12 @@ only showing top 5 rows</code></pre>
 </div>
 <div id="evaluation" class="section level3">
 <h3>7. Evaluation</h3>
-<pre class="r"><code># Select (prediction, true label) and compute test error
+<pre class="python"><code># Select (prediction, true label) and compute test error
 evaluator = RegressionEvaluator(
     labelCol=&quot;label&quot;, predictionCol=&quot;prediction&quot;, metricName=&quot;rmse&quot;)
 rmse = evaluator.evaluate(predictions)
 print(&quot;Root Mean Squared Error (RMSE) on test data = %g&quot; % rmse)</code></pre>
-<pre class="r"><code># output
+<pre class="python"><code># output
 Root Mean Squared Error (RMSE) on test data = 1.63981</code></pre>
 </div>
 <div id="compared-with-r" class="section level3">
@@ -542,7 +542,7 @@ test  = splited$test</code></pre>
 </ul>
 <pre class="r"><code>#plot(fit)
 #text(fit)</code></pre>
-<pre class="r"><code>fancyRpartPlot(fit)</code></pre>
+<pre class="r"><code>fancyRpartPlot(fit,sub=&quot;&quot;)</code></pre>
 <p><img src="dttreeR_files/figure-html/unnamed-chunk-28-1.png" width="672" /></p>
 <ul>
 <li>prediction</li>
@@ -553,7 +553,7 @@ test  = splited$test</code></pre>
 </ul>
 <pre class="r"><code>RMSE &lt;- sqrt(mean((test$Sales-Prediction )^2))
 RMSE</code></pre>
-<pre><code>## [1] 1.768054</code></pre>
+<pre><code>## [1] 2.352359</code></pre>
 </div>
 
 <center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>

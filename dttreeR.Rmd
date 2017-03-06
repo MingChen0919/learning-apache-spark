@@ -32,17 +32,17 @@ spark = SparkSession \
 ```
 
 ### 2. Load dataset
-```{r eval=FALSE}
+```{python eval=FALSE}
 df = spark.read.format('com.databricks.spark.csv').\
                                options(header='true', \
                             inferschema='true').\
                   load("./data/Advertising.csv",header=True);
 ```
 - Check the schema of the dataset
-```{r eval=FALSE}
+```{python eval=FALSE}
 df.printSchema()
 ```
-```{r eval=FALSE}
+```{python eval=FALSE}
 # output
 root
  |-- _c0: integer (nullable = true)
@@ -52,10 +52,10 @@ root
  |-- Sales: double (nullable = true)
 ```
 - preview the dataset
-```{r eval=FALSE}
+```{python eval=FALSE}
 df.show(6)
 ```
-```{r eval=FALSE}
+```{python eval=FALSE}
 +---+-----+-----+---------+-----+
 |_c0|   TV|Radio|Newspaper|Sales|
 +---+-----+-----+---------+-----+
@@ -72,13 +72,13 @@ only showing top 6 rows
 ### 3. Convert the data to Pysaprk ML data framework (features (dense vector) and label)
 
 -  load required library
-```{r eval=FALSE}
+```{python eval=FALSE}
 from pyspark.sql import Row
 from pyspark.ml.linalg import Vectors
 ```
 
 - convert data. 
-```{r eval=FALSE}
+```{python eval=FALSE}
 # convert the data to dense vector
 #def transData(row):
 #    return Row(label=row["Sales"],
@@ -92,12 +92,12 @@ def transData(data):
 **Remark:** I presented two methods at here, each of them has advantage and drawback.
 
 - Transform the dataset to DataFrame
-```{r eval=FALSE}
+```{python eval=FALSE}
 data = transData(df)
 data.show(6)
 ```
 
-```{r eval=FALSE}
+```{python eval=FALSE}
 # output
 +--------------------+-----+
 |            features|label|
@@ -115,7 +115,7 @@ only showing top 6 rows
 ### 4. Convert features data format and set up training and test data sets
 
 - load required library 
-```{r eval=FALSE}
+```{python eval=FALSE}
 from pyspark.ml import Pipeline
 from pyspark.ml.regression import DecisionTreeRegressor
 from pyspark.ml.feature import VectorIndexer
@@ -123,26 +123,26 @@ from pyspark.ml.evaluation import RegressionEvaluator
 ```
 
 - convert the `features`: this is a main step for treating categorical variables.
-```{r eval=FALSE}
+```{python eval=FALSE}
 featureIndexer = VectorIndexer(inputCol="features", \
                                outputCol="indexedFeatures", maxCategories=4).fit(data)
 ```
 - Split the data into training and test sets (40% held out for testing)
-```{r eval=FALSE}
+```{python eval=FALSE}
 # Split the data into training and test sets (40% held out for testing)
 (trainingData, testData) = data.randomSplit([0.6, 0.4])
 ```
 
 ### 5. Train model
-```{r eval=FALSE}
+```{python eval=FALSE}
 # Train a DecisionTree model.
 dt = DecisionTreeRegressor(featuresCol="indexedFeatures")
 ```
-```{r eval=FALSE}
+```{python eval=FALSE}
 # Chain indexer and tree in a Pipeline
 pipeline = Pipeline(stages=[featureIndexer, dt])
 ```
-```{r eval=FALSE}
+```{python eval=FALSE}
 # Train model.  This also runs the indexer.
 model = pipeline.fit(trainingData)
 ```
@@ -151,17 +151,17 @@ model = pipeline.fit(trainingData)
 ### 6. Make predictions
 
 - Make predictions
-```{r eval=FALSE}
+```{python eval=FALSE}
 # Make predictions.
 predictions = model.transform(testData)
 ```
 
 - Select example rows to display
-```{r eval=FALSE}
+```{python eval=FALSE}
 # Select example rows to display.
 predictions.select("prediction", "label", "features").show(5)
 ```
-```{r eval=FALSE}
+```{python eval=FALSE}
 # output
 +------------------+-----+--------------------+
 |        prediction|label|            features|
@@ -177,14 +177,14 @@ only showing top 5 rows
 
 ### 7. Evaluation
 
-```{r eval=FALSE}
+```{python eval=FALSE}
 # Select (prediction, true label) and compute test error
 evaluator = RegressionEvaluator(
     labelCol="label", predictionCol="prediction", metricName="rmse")
 rmse = evaluator.evaluate(predictions)
 print("Root Mean Squared Error (RMSE) on test data = %g" % rmse)
 ```
-```{r eval=FALSE}
+```{python eval=FALSE}
 # output
 Root Mean Squared Error (RMSE) on test data = 1.63981
 ```
@@ -242,7 +242,7 @@ fit <- rpart(Sales ~ TV + Radio + Newspaper,
 ```
 
 ```{r}
-fancyRpartPlot(fit)
+fancyRpartPlot(fit,sub="")
 ```
 
 - prediction 
