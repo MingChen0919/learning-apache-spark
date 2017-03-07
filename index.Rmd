@@ -7,6 +7,8 @@ output: html_document
 
 ### About
 
+![Learning Apache Spark with Python.](logo.jpg)
+
 This is the shared repository for Learning Apache Spark Notes. This shared repository mainly contains notes and projects which from Ming's Big data class and Wenqiang's IMA Data Fellows' projects. 
 
 In this repository, we try to use the detailed demo code and examples to show how to use each main functions. **If you find your work wasn't cited in this note, please feel free to let us know.**
