@@ -74,7 +74,7 @@ navbar:
         - text: "-----------"          
         - text: "Natural Language Processing"
         - text: "Natural Language Processing" 
-          href:  fnn.html          
+          href:  nlp.html          
     - text: "Module Tuning and Evaluation"
       icon: fa-gear
       menu:
