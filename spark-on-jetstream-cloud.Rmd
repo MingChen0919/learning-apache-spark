@@ -1,0 +1,41 @@
+---
+title: "Spark on Jetstream Cloud"
+author: "Wenqiang Feng & Ming Chen"
+date: "3/8/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+
+## Set up apache spark on jetstream
+
+* Install linuxbrew and spark
+
+```{python}
+sudo apt-get install -y ruby
+ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install)"
+
+echo 'export PATH="/home/mchen33/.linuxbrew/bin:$PATH"' >>~/.bash_profile
+echo 'export MANPATH="/home/mchen33/.linuxbrew/share/man:$MANPATH"' >>~/.bash_profile
+echo 'export INFOPATH="/home/mchen33/.linuxbrew/share/info:$INFOPATH"' >>~/.bash_profile
+
+source ~/.bash_profile
+  
+sudo apt-get install build-essential
+
+brew install apache-spark
+
+## install java
+sudo apt-get install -y default-jre
+```
+
+
+```{python}
+export SPARK_LOCAL_IP="127.0.0.1"
+```
+
+
+
