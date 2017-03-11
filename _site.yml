@@ -73,8 +73,8 @@ navbar:
           href:  fnn.html
         - text: "-----------"          
         - text: "Natural Language Processing"
-        - text: "Natural Language Processing" 
-          href:  nlp.html          
+        - text: "Text Classification" 
+          href:  nlpC.html          
     - text: "Module Tuning and Evaluation"
       icon: fa-gear
       menu:
