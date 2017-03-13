@@ -74,7 +74,9 @@ navbar:
         - text: "-----------"          
         - text: "Natural Language Processing"
         - text: "Text Classification" 
-          href:  nlpC.html          
+          href:  nlpC.html    
+        - text: "Topic Model LDA" 
+          href:  nlpLDA.html          
     - text: "Module Tuning and Evaluation"
       icon: fa-gear
       menu:
