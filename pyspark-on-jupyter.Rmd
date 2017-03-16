@@ -9,36 +9,34 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Install jupyter with conda
+### 1. Install jupyter with conda
 
-```
+```{pyton eval=FALSE}
 conda install jupyter
 ```
 
-## Get `jupyter binary executable path`
+### 2. Get `jupyter binary executable path`
 
-```
+```{pyton eval=FALSE}
 which jupyter
 ```
-
-output
-
-```
+```{pyton eval=FALSE}
+# output
 /Users/mingchen/anaconda2/bin/jupyter
 ```
 
-## Link spark with jupyter
+### 3.Link spark with jupyter
 
-```
+```{pyton eval=FALSE}
 export PYSPARK_DRIVER_PYTHON=/Users/mingchen/anaconda2/bin/jupyter
 export PYSPARK_DRIVER_PYTHON_OPTS="notebook --NotebookApp.open_browser=False --NotebookApp.ip='*' --NotebookApp.port=8880"
 ```
 
 You can also add the two environmental variables to the `~/.bash_profile` file to permenantly link spark with jupyter
 
-## Run jupyter notebook
+### 4. Run jupyter notebook
 
-```
+```{pyton eval=FALSE}
 pyspark
 ```
 

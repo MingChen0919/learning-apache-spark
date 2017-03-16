@@ -5,33 +5,33 @@ date: "2/5/2017"
 output: html_document
 ---
 
-## Install Rodeo on Mac
+### 1. Install Rodeo on Mac
 
 * Download DMG file [https://www.yhat.com/products/rodeo/](https://www.yhat.com/products/rodeo/)
 
-## Install `apache-spark` with homebrew
+### 2. Install `apache-spark` with homebrew
 
 ```{bash eval=FALSE}
 brew install apache-spark
 ```
 
-## Locate the `python` directory within apache-spark root directory
+### 3.Locate the `python` directory within apache-spark root directory
 
 ```{bash eval=FALSE}
 /usr/local/Cellar/apache-spark/2.1.0/libexec/python
 ```
 
 
-## Set environment variable
+### 4. Set environment variable
 
 * Open Rodeo, go to **settings**->**ENVIRONMENT VARIABLES**
 * Add the path `/usr/local/Cellar/apache-spark/2.1.0/libexec/python` to `PYTHONPATH`
 
-## Test pyspark on Rodeo
+### 5. Test pyspark on Rodeo
 
 Run the following command
 
-```{bash eval=FALSE}
+```{pyton eval=FALSE}
 from pyspark import SparkConf, SparkContext
 
 conf = SparkConf().setAppName("myAppName")
@@ -41,6 +41,6 @@ sc
 
 You should get something this
 
-```{bash eval=FALSE}
+```{pyton eval=FALSE}
 <pyspark.context.SparkContext at 0x114ee1610>
 ```
