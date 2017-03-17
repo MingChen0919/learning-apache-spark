@@ -8,6 +8,13 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+### **Caution**: Before you start the following steps, please make sure you have already installed 
+
+- [Java JDK](http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html)
+- [Ipython and python](https://ipython.org/install.html)
+- If you use this method to install the Spark, you can skip the [Spark on Jupyter section](pyspark-on-jupyter.html)
+
 ### 1. Download Apache Spark from the official website 
  Weblink: [Download Apache Spark™](http://spark.apache.org/downloads.html)
 
@@ -46,7 +53,27 @@ findspark.init('/Users/wenqiangfeng/spark/', edit_rc=True)
 
 ### Note: 
 
-This will also help you to set up the `ipython notebook` or `Jupyter`. You may run the following code in terminal to double check it:
+- This will also help you to set up the `ipython notebook` or `Jupyter`. You may run the following code in terminal to double check it:
 ```{python eval=FALSE}
-ipython notebook
+jupyter notebook
 ```
+
+* If you PySpark still doesn't work, you need to check your `.profile` or `bash_profile` and add the following path to it
+
+    + check `.profile` or `bash_profile` at terminal
+    + add the path to your `.profile` or `bash_profile`
+```{bash eval=FALSE}
+vim ~/.profile
+```
+    
+    
+```{bash eval=FALSE}
+# Added for Pyspark
+export SPARK_HOME=YOUR_PATH/apache-spark/libexec
+export PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin
+export PYSPARK_DRIVER_PYTHON="jupyter"
+export PYSPARK_DRIVER_PYTHON_OPTS="notebook"
+```
+    
+  
+

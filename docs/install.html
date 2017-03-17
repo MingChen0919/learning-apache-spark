@@ -348,6 +348,14 @@ $(document).ready(function () {
 </div>
 
 
+<div id="caution-before-you-start-the-following-steps-please-make-sure-you-have-already-installed" class="section level3">
+<h3><strong>Caution</strong>: Before you start the following steps, please make sure you have already installed</h3>
+<ul>
+<li><a href="http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html">Java JDK</a></li>
+<li><a href="https://ipython.org/install.html">Ipython and python</a></li>
+<li>If you use this method to install the Spark, you can skip the <a href="pyspark-on-jupyter.html">Spark on Jupyter section</a></li>
+</ul>
+</div>
 <div id="download-apache-spark-from-the-official-website" class="section level3">
 <h3>1. Download Apache Spark from the official website</h3>
 <p>Weblink: <a href="http://spark.apache.org/downloads.html">Download Apache Spark™</a></p>
@@ -381,8 +389,23 @@ findspark.init()</code></pre>
 </div>
 <div id="note" class="section level3">
 <h3>Note:</h3>
-<p>This will also help you to set up the <code>ipython notebook</code> or <code>Jupyter</code>. You may run the following code in terminal to double check it:</p>
-<pre class="python"><code>ipython notebook</code></pre>
+<ul>
+<li>This will also help you to set up the <code>ipython notebook</code> or <code>Jupyter</code>. You may run the following code in terminal to double check it:</li>
+</ul>
+<pre class="python"><code>jupyter notebook</code></pre>
+<ul>
+<li><p>If you PySpark still doesn’t work, you need to check your <code>.profile</code> or <code>bash_profile</code> and add the following path to it</p>
+<ul>
+<li>check <code>.profile</code> or <code>bash_profile</code> at terminal</li>
+<li>add the path to your <code>.profile</code> or <code>bash_profile</code></li>
+</ul></li>
+</ul>
+<pre class="bash"><code>vim ~/.profile</code></pre>
+<pre class="bash"><code># Added for Pyspark
+export SPARK_HOME=YOUR_PATH/apache-spark/libexec
+export PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin
+export PYSPARK_DRIVER_PYTHON=&quot;jupyter&quot;
+export PYSPARK_DRIVER_PYTHON_OPTS=&quot;notebook&quot;</code></pre>
 </div>
 
 <center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>
