@@ -27,7 +27,7 @@ use it when you unpack it.
 
 This is the most difficult step for the beginner. However, this step can be easily solved via  Min RK's [`findspark`](https://github.com/minrk/findspark).
 
-- install pyspark
+- install findspark
 ```{python eval=FALSE}
 pip install findspark
 ```
