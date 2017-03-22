@@ -292,7 +292,10 @@ $(document).ready(function () {
     <li class="divider"></li>
     <li class="dropdown-header">Natural Language Processing</li>
     <li>
-      <a href="nlp.html">Natural Language Processing</a>
+      <a href="nlpC.html">Text Classification</a>
+    </li>
+    <li>
+      <a href="nlpLDA.html">Topic Model LDA</a>
     </li>
   </ul>
 </li>
@@ -345,37 +348,37 @@ $(document).ready(function () {
 </div>
 
 
-<div id="install-rodeo-on-mac" class="section level2">
-<h2>Install Rodeo on Mac</h2>
+<div id="install-rodeo-on-mac" class="section level3">
+<h3>1. Install Rodeo on Mac</h3>
 <ul>
 <li>Download DMG file <a href="https://www.yhat.com/products/rodeo/" class="uri">https://www.yhat.com/products/rodeo/</a></li>
 </ul>
 </div>
-<div id="install-apache-spark-with-homebrew" class="section level2">
-<h2>Install <code>apache-spark</code> with homebrew</h2>
+<div id="install-apache-spark-with-homebrew" class="section level3">
+<h3>2. Install <code>apache-spark</code> with homebrew</h3>
 <pre class="bash"><code>brew install apache-spark</code></pre>
 </div>
-<div id="locate-the-python-directory-within-apache-spark-root-directory" class="section level2">
-<h2>Locate the <code>python</code> directory within apache-spark root directory</h2>
+<div id="locate-the-python-directory-within-apache-spark-root-directory" class="section level3">
+<h3>3.Locate the <code>python</code> directory within apache-spark root directory</h3>
 <pre class="bash"><code>/usr/local/Cellar/apache-spark/2.1.0/libexec/python</code></pre>
 </div>
-<div id="set-environment-variable" class="section level2">
-<h2>Set environment variable</h2>
+<div id="set-environment-variable" class="section level3">
+<h3>4. Set environment variable</h3>
 <ul>
 <li>Open Rodeo, go to <strong>settings</strong>-&gt;<strong>ENVIRONMENT VARIABLES</strong></li>
 <li>Add the path <code>/usr/local/Cellar/apache-spark/2.1.0/libexec/python</code> to <code>PYTHONPATH</code></li>
 </ul>
 </div>
-<div id="test-pyspark-on-rodeo" class="section level2">
-<h2>Test pyspark on Rodeo</h2>
+<div id="test-pyspark-on-rodeo" class="section level3">
+<h3>5. Test pyspark on Rodeo</h3>
 <p>Run the following command</p>
-<pre class="bash"><code>from pyspark import SparkConf, SparkContext
+<pre class="pyton"><code>from pyspark import SparkConf, SparkContext
 
 conf = SparkConf().setAppName(&quot;myAppName&quot;)
 sc = SparkContext(conf=conf)
 sc</code></pre>
 <p>You should get something this</p>
-<pre class="bash"><code>&lt;pyspark.context.SparkContext at 0x114ee1610&gt;</code></pre>
+<pre class="pyton"><code>&lt;pyspark.context.SparkContext at 0x114ee1610&gt;</code></pre>
 </div>
 
 <center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>
