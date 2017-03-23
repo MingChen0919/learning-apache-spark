@@ -9,7 +9,7 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="author" content="Ming Chen" />
+<meta name="author" content="Wenqiang Feng &amp; Ming Chen" />
 
 
 <title>Spark on Jetstream Cloud</title>
@@ -245,6 +245,9 @@ $(document).ready(function () {
     <li>
       <a href="reduce-functions.html">Reduce Functions</a>
     </li>
+    <li>
+      <a href="HashingTF-and-CountVectorizer.html">HashingTF and CountVectorizer</a>
+    </li>
   </ul>
 </li>
 <li class="dropdown">
@@ -295,7 +298,10 @@ $(document).ready(function () {
     <li class="divider"></li>
     <li class="dropdown-header">Natural Language Processing</li>
     <li>
-      <a href="nlp.html">Natural Language Processing</a>
+      <a href="nlpC.html">Text Classification</a>
+    </li>
+    <li>
+      <a href="nlpLDA.html">Topic Model LDA</a>
     </li>
   </ul>
 </li>
@@ -342,12 +348,17 @@ $(document).ready(function () {
 
 
 <h1 class="title toc-ignore">Spark on Jetstream Cloud</h1>
-<h4 class="author"><em>Ming Chen</em></h4>
+<h4 class="author"><em>Wenqiang Feng &amp; Ming Chen</em></h4>
 <h4 class="date"><em>3/8/2017</em></h4>
 
 </div>
 
 
+<div id="set-up-apache-spark-on-jetstream" class="section level2">
+<h2>Set up apache spark on jetstream</h2>
+<ul>
+<li>Install linuxbrew and spark</li>
+</ul>
 <pre class="python"><code>sudo apt-get install -y ruby
 ruby -e &quot;$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install)&quot;
 
@@ -363,6 +374,8 @@ brew install apache-spark
 
 ## install java
 sudo apt-get install -y default-jre</code></pre>
+<pre class="python"><code>export SPARK_LOCAL_IP=&quot;127.0.0.1&quot;</code></pre>
+</div>
 
 <center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>
 

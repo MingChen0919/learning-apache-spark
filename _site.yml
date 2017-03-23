@@ -43,6 +43,8 @@ navbar:
           href: aggregate-function.html
         - text: "Reduce Functions"
           href: reduce-functions.html
+        - text: "HashingTF and CountVectorizer"
+          href: HashingTF-and-CountVectorizer.html
         
     - text: "Machine Learning"
       icon: fa-gear
