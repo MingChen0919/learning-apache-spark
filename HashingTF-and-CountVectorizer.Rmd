@@ -1,0 +1,108 @@
+---
+title: "HashingTF and CountVectorizer"
+author: "Wenqiang & Ming Chen"
+date: "3/23/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+
+## HashingTF and CountVectorizer
+
+### Load data
+
+```{python}
+twitter = spark.createDataFrame([
+                                ('Wenqiang is a spark expert', 'Wenqiang', 1.0),
+                                ('Ming is learning spark', 'Ming', 0.0)],
+                                ['text', 'id', 'label']
+                               )
+```
+
+```{python}
+twitter.show()
+```
+
+```{python}
++--------------------+--------+-----+
+|                text|      id|label|
++--------------------+--------+-----+
+|Wenqiang is a spa...|Wenqiang|  1.0|
+|Ming is learning ...|    Ming|  0.0|
++--------------------+--------+-----+
+```
+
+
+### Tokenization
+
+```{python}
+from pyspark.ml.feature import Tokenizer
+```
+
+```{python}
+tokenizer_mod = Tokenizer(inputCol='text', outputCol='tokens')
+twitter_tokens = tokenizer_mod.transform(twitter)
+twitter_tokens.show()
+```
+
+```{python}
++--------------------+--------+-----+--------------------+
+|                text|      id|label|              tokens|
++--------------------+--------+-----+--------------------+
+|Wenqiang is a spa...|Wenqiang|  1.0|[wenqiang, is, a,...|
+|Ming is learning ...|    Ming|  0.0|[ming, is, learni...|
++--------------------+--------+-----+--------------------+
+```
+
+
+### HashingTF
+
+```{python}
+from pyspark.ml.feature import HashingTF
+hashingTF_mod = HashingTF(numFeatures=pow(2,4), inputCol='tokens', outputCol='features')
+hashingTF_twitter = hashingTF_mod.transform(twitter_tokens)
+```
+
+```{python}
+hashingTF_twitter.show(truncate=False)
+```
+
+```{python}
++--------------------------+--------+-----+--------------------------------+---------------------------------+
+|text                      |id      |label|tokens                          |features                         |
++--------------------------+--------+-----+--------------------------------+---------------------------------+
+|Wenqiang is a spark expert|Wenqiang|1.0  |[wenqiang, is, a, spark, expert]|(16,[1,2,9,13],[2.0,1.0,1.0,1.0])|
+|Ming is learning spark    |Ming    |0.0  |[ming, is, learning, spark]     |(16,[0,1,14],[1.0,2.0,1.0])      |
++--------------------------+--------+-----+--------------------------------+---------------------------------+
+```
+
+
+### CountVectorizer
+
+```{python}
+from pyspark.ml.feature import CountVectorizer
+count_vectorizer = CountVectorizer(vocabSize=pow(2,4), inputCol='tokens', outputCol='features')
+countVectorizer_mod = count_vectorizer.fit(twitter_tokens)
+countVectorizer_twitter = countVectorizer_mod.transform(twitter_tokens)
+```
+
+```{python}
+countVectorizer_twitter.show(truncate=False)
+```
+
+```{python}
++--------------------------+--------+-----+--------------------------------+-------------------------------------+
+|text                      |id      |label|tokens                          |features                             |
++--------------------------+--------+-----+--------------------------------+-------------------------------------+
+|Wenqiang is a spark expert|Wenqiang|1.0  |[wenqiang, is, a, spark, expert]|(7,[0,1,2,3,5],[1.0,1.0,1.0,1.0,1.0])|
+|Ming is learning spark    |Ming    |0.0  |[ming, is, learning, spark]     |(7,[0,1,4,6],[1.0,1.0,1.0,1.0])      |
++--------------------------+--------+-----+--------------------------------+-------------------------------------+
+```
+
+
+
+
+

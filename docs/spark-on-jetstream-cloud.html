@@ -4,7 +4,7 @@
 
 <head>
 
-<meta charset="utf-8" />
+<meta charset="utf-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 
@@ -12,7 +12,7 @@
 <meta name="author" content="Wenqiang Feng &amp; Ming Chen" />
 
 
-<title>Spark on Jupyter</title>
+<title>Spark on Jetstream Cloud</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -303,11 +303,6 @@ $(document).ready(function () {
     <li>
       <a href="nlpLDA.html">Topic Model LDA</a>
     </li>
-    <li class="divider"></li>
-    <li class="dropdown-header">Social Network Analysis</li>
-    <li>
-      <a href="sna.html">Social Network Analysis</a>
-    </li>
   </ul>
 </li>
 <li class="dropdown">
@@ -352,33 +347,34 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Spark on Jupyter</h1>
+<h1 class="title toc-ignore">Spark on Jetstream Cloud</h1>
 <h4 class="author"><em>Wenqiang Feng &amp; Ming Chen</em></h4>
-<h4 class="date"><em>2/5/2017</em></h4>
+<h4 class="date"><em>3/8/2017</em></h4>
 
 </div>
 
 
-<div id="install-jupyter-with-conda" class="section level3">
-<h3>1. Install jupyter with conda</h3>
-<pre class="python"><code>conda install jupyter</code></pre>
-</div>
-<div id="get-jupyter-binary-executable-path" class="section level3">
-<h3>2. Get <code>jupyter binary executable path</code></h3>
-<pre class="python"><code>which jupyter</code></pre>
-<pre class="python"><code># output
-/Users/mingchen/anaconda2/bin/jupyter</code></pre>
-</div>
-<div id="link-spark-with-jupyter" class="section level3">
-<h3>3.Link spark with jupyter</h3>
-<pre class="python"><code>export PYSPARK_DRIVER_PYTHON=/Users/mingchen/anaconda2/bin/jupyter
-export PYSPARK_DRIVER_PYTHON_OPTS=&quot;notebook --NotebookApp.open_browser=False --NotebookApp.ip=&#39;*&#39; --NotebookApp.port=8880&quot;</code></pre>
-<p>You can also add the two environmental variables to the <code>~/.bash_profile</code> file to permenantly link spark with jupyter</p>
-</div>
-<div id="run-jupyter-notebook" class="section level3">
-<h3>4. Run jupyter notebook</h3>
-<pre class="python"><code>pyspark</code></pre>
-<p>Then go to <a href="http://127.0.0.1:8880" class="uri">http://127.0.0.1:8880</a></p>
+<div id="set-up-apache-spark-on-jetstream" class="section level2">
+<h2>Set up apache spark on jetstream</h2>
+<ul>
+<li>Install linuxbrew and spark</li>
+</ul>
+<pre class="python"><code>sudo apt-get install -y ruby
+ruby -e &quot;$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install)&quot;
+
+echo &#39;export PATH=&quot;/home/mchen33/.linuxbrew/bin:$PATH&quot;&#39; &gt;&gt;~/.bash_profile
+echo &#39;export MANPATH=&quot;/home/mchen33/.linuxbrew/share/man:$MANPATH&quot;&#39; &gt;&gt;~/.bash_profile
+echo &#39;export INFOPATH=&quot;/home/mchen33/.linuxbrew/share/info:$INFOPATH&quot;&#39; &gt;&gt;~/.bash_profile
+
+source ~/.bash_profile
+  
+sudo apt-get install build-essential
+
+brew install apache-spark
+
+## install java
+sudo apt-get install -y default-jre</code></pre>
+<pre class="python"><code>export SPARK_LOCAL_IP=&quot;127.0.0.1&quot;</code></pre>
 </div>
 
 <center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>

@@ -20,6 +20,8 @@ navbar:
           href: pyspark-on-rodeo.html
         - text: "Integrate spark with Jupyter"
           href: pyspark-on-jupyter.html
+        - text: "Spark on jetstream cloud"
+          href: spark-on-jetstream-cloud.html
         - text: "------------" 
         - text: "Data Preprocessing Template"        
         - text: "Data Preprocessing Template"
@@ -41,6 +43,8 @@ navbar:
           href: aggregate-function.html
         - text: "Reduce Functions"
           href: reduce-functions.html
+        - text: "HashingTF and CountVectorizer"
+          href: HashingTF-and-CountVectorizer.html
         
     - text: "Machine Learning"
       icon: fa-gear
