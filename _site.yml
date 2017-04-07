@@ -76,7 +76,11 @@ navbar:
         - text: "Text Classification" 
           href:  nlpC.html    
         - text: "Topic Model LDA" 
-          href:  nlpLDA.html          
+          href:  nlpLDA.html   
+        - text: "-----------"          
+        - text: "Social Network Analysis"
+        - text: "Social Network Analysis" 
+          href:  sna.html            
     - text: "Module Tuning and Evaluation"
       icon: fa-gear
       menu:

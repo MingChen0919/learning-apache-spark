@@ -4,7 +4,7 @@
 
 <head>
 
-<meta charset="utf-8">
+<meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 
@@ -297,6 +297,11 @@ $(document).ready(function () {
     <li>
       <a href="nlpLDA.html">Topic Model LDA</a>
     </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">Social Network Analysis</li>
+    <li>
+      <a href="sna.html">Social Network Analysis</a>
+    </li>
   </ul>
 </li>
 <li class="dropdown">
@@ -372,13 +377,13 @@ $(document).ready(function () {
 <div id="test-pyspark-on-rodeo" class="section level3">
 <h3>5. Test pyspark on Rodeo</h3>
 <p>Run the following command</p>
-<pre class="pyton"><code>from pyspark import SparkConf, SparkContext
+<pre class="python"><code>from pyspark import SparkConf, SparkContext
 
 conf = SparkConf().setAppName(&quot;myAppName&quot;)
 sc = SparkContext(conf=conf)
 sc</code></pre>
 <p>You should get something this</p>
-<pre class="pyton"><code>&lt;pyspark.context.SparkContext at 0x114ee1610&gt;</code></pre>
+<pre class="python"><code>&lt;pyspark.context.SparkContext at 0x114ee1610&gt;</code></pre>
 </div>
 
 <center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>

@@ -4,7 +4,7 @@
 
 <head>
 
-<meta charset="utf-8">
+<meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 
@@ -297,6 +297,11 @@ $(document).ready(function () {
     <li>
       <a href="nlpLDA.html">Topic Model LDA</a>
     </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">Social Network Analysis</li>
+    <li>
+      <a href="sna.html">Social Network Analysis</a>
+    </li>
   </ul>
 </li>
 <li class="dropdown">
@@ -350,23 +355,23 @@ $(document).ready(function () {
 
 <div id="install-jupyter-with-conda" class="section level3">
 <h3>1. Install jupyter with conda</h3>
-<pre class="pyton"><code>conda install jupyter</code></pre>
+<pre class="python"><code>conda install jupyter</code></pre>
 </div>
 <div id="get-jupyter-binary-executable-path" class="section level3">
 <h3>2. Get <code>jupyter binary executable path</code></h3>
-<pre class="pyton"><code>which jupyter</code></pre>
-<pre class="pyton"><code># output
+<pre class="python"><code>which jupyter</code></pre>
+<pre class="python"><code># output
 /Users/mingchen/anaconda2/bin/jupyter</code></pre>
 </div>
 <div id="link-spark-with-jupyter" class="section level3">
 <h3>3.Link spark with jupyter</h3>
-<pre class="pyton"><code>export PYSPARK_DRIVER_PYTHON=/Users/mingchen/anaconda2/bin/jupyter
+<pre class="python"><code>export PYSPARK_DRIVER_PYTHON=/Users/mingchen/anaconda2/bin/jupyter
 export PYSPARK_DRIVER_PYTHON_OPTS=&quot;notebook --NotebookApp.open_browser=False --NotebookApp.ip=&#39;*&#39; --NotebookApp.port=8880&quot;</code></pre>
 <p>You can also add the two environmental variables to the <code>~/.bash_profile</code> file to permenantly link spark with jupyter</p>
 </div>
 <div id="run-jupyter-notebook" class="section level3">
 <h3>4. Run jupyter notebook</h3>
-<pre class="pyton"><code>pyspark</code></pre>
+<pre class="python"><code>pyspark</code></pre>
 <p>Then go to <a href="http://127.0.0.1:8880" class="uri">http://127.0.0.1:8880</a></p>
 </div>
 

@@ -31,7 +31,7 @@ brew install apache-spark
 
 Run the following command
 
-```{pyton eval=FALSE}
+```{python eval=FALSE}
 from pyspark import SparkConf, SparkContext
 
 conf = SparkConf().setAppName("myAppName")
@@ -41,6 +41,6 @@ sc
 
 You should get something this
 
-```{pyton eval=FALSE}
+```{python eval=FALSE}
 <pyspark.context.SparkContext at 0x114ee1610>
 ```
