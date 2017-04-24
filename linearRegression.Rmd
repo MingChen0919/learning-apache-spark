@@ -324,3 +324,8 @@ data <- read.csv("./data/Advertising.csv", header = TRUE)
 fit1 = lm(Sales~.,data = data)
 summary(fit1)
 ```
+
+```{r}
+par(mfrow=c(2,2))
+plot(fit1)
+```
