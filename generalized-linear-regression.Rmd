@@ -218,6 +218,6 @@ glm_cuse = glm(y~age + education + wantsMore, data = cuse_binary, family = 'bino
 glm_cuse$coefficients
 
  (Intercept)     age25-29       age<25     age40-49 educationlow  wantsMoreno 
-  -0.7325613   -0.5192319   -0.9086135    0.2806254   -0.3249947    0.8329548 
+   0.7325613    0.5192319    0.9086135   -0.2806254    0.3249947   -0.8329548 
 ```
 
