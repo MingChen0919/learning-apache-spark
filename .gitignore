@@ -1,5 +1,8 @@
-.Rproj.user
-.Rhistory
+/.Rproj.user
+/.Rhistory
 .RData
 .Ruserdata
 .DS_Store
+*.ipybn
+/.ipynb_checkpoints
+/.idea

@@ -1,0 +1,260 @@
+---
+title: "Kmeans"
+author: "Wenqiang Feng & Ming Chen"
+date: "2/17/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+### Remark: 
+
+- You can download the complete [ipython notebook](./ipynb/PysparkCluster.ipynb) for this tutorial session.
+
+#### 1. Pyspark cluster Demo from pyspark
+
+* set up _spark context_ and _SparkSession_
+
+```{python eval=FALSE}
+## set up spark context
+from pyspark import SparkConf, SparkContext
+from pyspark.sql import SQLContext
+sqlContext = SQLContext(sc)
+## set up  SparkSession
+from pyspark.sql import SparkSession
+
+spark = SparkSession \
+    .builder \
+    .appName("Python Spark SQL basic example") \
+    .config("spark.some.config.option", "some-value") \
+    .getOrCreate()
+```
+* Creat dataset
+```{python eval=FALSE}
+# load data
+data = [(Vectors.dense([0.0, 0.0]),), \
+        (Vectors.dense([1.0, 1.0]),),\
+        (Vectors.dense([9.0, 8.0]),), \
+        (Vectors.dense([8.0, 9.0]),)]
+df = sqlContext.createDataFrame(data, ["features"])
+df.show()
+```
+```{python eval=FALSE}
++---------+
+| features|
++---------+
+|[0.0,0.0]|
+|[1.0,1.0]|
+|[9.0,8.0]|
+|[8.0,9.0]|
++---------+
+```
+* load library
+```{python eval=FALSE}
+from pyspark.ml.clustering import KMeans
+from pyspark.ml.linalg import Vectors 
+#from pyspark.mllib.linalg import Vectors 
+
+# Remark: If your spark verion is above 2.0, then you need to use
+# the Vecttors from pyspark.ml.linalg, i.e.from pyspark.ml.linalg import Vectors
+```
+
+* fit Kmeans model
+```{python eval=FALSE}
+#kmeans model
+kmeans = KMeans(k=2, seed=1)
+Kmodel = kmeans.fit(df)
+# number of cenet
+centers = Kmodel.clusterCenters()
+len(centers)
+```
+```{python eval=FALSE}
+2
+```
+* run Kmeans model
+```{python eval=FALSE}
+transformed = Kmodel.transform(df).select("features", "prediction")
+rows = transformed.collect()
+rows
+```
+
+* predicted results
+```{python eval=FALSE}
+rows[0].prediction == rows[1].prediction
+#True
+rows[2].prediction == rows[3].prediction
+# True
+```
+```{python eval=FALSE}
+True
+```
+
+#### 2. Pyspark cluster for iris dataset
+
+
+* set up _spark context_ and _SparkSession_
+
+```{python eval=FALSE}
+## set up spark context
+from pyspark import SparkConf, SparkContext
+from pyspark.sql import SQLContext
+sqlContext = SQLContext(sc)
+## set up  SparkSession
+from pyspark.sql import SparkSession
+
+spark = SparkSession \
+    .builder \
+    .appName("Python Spark SQL basic example") \
+    .config("spark.some.config.option", "some-value") \
+    .getOrCreate()
+```
+
+* load data
+```{python eval = FALSE}
+data = sqlContext.read.format('com.databricks.spark.csv').\
+                               options(header='true', \
+                           inferschema='true').load('./data/iris.csv')
+```
+
+```{python eval = FALSE}
+data.printSchema()
+data.show()
+```
+
+```{python eval = FALSE}
+
+ |-- sepal_length: double (nullable = true)
+ |-- sepal_width: double (nullable = true)
+ |-- petal_length: double (nullable = true)
+ |-- petal_width: double (nullable = true)
+ |-- species: string (nullable = true)
+
++------------+-----------+------------+-----------+-------+
+|sepal_length|sepal_width|petal_length|petal_width|species|
++------------+-----------+------------+-----------+-------+
+|         5.1|        3.5|         1.4|        0.2| setosa|
+|         4.9|        3.0|         1.4|        0.2| setosa|
+|         4.7|        3.2|         1.3|        0.2| setosa|
+|         4.6|        3.1|         1.5|        0.2| setosa|
+|         5.0|        3.6|         1.4|        0.2| setosa|
+|         5.4|        3.9|         1.7|        0.4| setosa|
+|         4.6|        3.4|         1.4|        0.3| setosa|
+|         5.0|        3.4|         1.5|        0.2| setosa|
+|         4.4|        2.9|         1.4|        0.2| setosa|
+|         4.9|        3.1|         1.5|        0.1| setosa|
+|         5.4|        3.7|         1.5|        0.2| setosa|
+|         4.8|        3.4|         1.6|        0.2| setosa|
+|         4.8|        3.0|         1.4|        0.1| setosa|
+|         4.3|        3.0|         1.1|        0.1| setosa|
+|         5.8|        4.0|         1.2|        0.2| setosa|
+|         5.7|        4.4|         1.5|        0.4| setosa|
+|         5.4|        3.9|         1.3|        0.4| setosa|
+|         5.1|        3.5|         1.4|        0.3| setosa|
+|         5.7|        3.8|         1.7|        0.3| setosa|
+|         5.1|        3.8|         1.5|        0.3| setosa|
++------------+-----------+------------+-----------+-------+
+only showing top 20 rows
+```
+
+* required library 
+```{python eval=FALSE}
+from pyspark.sql import Row
+from pyspark.ml.clustering import KMeans
+from pyspark.ml.linalg import Vectors
+```
+
+* convert the data to dense vector
+```{python eval = FALSE}
+# convert the data to dense vector
+def transData(row):
+    return Row(label=row["targetlabel"],
+               features=Vectors.dense([row["sepal_length"],
+                                       row["sepal_width"],
+                                       row["petal_length"],
+                                       row["petal_width"]]))
+```
+
+* convert the data to Dataframe
+```{python eval = FALSE}
+#convert the data to Dataframe
+#Note: if your pyspark is 2.0 above, you need to convert Datafrme to rdd FIRST
+transformed = target.rdd.map(transData).toDF() 
+transformed.show()
+```
+```{python eval = FALSE}
++-----------------+-----+
+|         features|label|
++-----------------+-----+
+|[5.1,3.5,1.4,0.2]|  2.0|
+|[4.9,3.0,1.4,0.2]|  2.0|
+|[4.7,3.2,1.3,0.2]|  2.0|
+|[4.6,3.1,1.5,0.2]|  2.0|
+|[5.0,3.6,1.4,0.2]|  2.0|
+|[5.4,3.9,1.7,0.4]|  2.0|
+|[4.6,3.4,1.4,0.3]|  2.0|
+|[5.0,3.4,1.5,0.2]|  2.0|
+|[4.4,2.9,1.4,0.2]|  2.0|
+|[4.9,3.1,1.5,0.1]|  2.0|
+|[5.4,3.7,1.5,0.2]|  2.0|
+|[4.8,3.4,1.6,0.2]|  2.0|
+|[4.8,3.0,1.4,0.1]|  2.0|
+|[4.3,3.0,1.1,0.1]|  2.0|
+|[5.8,4.0,1.2,0.2]|  2.0|
+|[5.7,4.4,1.5,0.4]|  2.0|
+|[5.4,3.9,1.3,0.4]|  2.0|
+|[5.1,3.5,1.4,0.3]|  2.0|
+|[5.7,3.8,1.7,0.3]|  2.0|
+|[5.1,3.8,1.5,0.3]|  2.0|
++-----------------+-----+
+only showing top 20 rows
+```
+
+* Fit Kmeans model
+```{python eval = FALSE}
+# model and predict data
+kmeans = KMeans(k=3)
+model = kmeans.fit(transformed) 
+predict_data = model.transform(transformed)
+predict_data.show()
+```
+
+```{python eval = FALSE}
++-----------------+-----+----------+
+|         features|label|prediction|
++-----------------+-----+----------+
+|[5.1,3.5,1.4,0.2]|  2.0|         0|
+|[4.9,3.0,1.4,0.2]|  2.0|         0|
+|[4.7,3.2,1.3,0.2]|  2.0|         0|
+|[4.6,3.1,1.5,0.2]|  2.0|         0|
+|[5.0,3.6,1.4,0.2]|  2.0|         0|
+|[5.4,3.9,1.7,0.4]|  2.0|         0|
+|[4.6,3.4,1.4,0.3]|  2.0|         0|
+|[5.0,3.4,1.5,0.2]|  2.0|         0|
+|[4.4,2.9,1.4,0.2]|  2.0|         0|
+|[4.9,3.1,1.5,0.1]|  2.0|         0|
+|[5.4,3.7,1.5,0.2]|  2.0|         0|
+|[4.8,3.4,1.6,0.2]|  2.0|         0|
+|[4.8,3.0,1.4,0.1]|  2.0|         0|
+|[4.3,3.0,1.1,0.1]|  2.0|         0|
+|[5.8,4.0,1.2,0.2]|  2.0|         0|
+|[5.7,4.4,1.5,0.4]|  2.0|         0|
+|[5.4,3.9,1.3,0.4]|  2.0|         0|
+|[5.1,3.5,1.4,0.3]|  2.0|         0|
+|[5.7,3.8,1.7,0.3]|  2.0|         0|
+|[5.1,3.8,1.5,0.3]|  2.0|         0|
++-----------------+-----+----------+
+only showing top 20 rows
+
+```
+* the result
+```{python eval = FALSE}
+train_err = predict_data.filter(predict_data['label'] != predict_data['prediction']).count() 
+total = predict_data.count()
+```
+```{python eval = FALSE}
+train_err, total, 1-float(train_err)/total,float(train_err)/total
+```
+```{python eval = FALSE}
+(136, 150, 0.09333333333333338, 0.9066666666666666)
+```

@@ -45,33 +45,11 @@ navbar:
           href: linear-regression.html
         - text: "Generalized linear regression"
           href: generalized-linear-regression.html
-        - text: "Classification"
-        - text: "Kmeans Classification"
-          href:  kmeans.html
-        - text: "Decision tree Classification"
-          href:  dttreeC.html            
-        - text: "Random Forest Classification"
-          href:  randomforestC.html             
-        - text: "Logistic Regression"
-          href: logistic-regression.html
-        - text: "Support Vector Machine"
-          href: svm.html
-        - text: "Naive Bayes"
-          href: naive-baye.html
-        - text: "-----------"          
-        - text: "Neural Network"
-        - text: "Feedforward Neural Network" 
-          href:  fnn.html
-        - text: "-----------"          
-        - text: "Natural Language Processing"
-        - text: "Text Classification" 
-          href:  nlpC.html    
-        - text: "Topic Model LDA" 
-          href:  nlpLDA.html   
-        - text: "-----------"          
-        - text: "Social Network Analysis"
-        - text: "Social Network Analysis" 
-          href:  sna.html            
+        - text: "------------"
+        - text: "More ML methods coming soon"
+        - text: "------------"
+        - text: "Legacy"
+          href: https://github.com/MingChen0919/learning-apache-spark/tree/master/legacy
     - text: "Module Tuning and Evaluation"
       icon: fa-gear
       menu:
