@@ -311,36 +311,8 @@ $(document).ready(function () {
 </div>
 
 
-<div id="generalized-linear-regression-in-r" class="section level2">
-<h2>Generalized linear regression in R</h2>
-<pre class="r"><code>cuse = read.table(&#39;http://data.princeton.edu/wws509/datasets/cuse.dat&#39;, header = T)
-
-# convert count data to binary data
-not_using = rep(1:nrow(cuse), times=cuse$notUsing)
-using = rep(1:nrow(cuse), times=cuse$using)
-cuse_binary = cuse[c(not_using, using), 1:3]
-cuse_binary$y = c(rep(0, length(not_using)), rep(1, length(using)))
-
-# write data into a file
-write.csv(cuse_binary, file=&#39;data/cuse_binary.csv&#39;, row.names = FALSE)</code></pre>
-<p>Process categorical variables so they have the same pattern as in pyspar. Element levels are in the descending order of element frequencies.</p>
-<pre class="r"><code>cuse_binary$age = factor(cuse_binary$age, 
-                         levels = names(sort(table(cuse_binary$age), decreasing = TRUE)))
-cuse_binary$education = factor(cuse_binary$education,
-                               levels = names(sort(table(cuse_binary$education), decreasing = TRUE)))
-cuse_binary$wantsMore = factor(cuse_binary$wantsMore,
-                               levels = names(sort(table(cuse_binary$wantsMore), decreasing = TRUE)))
-cuse_binary$y = factor(cuse_binary$y,
-                       levels = names(sort(table(cuse_binary$y), decreasing = TRUE)))
-glm_cuse = glm(y~age + education + wantsMore, data = cuse_binary, family = &#39;binomial&#39;)</code></pre>
-<p><strong>Resulting coefficients</strong></p>
-<pre class="python"><code>glm_cuse$coefficients
-
- (Intercept)     age25-29       age&lt;25     age40-49 educationlow  wantsMoreno 
-  -0.7325613   -0.5192319   -0.9086135    0.2806254   -0.3249947    0.8329548 </code></pre>
-</div>
-<div id="generalized-linear-regression-with-r" class="section level2">
-<h2>Generalized linear regression with R</h2>
+<div id="generalized-linear-regression-with-pyspark" class="section level2">
+<h2>Generalized linear regression with pyspark</h2>
 <p><strong>Import data</strong></p>
 <pre class="python"><code>cuse = spark.read.csv(&#39;data/cuse_binary.csv&#39;, header=True, inferSchema=True)
 cuse.show(5)
@@ -355,50 +327,58 @@ cuse.show(5)
 |&lt;25|      low|      yes|  0|
 +---+---------+---------+---+
 only showing top 5 rows</code></pre>
-<p><strong>Convert string columns to categorical columns</strong> + step 1: implements <code>StringIndexer</code> + step 2: implements <code>OneHotEncoder</code></p>
-<pre class="python"><code># string index each categorical string columns
-from pyspark.ml.feature import StringIndexer
+</div>
+<div id="process-categorical-columns" class="section level2">
+<h2>Process categorical columns</h2>
+<p>The following code does three things with pipeline:</p>
+<ul>
+<li><code>StringIndexer</code> all categorical columns</li>
+<li><code>OneHotEncoder</code> all categorical index columns</li>
+<li><code>VectorAssembler</code> all feature columns into one vector column</li>
+</ul>
+<pre class="python"><code>from pyspark.ml.feature import StringIndexer, OneHotEncoder, VectorAssembler
 from pyspark.ml import Pipeline
-indexers = [StringIndexer(inputCol=column, outputCol=&quot;indexed_&quot;+column) for column in (&#39;age&#39;, &#39;education&#39;, &#39;wantsMore&#39;)]
-pipeline = Pipeline(stages=indexers)
-indexed_cuse = pipeline.fit(cuse).transform(cuse)</code></pre>
-<pre class="python"><code># onehotencode each indexed categorical columns
-from pyspark.ml.feature import OneHotEncoder
-columns = indexed_cuse.columns[0:3]
-onehoteencoders = [OneHotEncoder(inputCol=&quot;indexed_&quot;+column, outputCol=&quot;onehotencode_&quot;+column) for column in columns]
-pipeline = Pipeline(stages=onehoteencoders)
-onehotencode_columns = [&#39;onehotencode_age&#39;, &#39;onehotencode_education&#39;, &#39;onehotencode_wantsMore&#39;, &#39;y&#39;]
-onehotencode_cuse = pipeline.fit(indexed_cuse).transform(indexed_cuse).select(onehotencode_columns)
-onehotencode_cuse.distinct().show(5)
 
+# categorical columns
+categorical_columns = cuse.columns[0:3]
 
-+----------------+----------------------+----------------------+---+
-|onehotencode_age|onehotencode_education|onehotencode_wantsMore|  y|
-+----------------+----------------------+----------------------+---+
-|   (3,[1],[1.0])|             (1,[],[])|         (1,[0],[1.0])|  0|
-|   (3,[2],[1.0])|         (1,[0],[1.0])|             (1,[],[])|  1|
-|   (3,[0],[1.0])|         (1,[0],[1.0])|         (1,[0],[1.0])|  0|
-|       (3,[],[])|         (1,[0],[1.0])|         (1,[0],[1.0])|  1|
-|   (3,[2],[1.0])|             (1,[],[])|         (1,[0],[1.0])|  0|
-+----------------+----------------------+----------------------+---+
-only showing top 5 rows</code></pre>
-<p><strong><em>Assemble all feature columns into one single vector column</em></strong></p>
-<pre class="python"><code># assemble all feature columns into on single vector column
-from pyspark.ml.feature import VectorAssembler
-assembler = VectorAssembler(inputCols=[&#39;onehotencode_age&#39;, &#39;onehotencode_education&#39;, &#39;onehotencode_wantsMore&#39;], outputCol=&#39;features&#39;)
-cuse_df_2 = assembler.transform(onehotencode_cuse).withColumnRenamed(&#39;y&#39;, &#39;label&#39;)
-cuse_df_2.show(5)
+# build StringIndexer stages
+stringindexer_stages = [StringIndexer(inputCol=c, outputCol=&#39;strindexed_&#39; + c) for c in categorical_columns]
+# encode label column and add it to stringindexer_stages
+stringindexer_stages += [StringIndexer(inputCol=&#39;y&#39;, outputCol=&#39;label&#39;)]
 
-+----------------+----------------------+----------------------+-----+-------------------+
-|onehotencode_age|onehotencode_education|onehotencode_wantsMore|label|           features|
-+----------------+----------------------+----------------------+-----+-------------------+
-|   (3,[2],[1.0])|             (1,[],[])|         (1,[0],[1.0])|    0|(5,[2,4],[1.0,1.0])|
-|   (3,[2],[1.0])|             (1,[],[])|         (1,[0],[1.0])|    0|(5,[2,4],[1.0,1.0])|
-|   (3,[2],[1.0])|             (1,[],[])|         (1,[0],[1.0])|    0|(5,[2,4],[1.0,1.0])|
-|   (3,[2],[1.0])|             (1,[],[])|         (1,[0],[1.0])|    0|(5,[2,4],[1.0,1.0])|
-|   (3,[2],[1.0])|             (1,[],[])|         (1,[0],[1.0])|    0|(5,[2,4],[1.0,1.0])|
-+----------------+----------------------+----------------------+-----+-------------------+
-only showing top 5 rows</code></pre>
+# build OneHotEncoder stages
+onehotencoder_stages = [OneHotEncoder(inputCol=&#39;strindexed_&#39; + c, outputCol=&#39;onehot_&#39; + c) for c in categorical_columns]
+
+# build VectorAssembler stage
+feature_columns = [&#39;onehot_&#39; + c for c in categorical_columns]
+vectorassembler_stage = VectorAssembler(inputCols=feature_columns, outputCol=&#39;features&#39;) 
+
+# all stages
+all_stages = stringindexer_stages + onehotencoder_stages + [vectorassembler_stage]
+
+# build pipeline model
+pipeline = Pipeline(stages=all_stages)
+
+# fit pipeline model
+pipeline_model = pipeline.fit(cuse)
+
+# transform the data
+final_columns = feature_columns + [&#39;features&#39;, &#39;label&#39;]
+cuse_df = pipeline_model.transform(cuse).\
+            select(final_columns)
+            
+cuse_df.show(5)
+
++-------------+----------------+----------------+-------------------+-----+
+|   onehot_age|onehot_education|onehot_wantsMore|           features|label|
++-------------+----------------+----------------+-------------------+-----+
+|(3,[2],[1.0])|       (1,[],[])|   (1,[0],[1.0])|(5,[2,4],[1.0,1.0])|  0.0|
+|(3,[2],[1.0])|       (1,[],[])|   (1,[0],[1.0])|(5,[2,4],[1.0,1.0])|  0.0|
+|(3,[2],[1.0])|       (1,[],[])|   (1,[0],[1.0])|(5,[2,4],[1.0,1.0])|  0.0|
+|(3,[2],[1.0])|       (1,[],[])|   (1,[0],[1.0])|(5,[2,4],[1.0,1.0])|  0.0|
+|(3,[2],[1.0])|       (1,[],[])|   (1,[0],[1.0])|(5,[2,4],[1.0,1.0])|  0.0|
++-------------+----------------+----------------+-------------------+-----+</code></pre>
 <p><strong>Split data into training and test datasets</strong></p>
 <pre class="python"><code>training, test = cuse_df_2.randomSplit([0.8, 0.2], seed=1234)</code></pre>
 <p><strong>Build cross-validation model</strong></p>
@@ -423,7 +403,7 @@ from pyspark.ml.tuning import CrossValidator
 cv = CrossValidator(estimator=glm, estimatorParamMaps=param_grid, evaluator=evaluator, numFolds=4)</code></pre>
 <p><strong>Fit model</strong></p>
 <pre class="python"><code># cv_model = cv.fit(training)
-# To compare the results with R, here we use the entire dataset fit the model.
+# To compare the results with R, here we use the entire dataset to fit the model.
 cv_model = cv.fit(cuse_df_2)</code></pre>
 <p><strong>Prediction</strong></p>
 <pre class="python"><code># prediction
@@ -454,15 +434,47 @@ only showing top 5 rows
 |(3,[],[])       |(1,[],[])             |(1,[],[])             |0    |(5,[],[])|0.5140024065151293|
 +----------------+----------------------+----------------------+-----+---------+------------------+
 only showing top 5 rows</code></pre>
-<p><strong>Coefficients</strong></p>
-<pre class="python"><code>cv_model.bestModel.coefficients
-
-DenseVector([-0.2806, -0.7999, -1.1892, 0.325, -0.833])
-
-cv_model.bestModel.intercept
-0.056024275169240606</code></pre>
+<p><strong>Estimated intercept and coefficients</strong></p>
+<pre class="python"><code>print(&#39;Intercept: &#39; + str(cv_model.bestModel.intercept) + &quot;\n&quot;
+     &#39;coefficients: &#39; + str(cv_model.bestModel.coefficients))
+     
+Intercept: 0.0560242751692
+coefficients: [-0.280625443036,-0.799857303154,-1.18923892948,0.324994652864,-0.832954761554]</code></pre>
 <p>See results from R</p>
 <pre class="python"><code>glm_cuse$coefficients
+
+ (Intercept)     age25-29       age&lt;25     age40-49 educationlow  wantsMoreno 
+   0.7325613    0.5192319    0.9086135   -0.2806254    0.3249947   -0.8329548 </code></pre>
+</div>
+<div id="generalized-linear-regression-with-r" class="section level2">
+<h2>Generalized linear regression with R</h2>
+<pre class="r"><code>#====== This is R code! =========
+cuse = read.table(&#39;http://data.princeton.edu/wws509/datasets/cuse.dat&#39;, header = T)
+
+# convert count data to binary data
+not_using = rep(1:nrow(cuse), times=cuse$notUsing)
+using = rep(1:nrow(cuse), times=cuse$using)
+cuse_binary = cuse[c(not_using, using), 1:3]
+cuse_binary$y = c(rep(0, length(not_using)), rep(1, length(using)))
+
+# write data into a file
+write.csv(cuse_binary, file=&#39;data/cuse_binary.csv&#39;, row.names = FALSE)</code></pre>
+<p><strong>Process categorical variables so they have the same pattern as in pyspar. Element levels are in the descending order of element frequencies.</strong></p>
+<pre class="r"><code>#====== This is R code! =========
+cuse_binary$age = factor(cuse_binary$age, 
+                         levels = names(sort(table(cuse_binary$age), decreasing = TRUE)))
+cuse_binary$education = factor(cuse_binary$education,
+                               levels = names(sort(table(cuse_binary$education), decreasing = TRUE)))
+cuse_binary$wantsMore = factor(cuse_binary$wantsMore,
+                               levels = names(sort(table(cuse_binary$wantsMore), decreasing = TRUE)))
+
+# encode label column
+cuse_binary$y = factor(cuse_binary$y,
+                               levels = names(sort(table(cuse_binary$y))))
+glm_cuse = glm(y~age + education + wantsMore, data = cuse_binary, family = &#39;binomial&#39;)</code></pre>
+<p><strong>Resulting coefficients</strong></p>
+<pre class="python"><code>#====== This is R code! =========
+glm_cuse$coefficients
 
  (Intercept)     age25-29       age&lt;25     age40-49 educationlow  wantsMoreno 
   -0.7325613   -0.5192319   -0.9086135    0.2806254   -0.3249947    0.8329548 </code></pre>
