@@ -43,8 +43,10 @@ navbar:
         - text: "Regression"      
         - text: "Linear regression"
           href: linear-regression.html
-        - text: "Generalized linear regression"
-          href: generalized-linear-regression.html
+        - text: "------------"
+        - text: "Classification"      
+        - text: "Logistic regression"
+          href: logistic-regression.html
         - text: "------------"
         - text: "More ML methods coming soon"
         - text: "------------"

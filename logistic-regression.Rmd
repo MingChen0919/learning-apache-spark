@@ -1,7 +1,7 @@
 ---
 title: "Logistic Regression"
-author: "Wenqiang Feng & Ming Chen"
-date: "2/8/2017"
+author: "Ming Chen"
+date: "6/5/2017"
 output: html_document
 ---
 
@@ -9,208 +9,220 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
 ```
 
-## Set up sparkContext and sparkSession
+
+## Logistic regression with pyspark
+
+**Import data**
 
 ```{python}
-# connecting to spark
-from pyspark import SparkConf, SparkContext
-## set up spark context
-conf = SparkConf().setAppName("myApp")
-sc = SparkContext(conf=conf)
+cuse = spark.read.csv('data/cuse_binary.csv', header=True, inferSchema=True)
+cuse.show(5)
 
-# create sparksession object
-from pyspark.sql import SparkSession
-sparksession = SparkSession(sc)
++---+---------+---------+---+
+|age|education|wantsMore|  y|
++---+---------+---------+---+
+|<25|      low|      yes|  0|
+|<25|      low|      yes|  0|
+|<25|      low|      yes|  0|
+|<25|      low|      yes|  0|
+|<25|      low|      yes|  0|
++---+---------+---------+---+
+only showing top 5 rows
 ```
 
-## Import data
+
+## Process categorical columns
+
+The following code does three things with pipeline:
+
+* `StringIndexer` all categorical columns
+* `OneHotEncoder` all categorical index columns
+* `VectorAssembler` all feature columns into one vector column
+    
 ```{python}
-horseshoe_crab = sparksession.read.csv("data/horseshoe_crab.csv", inferSchema=True, header=True)
-horseshoe_crab.show(n=5)
+from pyspark.ml.feature import StringIndexer, OneHotEncoder, VectorAssembler
+from pyspark.ml import Pipeline
+
+# categorical columns
+categorical_columns = cuse.columns[0:3]
+
+# build StringIndexer stages
+stringindexer_stages = [StringIndexer(inputCol=c, outputCol='strindexed_' + c) for c in categorical_columns]
+# encode label column and add it to stringindexer_stages
+stringindexer_stages += [StringIndexer(inputCol='y', outputCol='label')]
+
+# build OneHotEncoder stages
+onehotencoder_stages = [OneHotEncoder(inputCol='strindexed_' + c, outputCol='onehot_' + c) for c in categorical_columns]
+
+# build VectorAssembler stage
+feature_columns = ['onehot_' + c for c in categorical_columns]
+vectorassembler_stage = VectorAssembler(inputCols=feature_columns, outputCol='features') 
+
+# all stages
+all_stages = stringindexer_stages + onehotencoder_stages + [vectorassembler_stage]
+
+# build pipeline model
+pipeline = Pipeline(stages=all_stages)
+
+# fit pipeline model
+pipeline_model = pipeline.fit(cuse)
+
+# transform the data
+final_columns = feature_columns + ['features', 'label']
+cuse_df = pipeline_model.transform(cuse).\
+            select(final_columns)
+            
+cuse_df.show(5)
+
++-------------+----------------+----------------+-------------------+-----+
+|   onehot_age|onehot_education|onehot_wantsMore|           features|label|
++-------------+----------------+----------------+-------------------+-----+
+|(3,[2],[1.0])|       (1,[],[])|   (1,[0],[1.0])|(5,[2,4],[1.0,1.0])|  0.0|
+|(3,[2],[1.0])|       (1,[],[])|   (1,[0],[1.0])|(5,[2,4],[1.0,1.0])|  0.0|
+|(3,[2],[1.0])|       (1,[],[])|   (1,[0],[1.0])|(5,[2,4],[1.0,1.0])|  0.0|
+|(3,[2],[1.0])|       (1,[],[])|   (1,[0],[1.0])|(5,[2,4],[1.0,1.0])|  0.0|
+|(3,[2],[1.0])|       (1,[],[])|   (1,[0],[1.0])|(5,[2,4],[1.0,1.0])|  0.0|
++-------------+----------------+----------------+-------------------+-----+
 ```
 
-## Data preprocessing
 
-* Convert column *Sa* to binary variable
+**Split data into training and test datasets**
 
 ```{python}
-bool_horseshoe_crab = horseshoe_crab.withColumn('boolean_Sa', horseshoe_crab['Sa'].cast('boolean'))
-bool_horseshoe_crab.show(n=5)
+training, test = cuse_df_2.randomSplit([0.8, 0.2], seed=1234)
 ```
 
-```{python}
-+---+---+----+----+---+----------+
-|  C|  S|   W|  Wt| Sa|boolean_Sa|
-+---+---+----+----+---+----------+
-|  2|  3|28.3|3.05|  8|      true|
-|  3|  3|26.0| 2.6|  4|      true|
-|  3|  3|25.6|2.15|  0|     false|
-|  4|  2|21.0|1.85|  0|     false|
-|  2|  3|29.0| 3.0|  1|      true|
-+---+---+----+----+---+----------+
-```
+**Build cross-validation model**
 
 ```{python}
-new_horseshoe_crab = bool_horseshoe_crab.withColumn('binary_Sa', bool_horseshoe_crab['boolean_Sa'].cast('integer'))
-new_horseshoe_crab.show(n=5)
-```
+## ======= build cross validation model ===========
 
-```{python}
-+---+---+----+----+---+----------+---------+
-|  C|  S|   W|  Wt| Sa|boolean_Sa|binary_Sa|
-+---+---+----+----+---+----------+---------+
-|  2|  3|28.3|3.05|  8|      true|        1|
-|  3|  3|26.0| 2.6|  4|      true|        1|
-|  3|  3|25.6|2.15|  0|     false|        0|
-|  4|  2|21.0|1.85|  0|     false|        0|
-|  2|  3|29.0| 3.0|  1|      true|        1|
-+---+---+----+----+---+----------+---------+
-```
-
-* Transform data into **featuresCol** and **labelCol** structure
-
-```{python}
-from pyspark.ml.linalg import Vectors
-lor_horseshoe_crab = new_horseshoe_crab.rdd.map(lambda r: [Vectors.dense(r[0:3]), r[-1]]).toDF(['features', 'label'])
-lor_horseshoe_crab.show(n=5)
-```
-
-```{python}
-+------------------+-----+
-|          features|label|
-+------------------+-----+
-|[2.0,3.0,28.3,8.0]|    1|
-|[3.0,3.0,26.0,4.0]|    1|
-|[3.0,3.0,25.6,0.0]|    0|
-|[4.0,2.0,21.0,0.0]|    0|
-|[2.0,3.0,29.0,1.0]|    1|
-+------------------+-----+
-```
-
-* Index categorical predictors from the *featuresCol* column
-
-```{python}
-from pyspark.ml.feature import VectorIndexer
-indexer = VectorIndexer(maxCategories=4, inputCol='features', outputCol='indexed_features')
-model = indexer.fit(lor_horseshoe_crab)
-lor_horseshoe_crab = model.transform(lor_horseshoe_crab)
-lor_horseshoe_crab.show(n=5)
-```
-
-```{python}
-+------------------+-----+------------------+
-|          features|label|  indexed_features|
-+------------------+-----+------------------+
-|[2.0,3.0,28.3,8.0]|    1|[1.0,2.0,28.3,8.0]|
-|[3.0,3.0,26.0,4.0]|    1|[2.0,2.0,26.0,4.0]|
-|[3.0,3.0,25.6,0.0]|    0|[2.0,2.0,25.6,0.0]|
-|[4.0,2.0,21.0,0.0]|    0|[3.0,1.0,21.0,0.0]|
-|[2.0,3.0,29.0,1.0]|    1|[1.0,2.0,29.0,1.0]|
-+------------------+-----+------------------+
-```
-
-## Splitting data into training and test sets
-
-```{python}
-training, test = lor_horseshoe_crab.randomSplit(weights=[0.7, 0.3], seed=123)
-```
-
-## Building logistic regression model with training set
-
-```{python}
+# estimator
+from pyspark.ml.regression import GeneralizedLinearRegression
 from pyspark.ml.classification import LogisticRegression
-blor = LogisticRegression(featuresCol='indexed_features', labelCol='label', family='binomial')
-model = blor.fit(training)
-```
 
-## Model Statistics
+logr = LogisticRegression(featuresCol='features', labelCol='label')
 
-```{python}
-model.summary.predictions.show(n=10)
-```
-
-* prediction
-
-```{python}
-+-------------------+-----+-------------------+--------------------+--------------------+----------+
-|           features|label|   indexed_features|       rawPrediction|         probability|prediction|
-+-------------------+-----+-------------------+--------------------+--------------------+----------+
-| [1.0,1.0,26.0,2.3]|  1.0| [0.0,0.0,26.0,2.3]|[-1.5151489612951...|[0.18017697059573...|       1.0|
-| [1.0,1.0,27.4,2.7]|  1.0| [0.0,0.0,27.4,2.7]|[-2.2888807838235...|[0.09204804595158...|       1.0|
-| [1.0,1.0,27.7,2.5]|  1.0| [0.0,0.0,27.7,2.5]|[-2.1351081685803...|[0.10573103058138...|       1.0|
-|[1.0,1.0,28.0,2.62]|  0.0|[0.0,0.0,28.0,2.62]|[-2.3392565198163...|[0.08792351845230...|       1.0|
-| [1.0,1.0,29.3,3.2]|  1.0| [0.0,0.0,29.3,3.2]|[-3.2910095563872...|[0.03588090545959...|       1.0|
-|[1.0,2.0,24.5,1.95]|  1.0|[0.0,1.0,24.5,1.95]|[-0.6836177605015...|[0.33545433483694...|       1.0|
-| [1.0,3.0,25.8,2.6]|  0.0| [0.0,2.0,25.8,2.6]|[-1.6232508088143...|[0.16475703172839...|       1.0|
-| [2.0,1.0,22.5,1.6]|  1.0| [1.0,0.0,22.5,1.6]|[0.71763847632131...|[0.67208678163936...|       0.0|
-| [2.0,1.0,22.9,1.6]|  0.0| [1.0,0.0,22.9,1.6]|[0.62440115791289...|[0.65121886027244...|       0.0|
-| [2.0,1.0,23.1,2.0]|  0.0| [1.0,0.0,23.1,2.0]|[0.13038129060970...|[0.53254922625747...|       0.0|
-+-------------------+-----+-------------------+--------------------+--------------------+----------+
-```
-
-* intercept
-
-```{python}
-model.intercept
-```
-
-```{python}
--7.1178336818210335
-```
-
-* coefficients
-
-```{python}
-model.coefficients
-```
-
-```{python}
-DenseVector([-0.634, -0.0904, 0.2331, 1.1185])
-```
-
-* Area under ROC
-
-```{python}
-model.evaluate(training).areaUnderROC
-```
-
-```{python}
-0.8060398505603983
-```
-
-## Apply model to test set
-
-```{python}
-fitted_test = model.transform(test)
-fitted_test.show(n=10)
-```
-
-```{python}
-+-------------------+-----+-------------------+--------------------+--------------------+----------+
-|           features|label|   indexed_features|       rawPrediction|         probability|prediction|
-+-------------------+-----+-------------------+--------------------+--------------------+----------+
-| [1.0,1.0,26.1,2.8]|    1| [0.0,0.0,26.1,2.8]|[-2.0977098010209...|[0.10931961576789...|       1.0|
-|[1.0,1.0,26.5,2.35]|    0|[0.0,0.0,26.5,2.35]|[-1.6876207603180...|[0.15608898960572...|       1.0|
-|[1.0,1.0,27.1,2.95]|    1|[0.0,0.0,27.1,2.95]|[-2.4985785500791...|[0.07595788904099...|       1.0|
-|[1.0,1.0,30.2,3.28]|    1|[0.0,0.0,30.2,3.28]|[-3.5902737644259...|[0.02684996465542...|       1.0|
-| [1.0,2.0,25.0,2.3]|    1| [0.0,1.0,25.0,2.3]|[-1.1916404655987...|[0.23296566819752...|       1.0|
-|[2.0,1.0,23.7,1.95]|    0|[1.0,0.0,23.7,1.95]|[0.04645046400945...|[0.51161052846028...|       0.0|
-| [2.0,1.0,24.3,2.0]|    0| [1.0,0.0,24.3,2.0]|[-0.1493306646155...|[0.46273655493059...|       1.0|
-| [2.0,1.0,24.9,2.3]|    1| [1.0,0.0,24.9,2.3]|[-0.6247375483023...|[0.34870473830470...|       1.0|
-|[2.0,1.0,26.8,2.55]|    0|[1.0,0.0,26.8,2.55]|[-1.3472405658042...|[0.20632187168645...|       1.0|
-| [2.0,1.0,28.0,2.9]|    1| [1.0,0.0,28.0,2.9]|[-2.0184285781160...|[0.11728157703955...|       1.0|
-+-------------------+-----+-------------------+--------------------+--------------------+----------+
-```
-
-* Model evaluation on test set
-
-```{python}
+# parameter grid
+from pyspark.ml.tuning import ParamGridBuilder
+param_grid = ParamGridBuilder().\
+    addGrid(logr.regParam, [0, 0.5, 1, 2]).\
+    addGrid(logr.elasticNetParam, [0, 0.5, 1]).\
+    build()
+    
+# evaluator
 from pyspark.ml.evaluation import BinaryClassificationEvaluator
-evaluator = BinaryClassificationEvaluator(rawPredictionCol='rawPrediction')
-evaluator.evaluate(fitted_test)
+evaluator = BinaryClassificationEvaluator(rawPredictionCol="rawPrediction")
+
+# build cross-validation model
+from pyspark.ml.tuning import CrossValidator
+cv = CrossValidator(estimator=logr, estimatorParamMaps=param_grid, evaluator=evaluator, numFolds=4)
 ```
 
+**Fit model**
+
 ```{python}
-0.6637426900584795
+# cv_model = cv.fit(training)
+# To compare the results with R, here we use the entire dataset to fit the model.
+cv_model = cv.fit(cuse_df_2)
+```
+
+**Prediction**
+
+```{python}
+# prediction
+show_columns = ['features', 'label', 'prediction', 'rawPrediction', 'probability']
+
+pred_training_cv = cv_model.transform(training)
+pred_test_cv = cv_model.transform(test)
+
+pred_training_cv.select(show_columns).show(5, truncate=False)
+pred_test_cv.select(show_columns).show(5, truncate=False)
+
++---------+-----+----------+------------------------------------------+---------------------------------------+
+|features |label|prediction|rawPrediction                             |probability                            |
++---------+-----+----------+------------------------------------------+---------------------------------------+
+|(5,[],[])|0.0  |1.0       |[-0.05602431718564116,0.05602431718564116]|[0.4859975829890087,0.5140024170109914]|
+|(5,[],[])|0.0  |1.0       |[-0.05602431718564116,0.05602431718564116]|[0.4859975829890087,0.5140024170109914]|
+|(5,[],[])|0.0  |1.0       |[-0.05602431718564116,0.05602431718564116]|[0.4859975829890087,0.5140024170109914]|
+|(5,[],[])|0.0  |1.0       |[-0.05602431718564116,0.05602431718564116]|[0.4859975829890087,0.5140024170109914]|
+|(5,[],[])|0.0  |1.0       |[-0.05602431718564116,0.05602431718564116]|[0.4859975829890087,0.5140024170109914]|
++---------+-----+----------+------------------------------------------+---------------------------------------+
+only showing top 5 rows
+
++---------+-----+----------+------------------------------------------+---------------------------------------+
+|features |label|prediction|rawPrediction                             |probability                            |
++---------+-----+----------+------------------------------------------+---------------------------------------+
+|(5,[],[])|0.0  |1.0       |[-0.05602431718564116,0.05602431718564116]|[0.4859975829890087,0.5140024170109914]|
+|(5,[],[])|0.0  |1.0       |[-0.05602431718564116,0.05602431718564116]|[0.4859975829890087,0.5140024170109914]|
+|(5,[],[])|0.0  |1.0       |[-0.05602431718564116,0.05602431718564116]|[0.4859975829890087,0.5140024170109914]|
+|(5,[],[])|0.0  |1.0       |[-0.05602431718564116,0.05602431718564116]|[0.4859975829890087,0.5140024170109914]|
+|(5,[],[])|0.0  |1.0       |[-0.05602431718564116,0.05602431718564116]|[0.4859975829890087,0.5140024170109914]|
++---------+-----+----------+------------------------------------------+---------------------------------------+
+only showing top 5 rows
+```
+
+
+**Estimated intercept and coefficients**
+
+```{python}
+print('Intercept: ' + str(cv_model.bestModel.intercept) + "\n"
+     'coefficients: ' + str(cv_model.bestModel.coefficients))
+     
+Intercept: 0.0560243171856
+coefficients: [-0.280625539774,-0.799857435517,-1.18923909827,0.324994746147,-0.832954766261]
+```
+
+See results from R
+
+```{python}
+glm_cuse$coefficients
+
+ (Intercept)     age25-29       age<25     age40-49 educationlow  wantsMoreno 
+   0.7325613    0.5192319    0.9086135   -0.2806254    0.3249947   -0.8329548 
+```
+
+
+## Generalized linear regression with R
+
+```{r}
+#====== This is R code! =========
+cuse = read.table('http://data.princeton.edu/wws509/datasets/cuse.dat', header = T)
+
+# convert count data to binary data
+not_using = rep(1:nrow(cuse), times=cuse$notUsing)
+using = rep(1:nrow(cuse), times=cuse$using)
+cuse_binary = cuse[c(not_using, using), 1:3]
+cuse_binary$y = c(rep(0, length(not_using)), rep(1, length(using)))
+
+# write data into a file
+write.csv(cuse_binary, file='data/cuse_binary.csv', row.names = FALSE)
+```
+
+**Process categorical variables so they have the same pattern as in pyspar. Element levels are in the descending order of element frequencies.**
+
+```{r}
+#====== This is R code! =========
+cuse_binary$age = factor(cuse_binary$age, 
+                         levels = names(sort(table(cuse_binary$age), decreasing = TRUE)))
+cuse_binary$education = factor(cuse_binary$education,
+                               levels = names(sort(table(cuse_binary$education), decreasing = TRUE)))
+cuse_binary$wantsMore = factor(cuse_binary$wantsMore,
+                               levels = names(sort(table(cuse_binary$wantsMore), decreasing = TRUE)))
+
+# encode label column
+cuse_binary$y = factor(cuse_binary$y,
+                               levels = names(sort(table(cuse_binary$y))))
+glm_cuse = glm(y~age + education + wantsMore, data = cuse_binary, family = binomial(link = "logit"))
+```
+
+**Resulting coefficients**
+
+```{python}
+#====== This is R code! =========
+glm_cuse$coefficients
+
+ (Intercept)     age25-29       age<25     age40-49 educationlow  wantsMoreno 
+   0.7325613    0.5192319    0.9086135   -0.2806254    0.3249947   -0.8329548 
 ```
 
