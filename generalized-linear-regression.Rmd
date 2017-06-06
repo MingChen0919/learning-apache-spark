@@ -1,0 +1,224 @@
+---
+title: "Generalized Linear Regression"
+author: "Ming Chen"
+date: "6/5/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+
+## Generalized linear regression in R
+
+```{r}
+cuse = read.table('http://data.princeton.edu/wws509/datasets/cuse.dat', header = T)
+
+# convert count data to binary data
+not_using = rep(1:nrow(cuse), times=cuse$notUsing)
+using = rep(1:nrow(cuse), times=cuse$using)
+cuse_binary = cuse[c(not_using, using), 1:3]
+cuse_binary$y = c(rep(0, length(not_using)), rep(1, length(using)))
+
+# write data into a file
+write.csv(cuse_binary, file='data/cuse_binary.csv', row.names = FALSE)
+```
+
+Process categorical variables so they have the same pattern as in pyspar. Element levels are in the descending order of element frequencies.
+
+```{r}
+cuse_binary$age = factor(cuse_binary$age, 
+                         levels = names(sort(table(cuse_binary$age), decreasing = TRUE)))
+cuse_binary$education = factor(cuse_binary$education,
+                               levels = names(sort(table(cuse_binary$education), decreasing = TRUE)))
+cuse_binary$wantsMore = factor(cuse_binary$wantsMore,
+                               levels = names(sort(table(cuse_binary$wantsMore), decreasing = TRUE)))
+cuse_binary$y = factor(cuse_binary$y,
+                       levels = names(sort(table(cuse_binary$y), decreasing = TRUE)))
+glm_cuse = glm(y~age + education + wantsMore, data = cuse_binary, family = 'binomial')
+```
+
+**Resulting coefficients**
+
+```{python}
+glm_cuse$coefficients
+
+ (Intercept)     age25-29       age<25     age40-49 educationlow  wantsMoreno 
+  -0.7325613   -0.5192319   -0.9086135    0.2806254   -0.3249947    0.8329548 
+```
+
+
+## Generalized linear regression with R
+
+**Import data**
+
+```{python}
+cuse = spark.read.csv('data/cuse_binary.csv', header=True, inferSchema=True)
+cuse.show(5)
+
++---+---------+---------+---+
+|age|education|wantsMore|  y|
++---+---------+---------+---+
+|<25|      low|      yes|  0|
+|<25|      low|      yes|  0|
+|<25|      low|      yes|  0|
+|<25|      low|      yes|  0|
+|<25|      low|      yes|  0|
++---+---------+---------+---+
+only showing top 5 rows
+```
+
+
+**Convert string columns to categorical columns**
+    + step 1: implements `StringIndexer`
+    + step 2: implements `OneHotEncoder`
+    
+    
+    
+```{python}
+# string index each categorical string columns
+from pyspark.ml.feature import StringIndexer
+from pyspark.ml import Pipeline
+indexers = [StringIndexer(inputCol=column, outputCol="indexed_"+column) for column in ('age', 'education', 'wantsMore')]
+pipeline = Pipeline(stages=indexers)
+indexed_cuse = pipeline.fit(cuse).transform(cuse)
+```
+
+```{python}
+# onehotencode each indexed categorical columns
+from pyspark.ml.feature import OneHotEncoder
+columns = indexed_cuse.columns[0:3]
+onehoteencoders = [OneHotEncoder(inputCol="indexed_"+column, outputCol="onehotencode_"+column) for column in columns]
+pipeline = Pipeline(stages=onehoteencoders)
+onehotencode_columns = ['onehotencode_age', 'onehotencode_education', 'onehotencode_wantsMore', 'y']
+onehotencode_cuse = pipeline.fit(indexed_cuse).transform(indexed_cuse).select(onehotencode_columns)
+onehotencode_cuse.distinct().show(5)
+
+
++----------------+----------------------+----------------------+---+
+|onehotencode_age|onehotencode_education|onehotencode_wantsMore|  y|
++----------------+----------------------+----------------------+---+
+|   (3,[1],[1.0])|             (1,[],[])|         (1,[0],[1.0])|  0|
+|   (3,[2],[1.0])|         (1,[0],[1.0])|             (1,[],[])|  1|
+|   (3,[0],[1.0])|         (1,[0],[1.0])|         (1,[0],[1.0])|  0|
+|       (3,[],[])|         (1,[0],[1.0])|         (1,[0],[1.0])|  1|
+|   (3,[2],[1.0])|             (1,[],[])|         (1,[0],[1.0])|  0|
++----------------+----------------------+----------------------+---+
+only showing top 5 rows
+```
+
+***Assemble all feature columns into one single vector column***
+
+```{python}
+# assemble all feature columns into on single vector column
+from pyspark.ml.feature import VectorAssembler
+assembler = VectorAssembler(inputCols=['onehotencode_age', 'onehotencode_education', 'onehotencode_wantsMore'], outputCol='features')
+cuse_df_2 = assembler.transform(onehotencode_cuse).withColumnRenamed('y', 'label')
+cuse_df_2.show(5)
+
++----------------+----------------------+----------------------+-----+-------------------+
+|onehotencode_age|onehotencode_education|onehotencode_wantsMore|label|           features|
++----------------+----------------------+----------------------+-----+-------------------+
+|   (3,[2],[1.0])|             (1,[],[])|         (1,[0],[1.0])|    0|(5,[2,4],[1.0,1.0])|
+|   (3,[2],[1.0])|             (1,[],[])|         (1,[0],[1.0])|    0|(5,[2,4],[1.0,1.0])|
+|   (3,[2],[1.0])|             (1,[],[])|         (1,[0],[1.0])|    0|(5,[2,4],[1.0,1.0])|
+|   (3,[2],[1.0])|             (1,[],[])|         (1,[0],[1.0])|    0|(5,[2,4],[1.0,1.0])|
+|   (3,[2],[1.0])|             (1,[],[])|         (1,[0],[1.0])|    0|(5,[2,4],[1.0,1.0])|
++----------------+----------------------+----------------------+-----+-------------------+
+only showing top 5 rows
+```
+
+**Split data into training and test datasets**
+
+```{python}
+training, test = cuse_df_2.randomSplit([0.8, 0.2], seed=1234)
+```
+
+**Build cross-validation model**
+
+```{python}
+## ======= build cross validation model ===========
+
+# estimator
+from pyspark.ml.regression import GeneralizedLinearRegression
+glm = GeneralizedLinearRegression(featuresCol='features', labelCol='label', family='binomial')
+
+# parameter grid
+from pyspark.ml.tuning import ParamGridBuilder
+param_grid = ParamGridBuilder().\
+    addGrid(glm.regParam, [0, 0.5, 1, 2, 4]).\
+    build()
+    
+# evaluator
+from pyspark.ml.evaluation import BinaryClassificationEvaluator
+evaluator = BinaryClassificationEvaluator(rawPredictionCol='prediction')
+
+# build cross-validation model
+from pyspark.ml.tuning import CrossValidator
+cv = CrossValidator(estimator=glm, estimatorParamMaps=param_grid, evaluator=evaluator, numFolds=4)
+```
+
+**Fit model**
+
+```{python}
+# cv_model = cv.fit(training)
+# To compare the results with R, here we use the entire dataset fit the model.
+cv_model = cv.fit(cuse_df_2)
+```
+
+**Prediction**
+
+```{python}
+# prediction
+pred_training_cv = cv_model.transform(training)
+pred_test_cv = cv_model.transform(test)
+
+pred_training_cv.show(5)
+pred_test_cv.show(5, truncate=False)
+
++----------------+----------------------+----------------------+-----+---------+------------------+
+|onehotencode_age|onehotencode_education|onehotencode_wantsMore|label| features|        prediction|
++----------------+----------------------+----------------------+-----+---------+------------------+
+|       (3,[],[])|             (1,[],[])|             (1,[],[])|    0|(5,[],[])|0.5140024065151293|
+|       (3,[],[])|             (1,[],[])|             (1,[],[])|    0|(5,[],[])|0.5140024065151293|
+|       (3,[],[])|             (1,[],[])|             (1,[],[])|    0|(5,[],[])|0.5140024065151293|
+|       (3,[],[])|             (1,[],[])|             (1,[],[])|    0|(5,[],[])|0.5140024065151293|
+|       (3,[],[])|             (1,[],[])|             (1,[],[])|    0|(5,[],[])|0.5140024065151293|
++----------------+----------------------+----------------------+-----+---------+------------------+
+only showing top 5 rows
+
++----------------+----------------------+----------------------+-----+---------+------------------+
+|onehotencode_age|onehotencode_education|onehotencode_wantsMore|label|features |prediction        |
++----------------+----------------------+----------------------+-----+---------+------------------+
+|(3,[],[])       |(1,[],[])             |(1,[],[])             |0    |(5,[],[])|0.5140024065151293|
+|(3,[],[])       |(1,[],[])             |(1,[],[])             |0    |(5,[],[])|0.5140024065151293|
+|(3,[],[])       |(1,[],[])             |(1,[],[])             |0    |(5,[],[])|0.5140024065151293|
+|(3,[],[])       |(1,[],[])             |(1,[],[])             |0    |(5,[],[])|0.5140024065151293|
+|(3,[],[])       |(1,[],[])             |(1,[],[])             |0    |(5,[],[])|0.5140024065151293|
++----------------+----------------------+----------------------+-----+---------+------------------+
+only showing top 5 rows
+```
+
+
+**Coefficients**
+
+```{python}
+cv_model.bestModel.coefficients
+
+DenseVector([-0.2806, -0.7999, -1.1892, 0.325, -0.833])
+
+cv_model.bestModel.intercept
+0.056024275169240606
+```
+
+See results from R
+
+```{python}
+glm_cuse$coefficients
+
+ (Intercept)     age25-29       age<25     age40-49 educationlow  wantsMoreno 
+  -0.7325613   -0.5192319   -0.9086135    0.2806254   -0.3249947    0.8329548 
+```
+
+

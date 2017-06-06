@@ -1,0 +1,195 @@
+---
+title: "Linear Regression"
+author: "Ming Chen"
+date: "6/5/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+# Linear regression
+
+## Linear regression without cross-valiation
+
+**Import data**
+
+```{python}
+ad = spark.read.csv('data/Advertising.csv', header=True, inferSchema=True)
+ad.show(5)
+
++-----+-----+---------+-----+
+|   TV|Radio|Newspaper|Sales|
++-----+-----+---------+-----+
+|230.1| 37.8|     69.2| 22.1|
+| 44.5| 39.3|     45.1| 10.4|
+| 17.2| 45.9|     69.3|  9.3|
+|151.5| 41.3|     58.5| 18.5|
+|180.8| 10.8|     58.4| 12.9|
++-----+-----+---------+-----+
+only showing top 5 rows
+```
+
+**Transform data structure**
+
+```{python}
+from pyspark.ml.linalg import Vectors
+ad_df = ad.rdd.map(lambda x: [Vectors.dense(x[0:3]), x[-1]]).toDF(['features', 'label'])
+ad_df.show(5)
+
++-----------------+-----+
+|         features|label|
++-----------------+-----+
+|[230.1,37.8,69.2]| 22.1|
+| [44.5,39.3,45.1]| 10.4|
+| [17.2,45.9,69.3]|  9.3|
+|[151.5,41.3,58.5]| 18.5|
+|[180.8,10.8,58.4]| 12.9|
++-----------------+-----+
+only showing top 5 rows
+```
+
+**Build linear regression model**
+
+```{python}
+from pyspark.ml.regression import LinearRegression
+lr = LinearRegression(featuresCol = 'features', labelCol = 'label')
+```
+
+**Fit the model**
+
+```{python}
+lr_model = lr.fit(ad_df)
+```
+
+**Module evaluation**
+
+```{python}
+from pyspark.ml.evaluation import RegressionEvaluator 
+evaluator = RegressionEvaluator(predictionCol='prediction', labelCol='label')
+evaluator.evaluate(ad_pred, {evaluator.metricName: "r2"})
+
+0.897210638178952
+```
+
+**Compare results with results from R**
+
+The comparison below shows that the linear regression analyses from pyspark and R obtained very close results.
+
+```{python}
+# intercept and coefficients from R
+advertise = read.csv('data/Advertising.csv', header = TRUE)
+lr_ad = lm(Sales~., data = advertise)
+lr_ad$coefficients
+
+ (Intercept)           TV        Radio    Newspaper 
+ 2.938889369  0.045764645  0.188530017 -0.001037493
+ 
+# intercept and coefficents from pyspark
+lr_model.intercept
+
+2.9388893694594134
+
+lr_model.coefficients
+
+DenseVector([0.0458, 0.1885, -0.001])
+
+# R squared from R
+summary(lr_ad)$r.squared
+
+0.8972106
+
+# R squared from pyspark
+evaluator.evaluate(ad_pred, {evaluator.metricName: "r2"})
+
+0.897210638178952
+```
+
+
+## Linear regression with cross-validation
+
+**Training and test datasets**
+
+```{python}
+## split data into training and test datasets
+training, test = ad_df.randomSplit([0.8, 0.2], seed=123)
+```
+
+**Build cross-validation model**
+
+```{python}
+##=====build cross valiation model======
+
+# estimator
+lr = LinearRegression(featuresCol = 'features', labelCol = 'label')
+
+# parameter grid
+from pyspark.ml.tuning import ParamGridBuilder
+param_grid = ParamGridBuilder().\
+    addGrid(lr.regParam, [0, 0.5, 1]).\
+    addGrid(lr.elasticNetParam, [0, 0.5, 1]).\
+    build()
+    
+# evaluator
+evaluator = RegressionEvaluator(predictionCol='prediction', labelCol='label', metricName='r2')
+
+# cross-validation model
+from pyspark.ml.tuning import CrossValidator
+cv = CrossValidator(estimator=lr, estimatorParamMaps=param_grid, evaluator=evaluator, numFolds=4)
+```
+
+**Fit cross-validation model**
+
+```{python}
+cv_model = cv.fit(training)
+```
+
+**Prediction**
+
+```{python}
+pred_training_cv = cv_model.transform(training)
+pred_test_cv = cv_model.transform(test)
+```
+
+**Evaluation**
+
+```{python}
+# performance on training data
+evaluator.evaluate(pred_training_cv)
+
+0.8982486958337326
+
+# performance on test data
+evaluator.evaluate(pred_test_cv)
+
+0.8896562076565583
+```
+
+
+**Intercept and coefficients**
+
+```{python}
+cv_model.bestModel.intercept
+
+3.075068686285647
+
+cv_model.bestModel.coefficients
+
+DenseVector([0.0465, 0.1809, -0.0011])
+```
+
+**Get parameter values from the best model**
+
+Parameters can be extracted by calling the java property.
+
+```{python}
+print('best regParam: ' + str(cv_model.bestModel._java_obj.getRegParam()) + "\n" +
+     'best ElasticNetParam:' + str(cv_model.bestModel._java_obj.getElasticNetParam()))
+     
+best regParam: 0.0
+best ElasticNetParam:0.0
+```
+
+
+

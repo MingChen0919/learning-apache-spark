@@ -1,0 +1,211 @@
+---
+title: "Machine Learning Framework"
+author: "Ming Chen"
+date: "6/5/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+# Content
+
+* [Machine learning without cross-validation](#machine-learning-without-cross-validation)
+
+## Machine learning without cross-validation.
+
+#### Below are the steps:
+
+1. **Module (estimator)**
+    + Build a module instance with all kinds of module classes. E.g., `pyspark.ml.classfication.LogisticRegression` and `pyspark.ml.classification.DecisionTreeClassifier`.
+2. **Learning the Module (fit)**
+    + Use the `fit` function to fit the module with *training data*. At this step, the module's parameters get estimated.
+3. **Prediction (transform)**
+    + Apply the `transform` function to **training** and **test** data to get predicting values on test data.
+4. **Evaluation (evaluator)**
+    + Build an evaluator and use the evaluator instance to calculate a module evaluation score. The evaluation score is obtained by comparing the predicting values with known response values. 
+    + **Training error** is obtained by comparing predicting values from training data with corresponding known response values. **Testing error** is obtained by comparing predicting values from test data with corresponding known response values.
+    + There are three evaluators: `BinaryClassificationEvaluator`, `RegressionEvaluator` and `MulticlassClassificationEvaluator`.
+5. **Module in production use**
+    + Make decisions about using which models based on the evaluation results and apply the best model to intact data.
+    
+    
+#### Example
+
+**Data preparation**
+
+```{python}
+# import data
+horseshoe_crab = spark.read.csv('data/horseshoe_crab.csv', inferSchema=True, header=True)
+
+# convert Sa column to binary data: if Sa = 0, new_Sa = 0, else new_Sa = 1
+from pyspark.sql.functions import udf
+from pyspark.sql.types import IntegerType
+count_to_bin = udf(lambda x: int(bool(x)), IntegerType())
+
+horseshoe_crab_bin = horseshoe_crab.withColumn('new_Sa', count_to_bin(horseshoe_crab.Sa))
+horseshot_crab_bin.show(5)
+
+# new data
++---+---+----+----+---+------+
+|  C|  S|   W|  Wt| Sa|new_Sa|
++---+---+----+----+---+------+
+|  2|  3|28.3|3.05|  8|     1|
+|  3|  3|26.0| 2.6|  4|     1|
+|  3|  3|25.6|2.15|  0|     0|
+|  4|  2|21.0|1.85|  0|     0|
+|  2|  3|29.0| 3.0|  1|     1|
++---+---+----+----+---+------+
+only showing top 5 rows
+
+# transform data into 'featuresCol' and 'labelCol' structure
+from pyspark.ml.linalg import Vectors
+horseshoe_crab_df = horseshoe_crab_bin.rdd.\
+                        map(lambda x: [Vectors.dense(x[0:3]), x[-1]]).\
+                        toDF(['features', 'label'])
+horseshoe_crab_df.show(5)
+
++-------------------+-----+
+|           features|label|
++-------------------+-----+
+|[2.0,3.0,28.3,3.05]|    1|
+| [3.0,3.0,26.0,2.6]|    1|
+|[3.0,3.0,25.6,2.15]|    0|
+|[4.0,2.0,21.0,1.85]|    0|
+| [2.0,3.0,29.0,3.0]|    1|
++-------------------+-----+
+only showing top 5 rows
+
+
+# index categorical predictors from the featuresCol column
+from pyspark.ml.feature import VectorIndexer
+indexer = VectorIndexer(maxCategories=5, inputCol='features', outputCol='indexed_features')
+model = indexer.fit(horseshoe_crab_df)
+horseshoe_crab_data = model.transform(horseshoe_crab_df)
+horseshoe_crab_data.show(5)
+
++-------------------+-----+-------------------+
+|           features|label|   indexed_features|
++-------------------+-----+-------------------+
+|[2.0,3.0,28.3,3.05]|    1|[1.0,2.0,28.3,3.05]|
+| [3.0,3.0,26.0,2.6]|    1| [2.0,2.0,26.0,2.6]|
+|[3.0,3.0,25.6,2.15]|    0|[2.0,2.0,25.6,2.15]|
+|[4.0,2.0,21.0,1.85]|    0|[3.0,1.0,21.0,1.85]|
+| [2.0,3.0,29.0,3.0]|    1| [1.0,2.0,29.0,3.0]|
++-------------------+-----+-------------------+
+only showing top 5 rows
+
+
+# split data into training and test sets.
+training, test = horseshoe_crab_data.randomSplit(weights=[0.7, 0.3], seed=123)
+```
+
+**Step 1: build model**
+
+```{python}
+from pyspark.ml.classification import LogisticRegression
+blor = LogisticRegression(featuresCol='indexed_features', labelCol='label', family='binomial')
+```
+
+**Step 2: fit model**
+
+```{python}
+# fit model with training data
+model = blor.fit(training)
+```
+
+**Step 3: prediction with `transform` function**
+
+```{python}
+training_pred = model.transform(training)
+test_pred = model.transform(test)
+training_pred.show(5)
+test_pred.show(5)
+
++-------------------+-----+-------------------+--------------------+--------------------+----------+
+|           features|label|   indexed_features|       rawPrediction|         probability|prediction|
++-------------------+-----+-------------------+--------------------+--------------------+----------+
+| [1.0,1.0,26.0,2.3]|    1| [0.0,0.0,26.0,2.3]|[-1.5151489612951...|[0.18017697059573...|       1.0|
+| [1.0,1.0,27.4,2.7]|    1| [0.0,0.0,27.4,2.7]|[-2.2888807838235...|[0.09204804595158...|       1.0|
+| [1.0,1.0,27.7,2.5]|    1| [0.0,0.0,27.7,2.5]|[-2.1351081685803...|[0.10573103058138...|       1.0|
+|[1.0,1.0,28.0,2.62]|    0|[0.0,0.0,28.0,2.62]|[-2.3392565198163...|[0.08792351845230...|       1.0|
+| [1.0,1.0,29.3,3.2]|    1| [0.0,0.0,29.3,3.2]|[-3.2910095563872...|[0.03588090545959...|       1.0|
++-------------------+-----+-------------------+--------------------+--------------------+----------+
+only showing top 5 rows
+
++-------------------+-----+-------------------+--------------------+--------------------+----------+
+|           features|label|   indexed_features|       rawPrediction|         probability|prediction|
++-------------------+-----+-------------------+--------------------+--------------------+----------+
+| [1.0,1.0,26.1,2.8]|    1| [0.0,0.0,26.1,2.8]|[-2.0977098010209...|[0.10931961576789...|       1.0|
+|[1.0,1.0,26.5,2.35]|    0|[0.0,0.0,26.5,2.35]|[-1.6876207603180...|[0.15608898960572...|       1.0|
+|[1.0,1.0,27.1,2.95]|    1|[0.0,0.0,27.1,2.95]|[-2.4985785500791...|[0.07595788904099...|       1.0|
+|[1.0,1.0,30.2,3.28]|    1|[0.0,0.0,30.2,3.28]|[-3.5902737644259...|[0.02684996465542...|       1.0|
+| [1.0,2.0,25.0,2.3]|    1| [0.0,1.0,25.0,2.3]|[-1.1916404655987...|[0.23296566819752...|       1.0|
++-------------------+-----+-------------------+--------------------+--------------------+----------+
+only showing top 5 rows
+```
+
+
+**Step 4: evaluation**
+
+```{python}
+from pyspark.ml.evaluation import BinaryClassificationEvaluator
+evaluator = BinaryClassificationEvaluator(rawPredictionCol="rawPrediction")
+
+# performance on training data
+evaluator.evaluate(training_pred)
+0.8060398505603983
+
+# performance on test data
+evaluator.evaluate(test_pred)
+0.6637426900584795
+```
+
+
+## Machine learning with cross-validation
+
+### Below are the steps:
+
+1. **Cross-validator model (CrossValidator)**
+    + Use the `pyspark.ml.tuning.CrossValidator` to build a cross-validator model instance. This step needs three components:
+        * *an estimator (model)*
+        * *an estimator parameter grid*: created with the `pyspark.ml.tuming.ParamGridBuilder`
+        * *an evaluator*
+2. **Learning the model (fit)**
+3. **Evaluation**
+    + Calculate *training error* and *test error* with the best model from the cross-validation step.
+4. **Module in production use**
+
+### Example
+
+**Step 1: build cross-validation model**
+
+```{python}
+# estimator
+from pyspark.ml.classification import LogisticRegression
+blor = LogisticRegression(featuresCol='indexed_features', labelCol='label', family='binomial')
+
+# parameter grid
+from pyspark.ml.tuning import ParamGridBuilder
+param_grid = ParamGridBuilder().\
+    addGrid(blor.regParam, [0, 0.5, 1, 2]).\
+    addGrid(blor.elasticNetParam, [0, 0.5, 1]).\
+    build()
+    
+# estimator
+from pyspark.ml.evaluation import BinaryClassificationEvaluator
+evaluator = BinaryClassificationEvaluator()
+
+# build cross-validation model with k = 4
+from pyspark.ml.tuning import CrossValidator
+cv = CrossValidator(estimator=blor, estimatorParamMaps=param_grid, evaluator=evaluator, numFolds=4)
+```
+
+**Step 2: fit model**
+
+```{python}
+# fit model with training data
+cv_model = cv.fit(training)
+```
+

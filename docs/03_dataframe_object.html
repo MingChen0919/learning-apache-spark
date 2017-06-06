@@ -9,10 +9,10 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="author" content="Wenqiang Feng &amp; Ming Chen" />
+<meta name="author" content="Ming Chen" />
 
 
-<title>Logistic Regression</title>
+<title>DataFrame object</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -335,161 +335,81 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Logistic Regression</h1>
-<h4 class="author"><em>Wenqiang Feng &amp; Ming Chen</em></h4>
-<h4 class="date"><em>2/8/2017</em></h4>
+<h1 class="title toc-ignore">DataFrame object</h1>
+<h4 class="author"><em>Ming Chen</em></h4>
+<h4 class="date"><em>6/4/2017</em></h4>
 
 </div>
 
 
-<div id="set-up-sparkcontext-and-sparksession" class="section level2">
-<h2>Set up sparkContext and sparkSession</h2>
-<pre class="python"><code># connecting to spark
-from pyspark import SparkConf, SparkContext
-## set up spark context
-conf = SparkConf().setAppName(&quot;myApp&quot;)
-sc = SparkContext(conf=conf)
-
-# create sparksession object
-from pyspark.sql import SparkSession
-sparksession = SparkSession(sc)</code></pre>
+<div id="content" class="section level1">
+<h1>Content</h1>
+<ul>
+<li><a href="#create-a-dataframe-object">Create a DataFrame object</a></li>
+<li><a href="#column-instance">Column instance</a></li>
+<li><a href="#dataframe-column-methods">DataFrame column methods</a></li>
+</ul>
+<div id="create-a-dataframe-object" class="section level2">
+<h2>Create a DataFrame object</h2>
+<pre class="python"><code>mtcars = spark.read.csv(path=&#39;data/mtcars.csv&#39;,
+                        sep=&#39;,&#39;,
+                        encoding=&#39;UTF-8&#39;,
+                        comment=None,
+                        header=True, 
+                        inferSchema=True)</code></pre>
+<pre class="python"><code>mtcars.show(n=5, truncate=False)</code></pre>
+<pre class="python"><code>+-----------------+----+---+-----+---+----+-----+-----+---+---+----+----+
+|model            |mpg |cyl|disp |hp |drat|wt   |qsec |vs |am |gear|carb|
++-----------------+----+---+-----+---+----+-----+-----+---+---+----+----+
+|Mazda RX4        |21.0|6  |160.0|110|3.9 |2.62 |16.46|0  |1  |4   |4   |
+|Mazda RX4 Wag    |21.0|6  |160.0|110|3.9 |2.875|17.02|0  |1  |4   |4   |
+|Datsun 710       |22.8|4  |108.0|93 |3.85|2.32 |18.61|1  |1  |4   |1   |
+|Hornet 4 Drive   |21.4|6  |258.0|110|3.08|3.215|19.44|1  |0  |3   |1   |
+|Hornet Sportabout|18.7|8  |360.0|175|3.15|3.44 |17.02|0  |0  |3   |2   |
++-----------------+----+---+-----+---+----+-----+-----+---+---+----+----+
+only showing top 5 rows</code></pre>
 </div>
-<div id="import-data" class="section level2">
-<h2>Import data</h2>
-<pre class="python"><code>horseshoe_crab = sparksession.read.csv(&quot;data/horseshoe_crab.csv&quot;, inferSchema=True, header=True)
-horseshoe_crab.show(n=5)</code></pre>
+<div id="column-instance" class="section level2">
+<h2>Column instance</h2>
+<p>Column instances can be created in two ways:</p>
+<ol style="list-style-type: decimal">
+<li>directly select a column out of a <em>DataFrame</em>: <code>df.colName</code></li>
+<li>create from a column expression: <code>df.colName + 1</code></li>
+</ol>
+<p>Technically, there is only one way to create a column instance. Column expressions start from a column instance.</p>
+<p><strong>Remember how to create column instances, because this is usually the starting point if we want to operate DataFrame columns.</strong></p>
+<p>The column classes come with some methods that can operate on a column instance. <strong><em>However, almost all functions from the <code>pyspark.sql.functions</code> module take one or more column instances as argument(s)</em></strong>. These functions are important for data manipulation tools.</p>
 </div>
-<div id="data-preprocessing" class="section level2">
-<h2>Data preprocessing</h2>
+<div id="dataframe-column-methods" class="section level2">
+<h2>DataFrame column methods</h2>
+<div id="methods-that-take-column-names-as-arguments" class="section level3">
+<h3>Methods that take column names as arguments:</h3>
 <ul>
-<li>Convert column <em>Sa</em> to binary variable</li>
+<li><code>corr(col1, col2)</code>: two column names.</li>
+<li><code>cov(col1, col2)</code>: two column names.</li>
+<li><code>crosstab(col1, col2)</code>: two column names.</li>
+<li><code>describe(*cols)</code>: <strong><em><code>*cols</code> refers to only column names (strings).</em></strong></li>
 </ul>
-<pre class="python"><code>bool_horseshoe_crab = horseshoe_crab.withColumn(&#39;boolean_Sa&#39;, horseshoe_crab[&#39;Sa&#39;].cast(&#39;boolean&#39;))
-bool_horseshoe_crab.show(n=5)</code></pre>
-<pre class="python"><code>+---+---+----+----+---+----------+
-|  C|  S|   W|  Wt| Sa|boolean_Sa|
-+---+---+----+----+---+----------+
-|  2|  3|28.3|3.05|  8|      true|
-|  3|  3|26.0| 2.6|  4|      true|
-|  3|  3|25.6|2.15|  0|     false|
-|  4|  2|21.0|1.85|  0|     false|
-|  2|  3|29.0| 3.0|  1|      true|
-+---+---+----+----+---+----------+</code></pre>
-<pre class="python"><code>new_horseshoe_crab = bool_horseshoe_crab.withColumn(&#39;binary_Sa&#39;, bool_horseshoe_crab[&#39;boolean_Sa&#39;].cast(&#39;integer&#39;))
-new_horseshoe_crab.show(n=5)</code></pre>
-<pre class="python"><code>+---+---+----+----+---+----------+---------+
-|  C|  S|   W|  Wt| Sa|boolean_Sa|binary_Sa|
-+---+---+----+----+---+----------+---------+
-|  2|  3|28.3|3.05|  8|      true|        1|
-|  3|  3|26.0| 2.6|  4|      true|        1|
-|  3|  3|25.6|2.15|  0|     false|        0|
-|  4|  2|21.0|1.85|  0|     false|        0|
-|  2|  3|29.0| 3.0|  1|      true|        1|
-+---+---+----+----+---+----------+---------+</code></pre>
-<ul>
-<li>Transform data into <strong>featuresCol</strong> and <strong>labelCol</strong> structure</li>
-</ul>
-<pre class="python"><code>from pyspark.ml.linalg import Vectors
-lor_horseshoe_crab = new_horseshoe_crab.rdd.map(lambda r: [Vectors.dense(r[0:3]), r[-1]]).toDF([&#39;features&#39;, &#39;label&#39;])
-lor_horseshoe_crab.show(n=5)</code></pre>
-<pre class="python"><code>+------------------+-----+
-|          features|label|
-+------------------+-----+
-|[2.0,3.0,28.3,8.0]|    1|
-|[3.0,3.0,26.0,4.0]|    1|
-|[3.0,3.0,25.6,0.0]|    0|
-|[4.0,2.0,21.0,0.0]|    0|
-|[2.0,3.0,29.0,1.0]|    1|
-+------------------+-----+</code></pre>
-<ul>
-<li>Index categorical predictors from the <em>featuresCol</em> column</li>
-</ul>
-<pre class="python"><code>from pyspark.ml.feature import VectorIndexer
-indexer = VectorIndexer(maxCategories=4, inputCol=&#39;features&#39;, outputCol=&#39;indexed_features&#39;)
-model = indexer.fit(lor_horseshoe_crab)
-lor_horseshoe_crab = model.transform(lor_horseshoe_crab)
-lor_horseshoe_crab.show(n=5)</code></pre>
-<pre class="python"><code>+------------------+-----+------------------+
-|          features|label|  indexed_features|
-+------------------+-----+------------------+
-|[2.0,3.0,28.3,8.0]|    1|[1.0,2.0,28.3,8.0]|
-|[3.0,3.0,26.0,4.0]|    1|[2.0,2.0,26.0,4.0]|
-|[3.0,3.0,25.6,0.0]|    0|[2.0,2.0,25.6,0.0]|
-|[4.0,2.0,21.0,0.0]|    0|[3.0,1.0,21.0,0.0]|
-|[2.0,3.0,29.0,1.0]|    1|[1.0,2.0,29.0,1.0]|
-+------------------+-----+------------------+</code></pre>
 </div>
-<div id="splitting-data-into-training-and-test-sets" class="section level2">
-<h2>Splitting data into training and test sets</h2>
-<pre class="python"><code>training, test = lor_horseshoe_crab.randomSplit(weights=[0.7, 0.3], seed=123)</code></pre>
+<div id="methods-that-take-column-names-or-column-expressions-or-both-as-arguments" class="section level3">
+<h3>Methods that take column names or column expressions or <strong>both</strong> as arguments:</h3>
+<ul>
+<li><code>cube(*cols)</code>: column names (string) or column expressions or <strong>both</strong>.</li>
+<li><code>drop(*cols)</code>: <strong><em>a list of column names OR a single column expression.</em></strong></li>
+<li><code>groupBy(*cols)</code>: column name (string) or column expression or <strong>both</strong>.</li>
+<li><code>rollup(*cols)</code>: column name (string) or column expression or <strong>both</strong>.</li>
+<li><code>select(*cols)</code>: column name (string) or column expression or <strong>both</strong>.</li>
+<li><code>sort(*cols, **kwargs)</code>: column name (string) or column expression or <strong>both</strong>.</li>
+<li><code>sortWithinPartitions(*cols, **kwargs)</code>: column name (string) or column expression or <strong>both</strong>.</li>
+<li><code>orderBy(*cols, **kwargs)</code>: column name (string) or column expression or <strong>both</strong>.</li>
+<li><code>sampleBy(col, fractions, sed=None)</code>: a column name.</li>
+<li><code>toDF(*cols)</code>: <strong>a list of column names (string).</strong></li>
+<li><code>withColumn(colName, col)</code>: <code>colName</code> refers to column name; <code>col</code> refers to a column expression.</li>
+<li><code>withColumnRenamed(existing, new)</code>: takes column names as arguments.</li>
+<li><code>filter(condition)</code>: *<strong>condition</strong> refers to a column expression that returns <code>types.BooleanType</code> of values.</li>
+</ul>
 </div>
-<div id="building-logistic-regression-model-with-training-set" class="section level2">
-<h2>Building logistic regression model with training set</h2>
-<pre class="python"><code>from pyspark.ml.classification import LogisticRegression
-blor = LogisticRegression(featuresCol=&#39;indexed_features&#39;, labelCol=&#39;label&#39;, family=&#39;binomial&#39;)
-model = blor.fit(training)</code></pre>
 </div>
-<div id="model-statistics" class="section level2">
-<h2>Model Statistics</h2>
-<pre class="python"><code>model.summary.predictions.show(n=10)</code></pre>
-<ul>
-<li>prediction</li>
-</ul>
-<pre class="python"><code>+-------------------+-----+-------------------+--------------------+--------------------+----------+
-|           features|label|   indexed_features|       rawPrediction|         probability|prediction|
-+-------------------+-----+-------------------+--------------------+--------------------+----------+
-| [1.0,1.0,26.0,2.3]|  1.0| [0.0,0.0,26.0,2.3]|[-1.5151489612951...|[0.18017697059573...|       1.0|
-| [1.0,1.0,27.4,2.7]|  1.0| [0.0,0.0,27.4,2.7]|[-2.2888807838235...|[0.09204804595158...|       1.0|
-| [1.0,1.0,27.7,2.5]|  1.0| [0.0,0.0,27.7,2.5]|[-2.1351081685803...|[0.10573103058138...|       1.0|
-|[1.0,1.0,28.0,2.62]|  0.0|[0.0,0.0,28.0,2.62]|[-2.3392565198163...|[0.08792351845230...|       1.0|
-| [1.0,1.0,29.3,3.2]|  1.0| [0.0,0.0,29.3,3.2]|[-3.2910095563872...|[0.03588090545959...|       1.0|
-|[1.0,2.0,24.5,1.95]|  1.0|[0.0,1.0,24.5,1.95]|[-0.6836177605015...|[0.33545433483694...|       1.0|
-| [1.0,3.0,25.8,2.6]|  0.0| [0.0,2.0,25.8,2.6]|[-1.6232508088143...|[0.16475703172839...|       1.0|
-| [2.0,1.0,22.5,1.6]|  1.0| [1.0,0.0,22.5,1.6]|[0.71763847632131...|[0.67208678163936...|       0.0|
-| [2.0,1.0,22.9,1.6]|  0.0| [1.0,0.0,22.9,1.6]|[0.62440115791289...|[0.65121886027244...|       0.0|
-| [2.0,1.0,23.1,2.0]|  0.0| [1.0,0.0,23.1,2.0]|[0.13038129060970...|[0.53254922625747...|       0.0|
-+-------------------+-----+-------------------+--------------------+--------------------+----------+</code></pre>
-<ul>
-<li>intercept</li>
-</ul>
-<pre class="python"><code>model.intercept</code></pre>
-<pre class="python"><code>-7.1178336818210335</code></pre>
-<ul>
-<li>coefficients</li>
-</ul>
-<pre class="python"><code>model.coefficients</code></pre>
-<pre class="python"><code>DenseVector([-0.634, -0.0904, 0.2331, 1.1185])</code></pre>
-<ul>
-<li>Area under ROC</li>
-</ul>
-<pre class="python"><code>model.evaluate(training).areaUnderROC</code></pre>
-<pre class="python"><code>0.8060398505603983</code></pre>
-</div>
-<div id="apply-model-to-test-set" class="section level2">
-<h2>Apply model to test set</h2>
-<pre class="python"><code>fitted_test = model.transform(test)
-fitted_test.show(n=10)</code></pre>
-<pre class="python"><code>+-------------------+-----+-------------------+--------------------+--------------------+----------+
-|           features|label|   indexed_features|       rawPrediction|         probability|prediction|
-+-------------------+-----+-------------------+--------------------+--------------------+----------+
-| [1.0,1.0,26.1,2.8]|    1| [0.0,0.0,26.1,2.8]|[-2.0977098010209...|[0.10931961576789...|       1.0|
-|[1.0,1.0,26.5,2.35]|    0|[0.0,0.0,26.5,2.35]|[-1.6876207603180...|[0.15608898960572...|       1.0|
-|[1.0,1.0,27.1,2.95]|    1|[0.0,0.0,27.1,2.95]|[-2.4985785500791...|[0.07595788904099...|       1.0|
-|[1.0,1.0,30.2,3.28]|    1|[0.0,0.0,30.2,3.28]|[-3.5902737644259...|[0.02684996465542...|       1.0|
-| [1.0,2.0,25.0,2.3]|    1| [0.0,1.0,25.0,2.3]|[-1.1916404655987...|[0.23296566819752...|       1.0|
-|[2.0,1.0,23.7,1.95]|    0|[1.0,0.0,23.7,1.95]|[0.04645046400945...|[0.51161052846028...|       0.0|
-| [2.0,1.0,24.3,2.0]|    0| [1.0,0.0,24.3,2.0]|[-0.1493306646155...|[0.46273655493059...|       1.0|
-| [2.0,1.0,24.9,2.3]|    1| [1.0,0.0,24.9,2.3]|[-0.6247375483023...|[0.34870473830470...|       1.0|
-|[2.0,1.0,26.8,2.55]|    0|[1.0,0.0,26.8,2.55]|[-1.3472405658042...|[0.20632187168645...|       1.0|
-| [2.0,1.0,28.0,2.9]|    1| [1.0,0.0,28.0,2.9]|[-2.0184285781160...|[0.11728157703955...|       1.0|
-+-------------------+-----+-------------------+--------------------+--------------------+----------+</code></pre>
-<ul>
-<li>Model evaluation on test set</li>
-</ul>
-<pre class="python"><code>from pyspark.ml.evaluation import BinaryClassificationEvaluator
-evaluator = BinaryClassificationEvaluator(rawPredictionCol=&#39;rawPrediction&#39;)
-evaluator.evaluate(fitted_test)</code></pre>
-<pre class="python"><code>0.6637426900584795</code></pre>
 </div>
 
 <center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>

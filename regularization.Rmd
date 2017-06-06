@@ -1,7 +1,7 @@
 ---
 title: "Regularization"
-author: "Wenqiang Feng & Ming Chen"
-date: "2/20/2017"
+author: "Ming Chen"
+date: "6/5/2017"
 output: html_document
 ---
 
@@ -34,6 +34,6 @@ Elastic net is a regularized method that linearly combines penalities of the las
 * **elasticNetParam**: $\lambda_2$ ridge penalty
 * **Scenarios**:
     + *regParam* = $0$, *elasticNetParam* = $0$: no regularization applied, $\lambda = 0$
-    + *regParam* = $\neq 0$, *elasticNetParam* = $1$: lasso regularization applied
-    + *regParam* = $\neq 0$, *elasticNetParam* = $0$: ridge regularization applied
-    + *regParam* = $\neq 0$, $0 < elasticNetParam < 1$: elastic net regularization applied
+    + *regParam* $\neq 0$, *elasticNetParam* = $1$: lasso regularization applied
+    + *regParam* $\neq 0$, *elasticNetParam* = $0$: ridge regularization applied
+    + *regParam* $\neq 0$, $0 < elasticNetParam < 1$: elastic net regularization applied

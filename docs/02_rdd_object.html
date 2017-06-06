@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Ming Chen" />
+
+
+<title>RDD object</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-inverse  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Learning Apache Spark</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">
+    <span class="fa fa-home"></span>
+     
+    Home
+  </a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    Getting Start
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="divider"></li>
+    <li class="dropdown-header">Installations</li>
+    <li>
+      <a href="install.html">Installations</a>
+    </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">Integrate Spark</li>
+    <li>
+      <a href="pyspark-on-rodeo.html">Integrate spark with Rodeo</a>
+    </li>
+    <li>
+      <a href="pyspark-on-jupyter.html">Integrate spark with Jupyter</a>
+    </li>
+    <li>
+      <a href="spark-on-jetstream-cloud.html">Spark on jetstream cloud</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    Data Preparation
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="01_entry_points_to_spark.html">Entry points to spark</a>
+    </li>
+    <li>
+      <a href="02_rdd_object.html">RDD object</a>
+    </li>
+    <li>
+      <a href="03_dataframe_object.html">DataFrame object</a>
+    </li>
+    <li>
+      <a href="categorical-data.html">Categorial data</a>
+    </li>
+    <li>
+      <a href="HashingTF-and-CountVectorizer.html">HashingTF and CountVectorizer</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    Machine Learning
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="divider"></li>
+    <li class="dropdown-header">Regression</li>
+    <li>
+      <a href="linear-regression.html">Linear regression</a>
+    </li>
+    <li>
+      <a href="generalized-linear-regression.html">Generalized linear regression</a>
+    </li>
+    <li class="dropdown-header">Classification</li>
+    <li>
+      <a href="kmeans.html">Kmeans Classification</a>
+    </li>
+    <li>
+      <a href="dttreeC.html">Decision tree Classification</a>
+    </li>
+    <li>
+      <a href="randomforestC.html">Random Forest Classification</a>
+    </li>
+    <li>
+      <a href="logistic-regression.html">Logistic Regression</a>
+    </li>
+    <li>
+      <a href="svm.html">Support Vector Machine</a>
+    </li>
+    <li>
+      <a href="naive-baye.html">Naive Bayes</a>
+    </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">Neural Network</li>
+    <li>
+      <a href="fnn.html">Feedforward Neural Network</a>
+    </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">Natural Language Processing</li>
+    <li>
+      <a href="nlpC.html">Text Classification</a>
+    </li>
+    <li>
+      <a href="nlpLDA.html">Topic Model LDA</a>
+    </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">Social Network Analysis</li>
+    <li>
+      <a href="sna.html">Social Network Analysis</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    Module Tuning and Evaluation
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="divider"></li>
+    <li class="dropdown-header">Module Tuning</li>
+    <li>
+      <a href="regularization.html">Regularization</a>
+    </li>
+    <li>
+      <a href="k-folds-cross-validation.html">K-folds Cross Validation</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/MingChen0919/learning-apache-spark">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="https://twitter.com/mingchen0919">
+    <span class="fa fa-twitter"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">RDD object</h1>
+<h4 class="author"><em>Ming Chen</em></h4>
+<h4 class="date"><em>6/1/2017</em></h4>
+
+</div>
+
+
+<div id="content" class="section level1">
+<h1>Content</h1>
+<ul>
+<li><a href="#create-an-rdd-object">Create an RDD object</a></li>
+<li><a href="#map-functions">Map functions</a></li>
+<li><a href="#aggregate-functions">Aggregate functions</a></li>
+<li><a href="#summary-statistics">Summary statistics</a></li>
+<li><a href="#group-functions">Group functions</a></li>
+<li><a href="#merge%20functions">Merge functions</a></li>
+</ul>
+<div id="create-an-rdd-object" class="section level2">
+<h2>Create an RDD object</h2>
+<pre class="python"><code>mtcars = sc.textFile(&#39;data/mtcars.csv&#39;, use_unicode=False)</code></pre>
+<p>Display a few rows.</p>
+<pre class="python"><code>mtcars.take(5)</code></pre>
+<pre class="python"><code>[&#39;model,mpg,cyl,disp,hp,drat,wt,qsec,vs,am,gear,carb&#39;,
+ &#39;Mazda RX4,21,6,160,110,3.9,2.62,16.46,0,1,4,4&#39;,
+ &#39;Mazda RX4 Wag,21,6,160,110,3.9,2.875,17.02,0,1,4,4&#39;,
+ &#39;Datsun 710,22.8,4,108,93,3.85,2.32,18.61,1,1,4,1&#39;,
+ &#39;Hornet 4 Drive,21.4,6,258,110,3.08,3.215,19.44,1,0,3,1&#39;]</code></pre>
+</div>
+<div id="map-functions" class="section level2">
+<h2>Map functions</h2>
+<p>There are several map functions that operate on RDD objects:</p>
+<ul>
+<li><code>map()</code></li>
+<li><code>mapValues()</code></li>
+<li><code>flatMap()</code></li>
+<li><code>flatMapValues()</code></li>
+</ul>
+<div id="map" class="section level3">
+<h3><code>map()</code></h3>
+<p>The <code>map()</code> applies a function to each element of the RDD.</p>
+<pre class="python"><code># split string into array and remove the header row.
+mtcars_map = mtcars.map(lambda x: x.split(&#39;,&#39;)). \
+    filter(lambda x: x[0] != &#39;model&#39;)
+    
+mtcars_map.take(2)</code></pre>
+<pre class="python"><code>[[&#39;Mazda RX4&#39;,
+  &#39;21&#39;,
+  &#39;6&#39;,
+  &#39;160&#39;,
+  &#39;110&#39;,
+  &#39;3.9&#39;,
+  &#39;2.62&#39;,
+  &#39;16.46&#39;,
+  &#39;0&#39;,
+  &#39;1&#39;,
+  &#39;4&#39;,
+  &#39;4&#39;],
+ [&#39;Mazda RX4 Wag&#39;,
+  &#39;21&#39;,
+  &#39;6&#39;,
+  &#39;160&#39;,
+  &#39;110&#39;,
+  &#39;3.9&#39;,
+  &#39;2.875&#39;,
+  &#39;17.02&#39;,
+  &#39;0&#39;,
+  &#39;1&#39;,
+  &#39;4&#39;,
+  &#39;4&#39;]]</code></pre>
+</div>
+<div id="mapvalues" class="section level3">
+<h3><code>mapValues()</code></h3>
+<p>Each element in the RDD is a <strong><em>tuple</em></strong>. The first element is the key, and the second element is the value. The <code>mapValues()</code> applies a function to the values of each elements and keep the original keys.</p>
+<pre class="python"><code># create a tuple
+mtcars_tuple = mtcars_map.map(lambda x: (x[0], x[1:]))
+mtcars_tuple.take(2)</code></pre>
+<pre class="python"><code># note that the x below refers to the value in each tuple elements in the RDD
+# it does not include the key.
+mtcars_tuple.mapValues(lambda x: map(float, x) ).take(2)</code></pre>
+<pre class="python"><code>[(&#39;Mazda RX4&#39;,
+  [21.0, 6.0, 160.0, 110.0, 3.9, 2.62, 16.46, 0.0, 1.0, 4.0, 4.0]),
+ (&#39;Mazda RX4 Wag&#39;,
+  [21.0, 6.0, 160.0, 110.0, 3.9, 2.875, 17.02, 0.0, 1.0, 4.0, 4.0])]</code></pre>
+</div>
+<div id="flatmap" class="section level3">
+<h3><code>flatMap()</code></h3>
+<p><code>flatMap()</code> applies a function to each element of the RDD and then flaten each results. In another words, each value in the returned results for each elements will become a new row.</p>
+<pre class="python"><code># this command convert the data into a data frame of two variables:
+# one is car model, the other is observations from that car model.
+mtcars_map.flatMap(lambda x: [(x[0], number) for number in x[1:]]).take(20)</code></pre>
+<pre class="python"><code>[(&#39;Mazda RX4&#39;, &#39;21&#39;),
+ (&#39;Mazda RX4&#39;, &#39;6&#39;),
+ (&#39;Mazda RX4&#39;, &#39;160&#39;),
+ (&#39;Mazda RX4&#39;, &#39;110&#39;),
+ (&#39;Mazda RX4&#39;, &#39;3.9&#39;),
+ (&#39;Mazda RX4&#39;, &#39;2.62&#39;),
+ (&#39;Mazda RX4&#39;, &#39;16.46&#39;),
+ (&#39;Mazda RX4&#39;, &#39;0&#39;),
+ (&#39;Mazda RX4&#39;, &#39;1&#39;),
+ (&#39;Mazda RX4&#39;, &#39;4&#39;),
+ (&#39;Mazda RX4&#39;, &#39;4&#39;),
+ (&#39;Mazda RX4 Wag&#39;, &#39;21&#39;),
+ (&#39;Mazda RX4 Wag&#39;, &#39;6&#39;),
+ (&#39;Mazda RX4 Wag&#39;, &#39;160&#39;),
+ (&#39;Mazda RX4 Wag&#39;, &#39;110&#39;),
+ (&#39;Mazda RX4 Wag&#39;, &#39;3.9&#39;),
+ (&#39;Mazda RX4 Wag&#39;, &#39;2.875&#39;),
+ (&#39;Mazda RX4 Wag&#39;, &#39;17.02&#39;),
+ (&#39;Mazda RX4 Wag&#39;, &#39;0&#39;),
+ (&#39;Mazda RX4 Wag&#39;, &#39;1&#39;)]</code></pre>
+</div>
+<div id="flatmapvalues" class="section level3">
+<h3>‘flatMapValues()’</h3>
+<p><code>flatMapValues()</code> operates on <strong>key-value</strong> pair RDD and flatten the results without changing the keys.</p>
+<pre class="python"><code>mtcars_tuple.flatMapValues(lambda x: x).take(20)</code></pre>
+<pre class="python"><code>[(&#39;Mazda RX4&#39;, &#39;21&#39;),
+ (&#39;Mazda RX4&#39;, &#39;6&#39;),
+ (&#39;Mazda RX4&#39;, &#39;160&#39;),
+ (&#39;Mazda RX4&#39;, &#39;110&#39;),
+ (&#39;Mazda RX4&#39;, &#39;3.9&#39;),
+ (&#39;Mazda RX4&#39;, &#39;2.62&#39;),
+ (&#39;Mazda RX4&#39;, &#39;16.46&#39;),
+ (&#39;Mazda RX4&#39;, &#39;0&#39;),
+ (&#39;Mazda RX4&#39;, &#39;1&#39;),
+ (&#39;Mazda RX4&#39;, &#39;4&#39;),
+ (&#39;Mazda RX4&#39;, &#39;4&#39;),
+ (&#39;Mazda RX4 Wag&#39;, &#39;21&#39;),
+ (&#39;Mazda RX4 Wag&#39;, &#39;6&#39;),
+ (&#39;Mazda RX4 Wag&#39;, &#39;160&#39;),
+ (&#39;Mazda RX4 Wag&#39;, &#39;110&#39;),
+ (&#39;Mazda RX4 Wag&#39;, &#39;3.9&#39;),
+ (&#39;Mazda RX4 Wag&#39;, &#39;2.875&#39;),
+ (&#39;Mazda RX4 Wag&#39;, &#39;17.02&#39;),
+ (&#39;Mazda RX4 Wag&#39;, &#39;0&#39;),
+ (&#39;Mazda RX4 Wag&#39;, &#39;1&#39;)]</code></pre>
+</div>
+</div>
+<div id="aggregate-functions" class="section level2">
+<h2>Aggregate functions</h2>
+<p>Two aggregate functions:</p>
+<ul>
+<li><code>aggregate()</code></li>
+<li><code>aggregateByKey()</code></li>
+</ul>
+<div id="aggregatezerovalue-seqop-combop" class="section level3">
+<h3><code>aggregate(zeroValue, seqOp, combOp)</code></h3>
+<ul>
+<li><code>zeroValue</code> is like a data container. Its structure should match with the data structure of the returned values from the <strong><em>seqOp</em></strong> function.</li>
+<li><code>seqOp</code> is a function that takes <strong>two arguments</strong>: the first argument is the <code>zeroValue</code> and the second argument is an element from the RDD. The <code>zeroValue</code> gets updated with the returned value every run.</li>
+<li><code>combOp</code> is a function that takes <strong>two arguments</strong>: the first argument is the final <code>zeroValue</code> from one partition and the other is another final <code>zeroValue</code> from another partition.</li>
+</ul>
+<p>The code below calculates the sum of square roots for mpg and disp.</p>
+<pre class="python"><code># the data
+mtcars_map.take(2)</code></pre>
+<pre class="python"><code>[[&#39;Mazda RX4&#39;, 21.0, 6.0, 160.0, 110.0, 3.9, 2.62, 16.46, 0.0, 1.0, 4.0, 4.0],
+ [&#39;Mazda RX4 Wag&#39;,
+  21.0,
+  6.0,
+  160.0,
+  110.0,
+  3.9,
+  2.875,
+  17.02,
+  0.0,
+  1.0,
+  4.0,
+  4.0]]</code></pre>
+<pre class="python"><code># the 2nd and 4th columns are mpg and disp, respectively.
+# calculate the averages of mpg and disp
+mpg_mean = mtcars_vars.map(lambda x: x[1]).mean()
+disp_mean = mtcars_vars.map(lambda x: x[3]).mean()</code></pre>
+<p>Use <code>aggregate()</code> function.</p>
+<pre class="python"><code># define zeroValue
+zero_value = (0, 0) # we need to calculate two variances. Our initial value has two elements
+# define seqOp
+seqOp = lambda z, x: ( (x[1] - mpg_mean)**2, (x[3] - disp_mean)**2 )
+# define combOp
+combOp = lambda px, py: ( px[0] + py[0], px[1] + py[1] )
+
+# implements aggregate().
+mtcars_vars.aggregate(zero_value, seqOp, combOp)</code></pre>
+<pre class="python"><code>(1126.0471875, 476184.7946875)</code></pre>
+<p>The same result was obtained by using R.</p>
+<pre class="r"><code>c( (mtcars$mpg - mean(mtcars$mpg))^2 %&gt;% sum(),
+   (mtcars$disp - mean(mtcars$disp))^2 %&gt;% sum())</code></pre>
+<pre class="python"><code>1126.047 476184.795</code></pre>
+</div>
+</div>
+<div id="aggregatebykey" class="section level2">
+<h2><code>aggregateByKey()</code></h2>
+<p>This function does similar things as <code>aggregate()</code>. The <code>aggregate()</code> aggregate all results to the very end, but <code>aggregateByKey()</code> merge results by key.</p>
+<p>Again, let’s do some sum of squre root calculation.</p>
+<pre class="python"><code># get some data and make it a key-value pair RDD.
+iris_rdd = sc.textFile(&#39;data/iris.csv&#39;, use_unicode=False)
+iris_ssr = iris_rdd.map(lambda x: x.split(&#39;,&#39;)).\
+    map(lambda x: (x[-1], x[:-1])).\
+    filter(lambda x: x[0] != &#39;species&#39;).\
+    map(lambda x: (x[0], map(float, x[1])))
+iris_ssr.take(5)</code></pre>
+<pre class="python"><code>[(&#39;setosa&#39;, [5.1, 3.5, 1.4, 0.2]),
+ (&#39;setosa&#39;, [4.9, 3.0, 1.4, 0.2]),
+ (&#39;setosa&#39;, [4.7, 3.2, 1.3, 0.2]),
+ (&#39;setosa&#39;, [4.6, 3.1, 1.5, 0.2]),
+ (&#39;setosa&#39;, [5.0, 3.6, 1.4, 0.2])]</code></pre>
+<p>Calculate averages for sepal_length and sepal_width.</p>
+<pre class="python"><code>sepal_length_mean = iris_ssr.map(lambda x: x[1][1]).mean()
+sepal_width_mean = iris_ssr.map(lambda x: x[1][2]).mean()</code></pre>
+<p>Use <code>aggregateByKey()</code> function.</p>
+<pre class="python"><code># define zeroValue
+zero_value = (0, 0)
+# define seqOp
+seqOp = (lambda x, y: (x[0] + (y[1] - sepal_length_mean)**2, x[1] + (y[3] - sepal_width_mean)**2))
+# define combOp
+combOp = (lambda x, y: (x[0] + y[0], x[1] + y[1]))</code></pre>
+</div>
+<div id="summary-statistics" class="section level2">
+<h2>Summary statistics</h2>
+<ul>
+<li><code>count()</code>: return the total number of elements in the RDD</li>
+<li><code>max()</code>: return the maximum elements in the RDD</li>
+<li><code>min()</code>: return minimum elements in the RDD</li>
+<li><code>mean()</code>: return the mean of RDD’s elements</li>
+<li><code>sum()</code>: add up the elements in the RDD</li>
+<li><code>stdev()</code>: return standard deviation of the RDD’s elements</li>
+<li><code>variance()</code>: return variance of the RDD’s elements</li>
+<li><code>stats()</code>: calculate statistics above.</li>
+</ul>
+<p>Elements in the RDD are scalar object (single value).</p>
+<pre class="python"><code>mpg.take(5)</code></pre>
+<pre class="python"><code>[21.0, 21.0, 22.8, 21.4, 18.7]</code></pre>
+<p><code>count()</code></p>
+<pre class="python"><code>mpg.count()</code></pre>
+<pre class="python"><code>32</code></pre>
+<p><code>max()</code></p>
+<pre class="python"><code>mpg.max()</code></pre>
+<pre class="python"><code>33.9</code></pre>
+<pre class="python"><code>mpg.min()</code></pre>
+<pre class="python"><code>10.4</code></pre>
+<p><code>mean()</code></p>
+<pre class="python"><code>mpg.mean()</code></pre>
+<pre class="python"><code>20.090625</code></pre>
+<pre class="python"><code>mpg.sum()</code></pre>
+<pre class="python"><code>642.9</code></pre>
+<pre class="python"><code>mpg.stdev()</code></pre>
+<pre class="python"><code>5.9320295523012181</code></pre>
+<p><code>variance()</code></p>
+<pre class="python"><code>mpg.variance()</code></pre>
+<pre class="python"><code>35.188974609374995</code></pre>
+<p><code>stats()</code></p>
+<pre class="python"><code>mpg.stats()</code></pre>
+<pre class="python"><code>(count: 32, mean: 20.090625, stdev: 5.9320295523, max: 33.9, min: 10.4)</code></pre>
+</div>
+<div id="group-functions" class="section level2">
+<h2>Group functions</h2>
+<ul>
+<li><code>groupBy()</code></li>
+<li><code>groupByKey()</code></li>
+<li><code>cogroup()</code></li>
+<li><code>groupWith()</code></li>
+</ul>
+<div id="the-groupby-function" class="section level3">
+<h3>The <code>groupBy()</code> function</h3>
+<p>this function applies a function to each RDD’s elements and then use the returned values to group the elements. The <code>groupBy()</code> returns a key-value pair RDD. The keys are returned values from the applied function, the values are <strong>interable sequences</strong>. To show the real elements, you can convert these sequences to lists.</p>
+<pre class="python"><code>rdd = sc.parallelize([1,2,3,4,5, &#39;a&#39;,&#39;b&#39;,&#39;c&#39;])
+rdd.collect()</code></pre>
+<pre class="python"><code>[1, 2, 3, 4, 5, &#39;a&#39;, &#39;b&#39;, &#39;c&#39;]</code></pre>
+<p>Apply the <code>groupBy()</code> function.</p>
+<pre class="python"><code>rdd.groupBy(lambda x: isinstance(x, str)).collect()</code></pre>
+<pre class="python"><code>[(False, &lt;pyspark.resultiterable.ResultIterable at 0x10c5cde50&gt;),
+ (True, &lt;pyspark.resultiterable.ResultIterable at 0x10c5fd0d0&gt;)]</code></pre>
+<p>Convert values in the key-value pair RDD to lists.</p>
+<pre class="python"><code>rdd.groupBy(lambda x: isinstance(x, str)).mapValues(list).collect()</code></pre>
+<pre class="python"><code>[(False, [1, 2, 3, 4, 5]), (True, [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;])]</code></pre>
+</div>
+<div id="the-groupbykey-function" class="section level3">
+<h3>The <code>groupByKey()</code> function</h3>
+<p>This function is similar to <code>groupBy()</code>. The <code>groupBy()</code> needs a function to generate keys for the RDD’s elements. The <code>groupByKey()</code> function operate directly RDD that already has keys.</p>
+<pre class="python"><code>rdd = sc.parallelize([
+        (&#39;a&#39;, [1,2]),
+        (&#39;b&#39;, [3,4]),
+        (&#39;a&#39;, [1,5]),
+        (&#39;b&#39;, [2,3])
+    ])
+ 
+rdd.groupByKey().mapValues(list).collect()    </code></pre>
+<pre class="python"><code>[(&#39;a&#39;, [[1, 2], [1, 5]]), (&#39;b&#39;, [[3, 4], [2, 3]])]</code></pre>
+</div>
+<div id="the-cogroup-function" class="section level3">
+<h3>The <code>cogroup()</code> function</h3>
+<p>Merge two key-value pair RDDs by keys. The values in the returned RDD is a tuple. The first element in the tuple is the value from the first RDD, the second value inthe tuple is the value from the second RDD.</p>
+<pre class="python"><code>x_rdd = sc.parallelize([
+        (&#39;a&#39;, [1,2]),
+        (&#39;b&#39;, [2,4]),
+        (&#39;a&#39;, [5])
+    ])
+y_rdd = sc.parallelize([
+        (&#39;a&#39;, [8]),
+        (&#39;c&#39;, [10])
+    ])</code></pre>
+<pre class="python"><code>x_rdd.cogroup(y_rdd).collect()</code></pre>
+<pre class="python"><code>[(&#39;a&#39;,
+  (&lt;pyspark.resultiterable.ResultIterable at 0x10c6753d0&gt;,
+   &lt;pyspark.resultiterable.ResultIterable at 0x10c543b10&gt;)),
+ (&#39;c&#39;,
+  (&lt;pyspark.resultiterable.ResultIterable at 0x10c5432d0&gt;,
+   &lt;pyspark.resultiterable.ResultIterable at 0x10c543710&gt;)),
+ (&#39;b&#39;,
+  (&lt;pyspark.resultiterable.ResultIterable at 0x10c543fd0&gt;,
+   &lt;pyspark.resultiterable.ResultIterable at 0x10c543290&gt;))]</code></pre>
+<pre class="python"><code>x_rdd.cogroup(y_rdd).mapValues(lambda x: [map(list, i) for i in x] ).collect()</code></pre>
+<pre class="python"><code>[(&#39;a&#39;, [[[1, 2], [5]], [[8]]]), (&#39;c&#39;, [[], [[10]]]), (&#39;b&#39;, [[[2, 4]], []])]</code></pre>
+</div>
+</div>
+<div id="merge-functions" class="section level2">
+<h2>Merge functions</h2>
+<p>These functions merge values from two RDDs and generate one RDD:</p>
+<ul>
+<li><code>union()</code></li>
+<li><code>zip()</code></li>
+<li><code>zipWithIndex()</code></li>
+</ul>
+<p>The <code>union()</code> function append one RDD to the other.</p>
+<pre class="python"><code>x = sc.parallelize([1,2,3])
+y = sc.parallelize([4,5,6])
+x.union(y).collect()</code></pre>
+<pre class="python"><code>[1, 2, 3, 4, 5, 6]</code></pre>
+<p>The <code>zip()</code> function combines two RDDs and return a key-value pair RDD. The elements from the first RDD become the keys, and the elements from the second RDD become the values.</p>
+<pre class="python"><code>x = sc.parallelize([&#39;a&#39;, &#39;b&#39;, &#39;c&#39;])
+y = sc.parallelize([1, 2, 3])
+x.zip(y).collect()</code></pre>
+<pre class="python"><code>[(&#39;a&#39;, 1), (&#39;b&#39;, 2), (&#39;c&#39;, 3)]</code></pre>
+<p>The <code>zipWithIndex()</code> function combines an RDD’s elements with element indices and returns an RDD.</p>
+<pre class="python"><code>x = sc.parallelize([&#39;a&#39;, &#39;b&#39;, &#39;c&#39;])
+x.zipWithIndex().collect()</code></pre>
+<pre class="python"><code>[(&#39;a&#39;, 0), (&#39;b&#39;, 1), (&#39;c&#39;, 2)]</code></pre>
+</div>
+</div>
+
+<center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

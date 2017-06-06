@@ -22,27 +22,17 @@ navbar:
           href: pyspark-on-jupyter.html
         - text: "Spark on jetstream cloud"
           href: spark-on-jetstream-cloud.html
-        - text: "------------" 
-        - text: "Data Preprocessing Template"        
-        - text: "Data Preprocessing Template"
-          href: data-preprocessing-template.html
-    - text: "Data Wrangling"
+    - text: "Data Preparation"
       icon: fa-gear
       menu:
-        - text: "Basic DataFrame Manipulation"
-          href: data-manipulation.html
-        - text: "Pyspark Vectors"
-          href: pyspark-vectors.html
-        - text: "featuresCol & labelCol"
-          href: featuresCol-and-labelCol.html
-        - text: "StringIndexer & VectorIndexer"
-          href: StringIndexer-and-VectorIndexer.html
-        - text: "------------"
-        - text: "pyspark.RDD object"
-        - text: "Aggregate Functions"
-          href: aggregate-function.html
-        - text: "Reduce Functions"
-          href: reduce-functions.html
+        - text: "Entry points to spark"
+          href: 01_entry_points_to_spark.html
+        - text: "RDD object"
+          href: 02_rdd_object.html
+        - text: "DataFrame object"
+          href: 03_dataframe_object.html
+        - text: "Categorial data"
+          href: categorical-data.html
         - text: "HashingTF and CountVectorizer"
           href: HashingTF-and-CountVectorizer.html
         
@@ -51,13 +41,10 @@ navbar:
       menu:
         - text: "------------"
         - text: "Regression"      
-        - text: "Linear Regression"
-          href:  linearRegression.html
-        - text: "Decision tree Regression"
-          href:  dttreeR.html            
-        - text: "Random Forest Regression"
-          href:  randomforest.html          
-        - text: "-----------"          
+        - text: "Linear regression"
+          href: linear-regression.html
+        - text: "Generalized linear regression"
+          href: generalized-linear-regression.html
         - text: "Classification"
         - text: "Kmeans Classification"
           href:  kmeans.html

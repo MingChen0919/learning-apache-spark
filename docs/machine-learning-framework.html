@@ -9,10 +9,10 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="author" content="Wenqiang Feng &amp; Ming Chen" />
+<meta name="author" content="Ming Chen" />
 
 
-<title>Logistic Regression</title>
+<title>Machine Learning Framework</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -335,141 +335,137 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Logistic Regression</h1>
-<h4 class="author"><em>Wenqiang Feng &amp; Ming Chen</em></h4>
-<h4 class="date"><em>2/8/2017</em></h4>
+<h1 class="title toc-ignore">Machine Learning Framework</h1>
+<h4 class="author"><em>Ming Chen</em></h4>
+<h4 class="date"><em>6/5/2017</em></h4>
 
 </div>
 
 
-<div id="set-up-sparkcontext-and-sparksession" class="section level2">
-<h2>Set up sparkContext and sparkSession</h2>
-<pre class="python"><code># connecting to spark
-from pyspark import SparkConf, SparkContext
-## set up spark context
-conf = SparkConf().setAppName(&quot;myApp&quot;)
-sc = SparkContext(conf=conf)
-
-# create sparksession object
-from pyspark.sql import SparkSession
-sparksession = SparkSession(sc)</code></pre>
-</div>
-<div id="import-data" class="section level2">
-<h2>Import data</h2>
-<pre class="python"><code>horseshoe_crab = sparksession.read.csv(&quot;data/horseshoe_crab.csv&quot;, inferSchema=True, header=True)
-horseshoe_crab.show(n=5)</code></pre>
-</div>
-<div id="data-preprocessing" class="section level2">
-<h2>Data preprocessing</h2>
+<div id="content" class="section level1">
+<h1>Content</h1>
 <ul>
-<li>Convert column <em>Sa</em> to binary variable</li>
+<li><a href="#machine-learning-without-cross-validation">Machine learning without cross-validation</a></li>
 </ul>
-<pre class="python"><code>bool_horseshoe_crab = horseshoe_crab.withColumn(&#39;boolean_Sa&#39;, horseshoe_crab[&#39;Sa&#39;].cast(&#39;boolean&#39;))
-bool_horseshoe_crab.show(n=5)</code></pre>
-<pre class="python"><code>+---+---+----+----+---+----------+
-|  C|  S|   W|  Wt| Sa|boolean_Sa|
-+---+---+----+----+---+----------+
-|  2|  3|28.3|3.05|  8|      true|
-|  3|  3|26.0| 2.6|  4|      true|
-|  3|  3|25.6|2.15|  0|     false|
-|  4|  2|21.0|1.85|  0|     false|
-|  2|  3|29.0| 3.0|  1|      true|
-+---+---+----+----+---+----------+</code></pre>
-<pre class="python"><code>new_horseshoe_crab = bool_horseshoe_crab.withColumn(&#39;binary_Sa&#39;, bool_horseshoe_crab[&#39;boolean_Sa&#39;].cast(&#39;integer&#39;))
-new_horseshoe_crab.show(n=5)</code></pre>
-<pre class="python"><code>+---+---+----+----+---+----------+---------+
-|  C|  S|   W|  Wt| Sa|boolean_Sa|binary_Sa|
-+---+---+----+----+---+----------+---------+
-|  2|  3|28.3|3.05|  8|      true|        1|
-|  3|  3|26.0| 2.6|  4|      true|        1|
-|  3|  3|25.6|2.15|  0|     false|        0|
-|  4|  2|21.0|1.85|  0|     false|        0|
-|  2|  3|29.0| 3.0|  1|      true|        1|
-+---+---+----+----+---+----------+---------+</code></pre>
+<div id="machine-learning-without-cross-validation." class="section level2">
+<h2>Machine learning without cross-validation.</h2>
+<div id="below-are-the-steps" class="section level4">
+<h4>Below are the steps:</h4>
+<ol style="list-style-type: decimal">
+<li><strong>Module (estimator)</strong>
 <ul>
-<li>Transform data into <strong>featuresCol</strong> and <strong>labelCol</strong> structure</li>
-</ul>
-<pre class="python"><code>from pyspark.ml.linalg import Vectors
-lor_horseshoe_crab = new_horseshoe_crab.rdd.map(lambda r: [Vectors.dense(r[0:3]), r[-1]]).toDF([&#39;features&#39;, &#39;label&#39;])
-lor_horseshoe_crab.show(n=5)</code></pre>
-<pre class="python"><code>+------------------+-----+
-|          features|label|
-+------------------+-----+
-|[2.0,3.0,28.3,8.0]|    1|
-|[3.0,3.0,26.0,4.0]|    1|
-|[3.0,3.0,25.6,0.0]|    0|
-|[4.0,2.0,21.0,0.0]|    0|
-|[2.0,3.0,29.0,1.0]|    1|
-+------------------+-----+</code></pre>
+<li>Build a module instance with all kinds of module classes. E.g., <code>pyspark.ml.classfication.LogisticRegression</code> and <code>pyspark.ml.classification.DecisionTreeClassifier</code>.</li>
+</ul></li>
+<li><strong>Learning the Module (fit)</strong>
 <ul>
-<li>Index categorical predictors from the <em>featuresCol</em> column</li>
-</ul>
-<pre class="python"><code>from pyspark.ml.feature import VectorIndexer
-indexer = VectorIndexer(maxCategories=4, inputCol=&#39;features&#39;, outputCol=&#39;indexed_features&#39;)
-model = indexer.fit(lor_horseshoe_crab)
-lor_horseshoe_crab = model.transform(lor_horseshoe_crab)
-lor_horseshoe_crab.show(n=5)</code></pre>
-<pre class="python"><code>+------------------+-----+------------------+
-|          features|label|  indexed_features|
-+------------------+-----+------------------+
-|[2.0,3.0,28.3,8.0]|    1|[1.0,2.0,28.3,8.0]|
-|[3.0,3.0,26.0,4.0]|    1|[2.0,2.0,26.0,4.0]|
-|[3.0,3.0,25.6,0.0]|    0|[2.0,2.0,25.6,0.0]|
-|[4.0,2.0,21.0,0.0]|    0|[3.0,1.0,21.0,0.0]|
-|[2.0,3.0,29.0,1.0]|    1|[1.0,2.0,29.0,1.0]|
-+------------------+-----+------------------+</code></pre>
+<li>Use the <code>fit</code> function to fit the module with <em>training data</em>. At this step, the module’s parameters get estimated.</li>
+</ul></li>
+<li><strong>Prediction (transform)</strong>
+<ul>
+<li>Apply the <code>transform</code> function to <strong>training</strong> and <strong>test</strong> data to get predicting values on test data.</li>
+</ul></li>
+<li><strong>Evaluation (evaluator)</strong>
+<ul>
+<li>Build an evaluator and use the evaluator instance to calculate a module evaluation score. The evaluation score is obtained by comparing the predicting values with known response values.</li>
+<li><strong>Training error</strong> is obtained by comparing predicting values from training data with corresponding known response values. <strong>Testing error</strong> is obtained by comparing predicting values from test data with corresponding known response values.</li>
+<li>There are three evaluators: <code>BinaryClassificationEvaluator</code>, <code>RegressionEvaluator</code> and <code>MulticlassClassificationEvaluator</code>.</li>
+</ul></li>
+<li><strong>Module in production use</strong>
+<ul>
+<li>Make decisions about using which models based on the evaluation results and apply the best model to intact data.</li>
+</ul></li>
+</ol>
 </div>
-<div id="splitting-data-into-training-and-test-sets" class="section level2">
-<h2>Splitting data into training and test sets</h2>
-<pre class="python"><code>training, test = lor_horseshoe_crab.randomSplit(weights=[0.7, 0.3], seed=123)</code></pre>
-</div>
-<div id="building-logistic-regression-model-with-training-set" class="section level2">
-<h2>Building logistic regression model with training set</h2>
+<div id="example" class="section level4">
+<h4>Example</h4>
+<p><strong>Data preparation</strong></p>
+<pre class="python"><code># import data
+horseshoe_crab = spark.read.csv(&#39;data/horseshoe_crab.csv&#39;, inferSchema=True, header=True)
+
+# convert Sa column to binary data: if Sa = 0, new_Sa = 0, else new_Sa = 1
+from pyspark.sql.functions import udf
+from pyspark.sql.types import IntegerType
+count_to_bin = udf(lambda x: int(bool(x)), IntegerType())
+
+horseshoe_crab_bin = horseshoe_crab.withColumn(&#39;new_Sa&#39;, count_to_bin(horseshoe_crab.Sa))
+horseshot_crab_bin.show(5)
+
+# new data
++---+---+----+----+---+------+
+|  C|  S|   W|  Wt| Sa|new_Sa|
++---+---+----+----+---+------+
+|  2|  3|28.3|3.05|  8|     1|
+|  3|  3|26.0| 2.6|  4|     1|
+|  3|  3|25.6|2.15|  0|     0|
+|  4|  2|21.0|1.85|  0|     0|
+|  2|  3|29.0| 3.0|  1|     1|
++---+---+----+----+---+------+
+only showing top 5 rows
+
+# transform data into &#39;featuresCol&#39; and &#39;labelCol&#39; structure
+from pyspark.ml.linalg import Vectors
+horseshoe_crab_df = horseshoe_crab_bin.rdd.\
+                        map(lambda x: [Vectors.dense(x[0:3]), x[-1]]).\
+                        toDF([&#39;features&#39;, &#39;label&#39;])
+horseshoe_crab_df.show(5)
+
++-------------------+-----+
+|           features|label|
++-------------------+-----+
+|[2.0,3.0,28.3,3.05]|    1|
+| [3.0,3.0,26.0,2.6]|    1|
+|[3.0,3.0,25.6,2.15]|    0|
+|[4.0,2.0,21.0,1.85]|    0|
+| [2.0,3.0,29.0,3.0]|    1|
++-------------------+-----+
+only showing top 5 rows
+
+
+# index categorical predictors from the featuresCol column
+from pyspark.ml.feature import VectorIndexer
+indexer = VectorIndexer(maxCategories=5, inputCol=&#39;features&#39;, outputCol=&#39;indexed_features&#39;)
+model = indexer.fit(horseshoe_crab_df)
+horseshoe_crab_data = model.transform(horseshoe_crab_df)
+horseshoe_crab_data.show(5)
+
++-------------------+-----+-------------------+
+|           features|label|   indexed_features|
++-------------------+-----+-------------------+
+|[2.0,3.0,28.3,3.05]|    1|[1.0,2.0,28.3,3.05]|
+| [3.0,3.0,26.0,2.6]|    1| [2.0,2.0,26.0,2.6]|
+|[3.0,3.0,25.6,2.15]|    0|[2.0,2.0,25.6,2.15]|
+|[4.0,2.0,21.0,1.85]|    0|[3.0,1.0,21.0,1.85]|
+| [2.0,3.0,29.0,3.0]|    1| [1.0,2.0,29.0,3.0]|
++-------------------+-----+-------------------+
+only showing top 5 rows
+
+
+# split data into training and test sets.
+training, test = horseshoe_crab_data.randomSplit(weights=[0.7, 0.3], seed=123)</code></pre>
+<p><strong>Step 1: build model</strong></p>
 <pre class="python"><code>from pyspark.ml.classification import LogisticRegression
-blor = LogisticRegression(featuresCol=&#39;indexed_features&#39;, labelCol=&#39;label&#39;, family=&#39;binomial&#39;)
+blor = LogisticRegression(featuresCol=&#39;indexed_features&#39;, labelCol=&#39;label&#39;, family=&#39;binomial&#39;)</code></pre>
+<p><strong>Step 2: fit model</strong></p>
+<pre class="python"><code># fit model with training data
 model = blor.fit(training)</code></pre>
-</div>
-<div id="model-statistics" class="section level2">
-<h2>Model Statistics</h2>
-<pre class="python"><code>model.summary.predictions.show(n=10)</code></pre>
-<ul>
-<li>prediction</li>
-</ul>
-<pre class="python"><code>+-------------------+-----+-------------------+--------------------+--------------------+----------+
+<p><strong>Step 3: prediction with <code>transform</code> function</strong></p>
+<pre class="python"><code>training_pred = model.transform(training)
+test_pred = model.transform(test)
+training_pred.show(5)
+test_pred.show(5)
+
++-------------------+-----+-------------------+--------------------+--------------------+----------+
 |           features|label|   indexed_features|       rawPrediction|         probability|prediction|
 +-------------------+-----+-------------------+--------------------+--------------------+----------+
-| [1.0,1.0,26.0,2.3]|  1.0| [0.0,0.0,26.0,2.3]|[-1.5151489612951...|[0.18017697059573...|       1.0|
-| [1.0,1.0,27.4,2.7]|  1.0| [0.0,0.0,27.4,2.7]|[-2.2888807838235...|[0.09204804595158...|       1.0|
-| [1.0,1.0,27.7,2.5]|  1.0| [0.0,0.0,27.7,2.5]|[-2.1351081685803...|[0.10573103058138...|       1.0|
-|[1.0,1.0,28.0,2.62]|  0.0|[0.0,0.0,28.0,2.62]|[-2.3392565198163...|[0.08792351845230...|       1.0|
-| [1.0,1.0,29.3,3.2]|  1.0| [0.0,0.0,29.3,3.2]|[-3.2910095563872...|[0.03588090545959...|       1.0|
-|[1.0,2.0,24.5,1.95]|  1.0|[0.0,1.0,24.5,1.95]|[-0.6836177605015...|[0.33545433483694...|       1.0|
-| [1.0,3.0,25.8,2.6]|  0.0| [0.0,2.0,25.8,2.6]|[-1.6232508088143...|[0.16475703172839...|       1.0|
-| [2.0,1.0,22.5,1.6]|  1.0| [1.0,0.0,22.5,1.6]|[0.71763847632131...|[0.67208678163936...|       0.0|
-| [2.0,1.0,22.9,1.6]|  0.0| [1.0,0.0,22.9,1.6]|[0.62440115791289...|[0.65121886027244...|       0.0|
-| [2.0,1.0,23.1,2.0]|  0.0| [1.0,0.0,23.1,2.0]|[0.13038129060970...|[0.53254922625747...|       0.0|
-+-------------------+-----+-------------------+--------------------+--------------------+----------+</code></pre>
-<ul>
-<li>intercept</li>
-</ul>
-<pre class="python"><code>model.intercept</code></pre>
-<pre class="python"><code>-7.1178336818210335</code></pre>
-<ul>
-<li>coefficients</li>
-</ul>
-<pre class="python"><code>model.coefficients</code></pre>
-<pre class="python"><code>DenseVector([-0.634, -0.0904, 0.2331, 1.1185])</code></pre>
-<ul>
-<li>Area under ROC</li>
-</ul>
-<pre class="python"><code>model.evaluate(training).areaUnderROC</code></pre>
-<pre class="python"><code>0.8060398505603983</code></pre>
-</div>
-<div id="apply-model-to-test-set" class="section level2">
-<h2>Apply model to test set</h2>
-<pre class="python"><code>fitted_test = model.transform(test)
-fitted_test.show(n=10)</code></pre>
-<pre class="python"><code>+-------------------+-----+-------------------+--------------------+--------------------+----------+
+| [1.0,1.0,26.0,2.3]|    1| [0.0,0.0,26.0,2.3]|[-1.5151489612951...|[0.18017697059573...|       1.0|
+| [1.0,1.0,27.4,2.7]|    1| [0.0,0.0,27.4,2.7]|[-2.2888807838235...|[0.09204804595158...|       1.0|
+| [1.0,1.0,27.7,2.5]|    1| [0.0,0.0,27.7,2.5]|[-2.1351081685803...|[0.10573103058138...|       1.0|
+|[1.0,1.0,28.0,2.62]|    0|[0.0,0.0,28.0,2.62]|[-2.3392565198163...|[0.08792351845230...|       1.0|
+| [1.0,1.0,29.3,3.2]|    1| [0.0,0.0,29.3,3.2]|[-3.2910095563872...|[0.03588090545959...|       1.0|
++-------------------+-----+-------------------+--------------------+--------------------+----------+
+only showing top 5 rows
+
++-------------------+-----+-------------------+--------------------+--------------------+----------+
 |           features|label|   indexed_features|       rawPrediction|         probability|prediction|
 +-------------------+-----+-------------------+--------------------+--------------------+----------+
 | [1.0,1.0,26.1,2.8]|    1| [0.0,0.0,26.1,2.8]|[-2.0977098010209...|[0.10931961576789...|       1.0|
@@ -477,19 +473,69 @@ fitted_test.show(n=10)</code></pre>
 |[1.0,1.0,27.1,2.95]|    1|[0.0,0.0,27.1,2.95]|[-2.4985785500791...|[0.07595788904099...|       1.0|
 |[1.0,1.0,30.2,3.28]|    1|[0.0,0.0,30.2,3.28]|[-3.5902737644259...|[0.02684996465542...|       1.0|
 | [1.0,2.0,25.0,2.3]|    1| [0.0,1.0,25.0,2.3]|[-1.1916404655987...|[0.23296566819752...|       1.0|
-|[2.0,1.0,23.7,1.95]|    0|[1.0,0.0,23.7,1.95]|[0.04645046400945...|[0.51161052846028...|       0.0|
-| [2.0,1.0,24.3,2.0]|    0| [1.0,0.0,24.3,2.0]|[-0.1493306646155...|[0.46273655493059...|       1.0|
-| [2.0,1.0,24.9,2.3]|    1| [1.0,0.0,24.9,2.3]|[-0.6247375483023...|[0.34870473830470...|       1.0|
-|[2.0,1.0,26.8,2.55]|    0|[1.0,0.0,26.8,2.55]|[-1.3472405658042...|[0.20632187168645...|       1.0|
-| [2.0,1.0,28.0,2.9]|    1| [1.0,0.0,28.0,2.9]|[-2.0184285781160...|[0.11728157703955...|       1.0|
-+-------------------+-----+-------------------+--------------------+--------------------+----------+</code></pre>
-<ul>
-<li>Model evaluation on test set</li>
-</ul>
++-------------------+-----+-------------------+--------------------+--------------------+----------+
+only showing top 5 rows</code></pre>
+<p><strong>Step 4: evaluation</strong></p>
 <pre class="python"><code>from pyspark.ml.evaluation import BinaryClassificationEvaluator
-evaluator = BinaryClassificationEvaluator(rawPredictionCol=&#39;rawPrediction&#39;)
-evaluator.evaluate(fitted_test)</code></pre>
-<pre class="python"><code>0.6637426900584795</code></pre>
+evaluator = BinaryClassificationEvaluator(rawPredictionCol=&quot;rawPrediction&quot;)
+
+# performance on training data
+evaluator.evaluate(training_pred)
+0.8060398505603983
+
+# performance on test data
+evaluator.evaluate(test_pred)
+0.6637426900584795</code></pre>
+</div>
+</div>
+<div id="machine-learning-with-cross-validation" class="section level2">
+<h2>Machine learning with cross-validation</h2>
+<div id="below-are-the-steps-1" class="section level3">
+<h3>Below are the steps:</h3>
+<ol style="list-style-type: decimal">
+<li><strong>Cross-validator model (CrossValidator)</strong>
+<ul>
+<li>Use the <code>pyspark.ml.tuning.CrossValidator</code> to build a cross-validator model instance. This step needs three components:
+<ul>
+<li><em>an estimator (model)</em></li>
+<li><em>an estimator parameter grid</em>: created with the <code>pyspark.ml.tuming.ParamGridBuilder</code></li>
+<li><em>an evaluator</em></li>
+</ul></li>
+</ul></li>
+<li><strong>Learning the model (fit)</strong></li>
+<li><strong>Evaluation</strong>
+<ul>
+<li>Calculate <em>training error</em> and <em>test error</em> with the best model from the cross-validation step.</li>
+</ul></li>
+<li><strong>Module in production use</strong></li>
+</ol>
+</div>
+<div id="example-1" class="section level3">
+<h3>Example</h3>
+<p><strong>Step 1: build cross-validation model</strong></p>
+<pre class="python"><code># estimator
+from pyspark.ml.classification import LogisticRegression
+blor = LogisticRegression(featuresCol=&#39;indexed_features&#39;, labelCol=&#39;label&#39;, family=&#39;binomial&#39;)
+
+# parameter grid
+from pyspark.ml.tuning import ParamGridBuilder
+param_grid = ParamGridBuilder().\
+    addGrid(blor.regParam, [0, 0.5, 1, 2]).\
+    addGrid(blor.elasticNetParam, [0, 0.5, 1]).\
+    build()
+    
+# estimator
+from pyspark.ml.evaluation import BinaryClassificationEvaluator
+evaluator = BinaryClassificationEvaluator()
+
+# build cross-validation model with k = 4
+from pyspark.ml.tuning import CrossValidator
+cv = CrossValidator(estimator=blor, estimatorParamMaps=param_grid, evaluator=evaluator, numFolds=4)</code></pre>
+<p><strong>Step 2: fit model</strong></p>
+<pre class="python"><code># fit model with training data
+cv_model = cv.fit(training)</code></pre>
+</div>
+</div>
 </div>
 
 <center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>

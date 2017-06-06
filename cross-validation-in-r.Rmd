@@ -1,0 +1,45 @@
+---
+title: "Cross-validation in R"
+author: "Ming Chen"
+date: "6/5/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(boot)
+```
+
+
+## Prepare data
+
+```{r}
+horseshoe_crab = read.csv("data/horseshoe_crab.csv")
+horseshoe_crab$C = as.factor(horseshoe_crab$C)
+horseshoe_crab$S = as.factor(horseshoe_crab$S)
+y = numeric()
+y[horseshoe_crab$Sa != 0] = 1
+y[horseshoe_crab$Sa == 0] = 0
+horseshoe_crab$y = y
+```
+
+## Split data into training and test datasets
+
+```{r}
+training_index = sort(sample(nrow(horseshoe_crab), nrow(horseshoe_crab)*0.8))
+training = horseshoe_crab[training_index, ]
+test = horseshoe_crab[-training_index, ]
+```
+
+
+## Build cross validation model
+
+```{r}
+glm_logit = glm(formula = y ~ C + S + W + Wt, data = training,
+                family = 'binomial')
+glm_logit = glm(formula = y ~ C + S + W + Wt, data = horseshoe_crab,
+                family = 'binomial')
+# 4 fold cross validation
+cv_glm_5 = cv.glm(data = training, glmfit = glm_logit, K = 4)
+```
+

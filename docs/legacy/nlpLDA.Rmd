@@ -1,0 +1,530 @@
+---
+title: "Latent Dirichlet Allocation"
+author: "Wenqiang Feng"
+date: "3/2/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+### Remark: 
+
+- You can download the complete [ipython notebook](./ipynb/Natural Language Processing nb.ipynb) for this tutorial session.
+- The [YouTube video](https://www.youtube.com/watch?v=AsW0QzbYVow) should be useful for understanding this seesion. 
+- The online textbook [Natural Language Processing with Python](http://www.nltk.org/book/) is also useful.
+
+
+## Preprocessing 
+
+I always believe that better data often beats better algorithm.
+
+- library required by the preprocessing
+```{python eval = FALSE}
+from nltk.stem.wordnet import WordNetLemmatizer
+from nltk.corpus import stopwords
+from nltk import pos_tag
+import string
+import re
+import langid
+```
+
+- Convert to float format
+
+```{python eval = FALSE}
+def string_to_float(x):
+    return float(x)
+```  
+
+-  check to see if a row only contains whitespace
+
+```{python eval = FALSE}
+def check_blanks(data_str):
+    is_blank = str(data_str.isspace())
+    return is_blank
+```
+- Determine whether the language of the text content is english or not: Use langid module to classify the language to make sure we are applying the correct cleanup actions for English [langid](https://github.com/saffsd/langid.py)
+
+```{python eval = FALSE}
+def check_lang(data_str):
+    predict_lang = langid.classify(data_str)
+    if predict_lang[1] >= .9:
+        language = predict_lang[0]
+    else:
+        language = 'NA'
+    return language
+```
+
+- Remove features 
+```{python eval = FALSE}
+def remove_features(data_str):
+    # compile regex
+    url_re = re.compile('https?://(www.)?\w+\.\w+(/\w+)*/?')
+    punc_re = re.compile('[%s]' % re.escape(string.punctuation))
+    num_re = re.compile('(\\d+)')
+    mention_re = re.compile('@(\w+)')
+    alpha_num_re = re.compile("^[a-z0-9_.]+$")
+    # convert to lowercase
+    data_str = data_str.lower()
+    # remove hyperlinks
+    data_str = url_re.sub(' ', data_str)
+    # remove @mentions
+    data_str = mention_re.sub(' ', data_str)
+    # remove puncuation
+    data_str = punc_re.sub(' ', data_str)
+    # remove numeric 'words'
+    data_str = num_re.sub(' ', data_str)
+    # remove non a-z 0-9 characters and words shorter than 3 characters
+    list_pos = 0
+    cleaned_str = ''
+    for word in data_str.split():
+        if list_pos == 0:
+            if alpha_num_re.match(word) and len(word) > 2:
+                cleaned_str = word
+            else:
+                cleaned_str = ' '
+        else:
+            if alpha_num_re.match(word) and len(word) > 2:
+                cleaned_str = cleaned_str + ' ' + word
+            else:
+                cleaned_str += ' '
+        list_pos += 1
+    return cleaned_str
+```    
+
+- removes stop words 
+```{python eval = FALSE}
+def remove_stops(data_str):
+    # expects a string
+    stops = set(stopwords.words("english"))
+    list_pos = 0
+    cleaned_str = ''
+    text = data_str.split()
+    for word in text:
+        if word not in stops:
+            # rebuild cleaned_str
+            if list_pos == 0:
+                cleaned_str = word
+            else:
+                cleaned_str = cleaned_str + ' ' + word
+            list_pos += 1
+    return cleaned_str
+```
+
+
+- tagging text
+```{python eval = FALSE}
+def tag_and_remove(data_str):
+    cleaned_str = ' '
+    # noun tags
+    nn_tags = ['NN', 'NNP', 'NNP', 'NNPS', 'NNS']
+    # adjectives
+    jj_tags = ['JJ', 'JJR', 'JJS']
+    # verbs
+    vb_tags = ['VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ']
+    nltk_tags = nn_tags + jj_tags + vb_tags
+
+    # break string into 'words'
+    text = data_str.split()
+
+    # tag the text and keep only those with the right tags
+    tagged_text = pos_tag(text)
+    for tagged_word in tagged_text:
+        if tagged_word[1] in nltk_tags:
+            cleaned_str += tagged_word[0] + ' '
+
+    return cleaned_str
+```
+
+- lemmatization
+```{python eval = FALSE}
+def lemmatize(data_str):
+    # expects a string
+    list_pos = 0
+    cleaned_str = ''
+    lmtzr = WordNetLemmatizer()
+    text = data_str.split()
+    tagged_words = pos_tag(text)
+    for word in tagged_words:
+        if 'v' in word[1].lower():
+            lemma = lmtzr.lemmatize(word[0], pos='v')
+        else:
+            lemma = lmtzr.lemmatize(word[0], pos='n')
+        if list_pos == 0:
+            cleaned_str = lemma
+        else:
+            cleaned_str = cleaned_str + ' ' + lemma
+        list_pos += 1
+    return cleaned_str
+```
+
+
+## Natural Language Processing with PySpark
+
+### 1. Set up spark context and SparkSession
+
+```{python eval=FALSE}
+import pyspark
+from pyspark.sql import SQLContext
+
+# create spark contexts
+sc = pyspark.SparkContext()
+sqlContext = SQLContext(sc)
+
+from pyspark.sql import SparkSession
+
+spark = SparkSession \
+    .builder \
+    .appName("Python Spark Random Forest Regression") \
+    .config("spark.some.config.option", "some-value") \
+    .getOrCreate()
+```
+
+### 2. define the preprocessing function in PySpark
+```{python eval = FALSE}
+from pyspark.sql.functions import udf
+from pyspark.sql.types import StringType
+import preproc as pp
+
+check_lang_udf = udf(pp.check_lang, StringType())
+remove_stops_udf = udf(pp.remove_stops, StringType())
+remove_features_udf = udf(pp.remove_features, StringType())
+tag_and_remove_udf = udf(pp.tag_and_remove, StringType())
+lemmatize_udf = udf(pp.lemmatize, StringType())
+check_blanks_udf = udf(pp.check_blanks, StringType())
+```
+
+
+### 3. load dataset
+
+```{python eval = FALSE}
+data_rdd = sc.textFile("data/nlpdata/raw_classified.txt")
+parts_rdd = data_rdd.map(lambda l: l.split("\t"))
+# Filter bad rows out
+garantee_col_rdd = parts_rdd.filter(lambda l: len(l) == 3)
+typed_rdd = garantee_col_rdd.map(lambda p: (p[0], p[1], float(p[2])))
+#Create DataFrame
+data_df = sqlContext.createDataFrame(typed_rdd, ["text", "id", "label"])
+#data_df.show()
+```
+
+- shcek the schema
+```{python eval = FALSE}
+data_df.printSchema()
+```
+```{python eval = FALSE}
+# output
+root
+ |-- text: string (nullable = true)
+ |-- id: string (nullable = true)
+ |-- label: double (nullable = true)
+```
+
+- preview the dataset
+```{python eval = FALSE}
+data_df.show(4)
+```
+```{python eval = FALSE}
+# output 
++--------------------+------------------+-----+
+|                text|                id|label|
++--------------------+------------------+-----+
+|Fresh install of ...|        1018769417|  1.0|
+|Well. Now I know ...|       10284216536|  1.0|
+|"Literally six we...|       10298589026|  1.0|
+|Mitsubishi i MiEV...|109017669432377344|  1.0|
++--------------------+------------------+-----+
+only showing top 4 rows
+```
+
+### 4. preprocessing 
+
+- predict language and filter out those with less than 90% chance of being English
+```{python eval = FALSE}
+lang_df = data_df.withColumn("lang", check_lang_udf(data_df["text"]))
+en_df = lang_df.filter(lang_df["lang"] == "en")
+```
+```{python eval = FALSE}
+en_df.printSchema()
+```
+```{python eval = FALSE}
+# ouput 
+root
+ |-- text: string (nullable = true)
+ |-- id: string (nullable = true)
+ |-- label: double (nullable = true)
+ |-- lang: string (nullable = true)
+```
+
+```{python eval = FALSE}
+en_df.show(4)
+```
+```{python eval = FALSE}
++--------------------+------------------+-----+----+
+|                text|                id|label|lang|
++--------------------+------------------+-----+----+
+|RT @goeentertain:...|665305154954989568|  1.0|  en|
+|Teforia Uses Mach...|660668007975268352|  1.0|  en|
+|   Apple TV or Roku?|       25842461136|  1.0|  en|
+|Finished http://t...|        9412369614|  1.0|  en|
++--------------------+------------------+-----+----+
+only showing top 4 rows
+```
+
+- remove stop words
+```{python eval = FALSE}
+rm_stops_df = en_df.withColumn("stop_text", remove_stops_udf(en_df["text"]))
+```
+```{python eval = FALSE}
+rm_stops_df.printSchema()
+```
+
+
+```{python eval = FALSE}
+# output
+root
+ |-- text: string (nullable = true)
+ |-- id: string (nullable = true)
+ |-- label: double (nullable = true)
+ |-- lang: string (nullable = true)
+ |-- stop_text: string (nullable = true)
+```
+```{python eval = FALSE}
+rm_stops_df.show(4)
+```
+
+
+```{python eval = FALSE}
+#output
++--------------------+------------------+-----+----+--------------------+
+|                text|                id|label|lang|           stop_text|
++--------------------+------------------+-----+----+--------------------+
+|RT @goeentertain:...|665305154954989568|  1.0|  en|RT @goeentertain:...|
+|Teforia Uses Mach...|660668007975268352|  1.0|  en|Teforia Uses Mach...|
+|   Apple TV or Roku?|       25842461136|  1.0|  en|      Apple TV Roku?|
+|Finished http://t...|        9412369614|  1.0|  en|Finished http://t...|
++--------------------+------------------+-----+----+--------------------+
+only showing top 4 rows
+```
+
+- remove features 
+```{python eval = FALSE}
+rm_features_df = rm_stops_df.withColumn("feat_text", \
+                                        remove_features_udf(rm_stops_df["stop_text"]))
+```
+
+```{python eval = FALSE}
+rm_features_df.printSchema()
+```
+```{python eval = FALSE}
+# output 
+root
+ |-- text: string (nullable = true)
+ |-- id: string (nullable = true)
+ |-- label: double (nullable = true)
+ |-- lang: string (nullable = true)
+ |-- stop_text: string (nullable = true)
+ |-- feat_text: string (nullable = true)
+
+```
+
+```{python eval = FALSE}
+rm_features_df.show(4)
+```
+
+
+```{python eval = FALSE}
++--------------------+------------------+-----+----+--------------------+--------------------+
+|                text|                id|label|lang|           stop_text|           feat_text|
++--------------------+------------------+-----+----+--------------------+--------------------+
+|RT @goeentertain:...|665305154954989568|  1.0|  en|RT @goeentertain:...|  future blase   ...|
+|Teforia Uses Mach...|660668007975268352|  1.0|  en|Teforia Uses Mach...|teforia uses mach...|
+|   Apple TV or Roku?|       25842461136|  1.0|  en|      Apple TV Roku?|         apple  roku|
+|Finished http://t...|        9412369614|  1.0|  en|Finished http://t...|            finished|
++--------------------+------------------+-----+----+--------------------+--------------------+
+only showing top 4 rows
+
+```
+
+- tag the words remaining and keep only Nouns, Verbs and Adjectives
+```{python eval = FALSE}
+tagged_df = rm_features_df.withColumn("tagged_text", \
+                                      tag_and_remove_udf(rm_features_df.feat_text))
+```
+
+```{python eval = FALSE}
+tagged_df.printSchema()
+```
+
+
+```{python eval = FALSE}
+# ouput 
+root
+ |-- text: string (nullable = true)
+ |-- id: string (nullable = true)
+ |-- label: double (nullable = true)
+ |-- lang: string (nullable = true)
+ |-- stop_text: string (nullable = true)
+ |-- feat_text: string (nullable = true)
+ |-- tagged_text: string (nullable = true)
+```
+
+```{python eval = FALSE}
+tagged_df.show(4)
+```
+```{python eval = FALSE}
+# output 
++--------------------+------------------+-----+----+--------------------+--------------------+--------------------+
+|                text|                id|label|lang|           stop_text|           feat_text|         tagged_text|
++--------------------+------------------+-----+----+--------------------+--------------------+--------------------+
+|RT @goeentertain:...|665305154954989568|  1.0|  en|RT @goeentertain:...|  future blase   ...| future blase vic...|
+|Teforia Uses Mach...|660668007975268352|  1.0|  en|Teforia Uses Mach...|teforia uses mach...| teforia uses mac...|
+|   Apple TV or Roku?|       25842461136|  1.0|  en|      Apple TV Roku?|         apple  roku|         apple roku |
+|Finished http://t...|        9412369614|  1.0|  en|Finished http://t...|            finished|           finished |
++--------------------+------------------+-----+----+--------------------+--------------------+--------------------+
+only showing top 4 rows
+```
+
+
+- lemmatization of remaining words to reduce dimensionality & boost measures
+
+```{python eval = FALSE}
+lemm_df = tagged_df.withColumn("lemm_text", lemmatize_udf(tagged_df["tagged_text"]))
+```
+
+- remove all rows containing only blank spaces
+```{python eval = FALSE}
+check_blanks_df = lemm_df.withColumn("is_blank", check_blanks_udf(lemm_df["lemm_text"]))
+no_blanks_df = check_blanks_df.filter(check_blanks_df["is_blank"] == "False")
+no_blanks_df.printSchema()
+```
+
+
+```{python eval = FALSE}
+# output 
+root
+ |-- text: string (nullable = true)
+ |-- id: string (nullable = true)
+ |-- label: double (nullable = true)
+ |-- lang: string (nullable = true)
+ |-- stop_text: string (nullable = true)
+ |-- feat_text: string (nullable = true)
+ |-- tagged_text: string (nullable = true)
+ |-- lemm_text: string (nullable = true)
+ |-- is_blank: string (nullable = true)
+```
+
+
+```{python eval = FALSE}
+no_blanks_df = no_blanks_df.withColumn("text",no_blanks_df.lemm_text)
+```
+
+-  remove duplicate records
+```{python eval = FALSE}
+dedup_df = no_blanks_df.dropDuplicates(['text', 'label'])
+```
+
+- extract the useful columns
+```{python eval = FALSE}
+data_set = dedup_df.select('id', 'text','label')
+```
+
+- preview the clean data
+```{python eval = FALSE}
+data_set.show(4)
+```
+```{python eval = FALSE}
+# output 
++------------------+--------------------+-----+
+|                id|                text|label|
++------------------+--------------------+-----+
+|        1546813742|              dragon|  1.0|
+|        1558492525|           hurt much|  1.0|
+|383221484023709697|seth blog word se...|  1.0|
+|660668007975268352|teforia use machi...|  1.0|
++------------------+--------------------+-----+
+only showing top 4 rows
+```
+
+
+### 5. splitting data to train and test datasets
+```{python eval = FALSE}
+# Split the data into training and test sets (40% held out for testing)
+(trainingData, testData) = data_set.randomSplit([0.6, 0.4], seed=1234)
+```
+
+
+### 6. Machine learning 
+
+- load required library
+```{python eval = FALSE}
+from pyspark.ml.feature import HashingTF, IDF, Tokenizer
+from pyspark.ml import Pipeline
+from pyspark.ml.classification import NaiveBayes, RandomForestClassifier 
+from pyspark.ml.classification import DecisionTreeClassifier
+from pyspark.ml.evaluation import MulticlassClassificationEvaluator
+from pyspark.ml.tuning import ParamGridBuilder
+from pyspark.ml.tuning import CrossValidator
+from pyspark.ml.feature import IndexToString, StringIndexer, VectorIndexer
+```
+
+-  Configure an ML pipeline, which consists of tree stages: tokenizer, hashingTF, and rf (Random Forest).
+```{python eval = FALSE}
+# Configure an ML pipeline, which consists of tree stages: tokenizer, hashingTF, and nb.
+tokenizer = Tokenizer(inputCol="text", outputCol="words")
+hashingTF = HashingTF(inputCol=tokenizer.getOutputCol(), outputCol="features")
+idf = IDF(minDocFreq=3, inputCol="features", outputCol="idf")
+```
+
+- Random Forest
+```{python eval = FALSE}
+rf = RandomForestClassifier(numTrees=100,maxDepth=10)
+```
+
+- pipline 
+```{python eval = FALSE}
+pipeline = Pipeline(stages=[tokenizer, hashingTF, idf, rf])
+```
+
+- Train model.  This also runs the indexers.
+```{python eval = FALSE}
+# Train model.  This also runs the indexers.
+model = pipeline.fit(trainingData)
+```
+
+- Make predictions.
+
+```{python eval = FALSE}
+predictions = model.transform(testData)
+```
+
+- preview the prediction
+```{python eval = FALSE}
+predictions.select("text", "label", "prediction").show(5)
+```
+
+```{python eval = FALSE}
+# ouput 
++--------------------+-----+----------+
+|                text|label|prediction|
++--------------------+-----+----------+
+|teforia use machi...|  1.0|       1.0|
+|future blase vice...|  1.0|       1.0|
+|meet rolo dogsoft...|  1.0|       1.0|
+|meet jet dogsofth...|  1.0|       1.0|
+|                 hot|  1.0|       1.0|
++--------------------+-----+----------+
+only showing top 5 rows
+```
+
+- evaluate the model
+```{python eval = FALSE}
+from pyspark.ml.evaluation import MulticlassClassificationEvaluator
+evaluator = MulticlassClassificationEvaluator(predictionCol="prediction")
+evaluator.evaluate(predictions)
+```
+
+```{python eval = FALSE}
+# output
+0.8272058823529411
+```

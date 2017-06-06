@@ -1,0 +1,34 @@
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval=FALSE)
+```
+
+
+# Entry points to spark cluster
+
+There are two main entry points to spark cluster:
+
+* **SparkContext**: create **RDD** and broadcast variables on the cluster.
+* **SparkSession**: create **DataFrame** (pyspark.sql.dataframe.DataFrame).
+
+# Create entry point instances
+
+* Create a **SparkContext** instance:
+
+```{python eval=FALSE}
+from pyspark import SparkContext
+sc = SparkContext(master = 'local')
+```
+
+* Create a **SparkSession** instance
+
+```{python eval=FALSE}
+from pyspark.sql import SparkSession
+spark = SparkSession.builder \
+          .builder \
+          .appName("Python Spark SQL basic example") \
+          .config("spark.some.config.option", "some-value") \
+          .getOrCreate()
+
+```

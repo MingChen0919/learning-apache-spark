@@ -1,0 +1,141 @@
+---
+title: "Random Forest Regression"
+author: "Wenqiang Feng & Ming Chen"
+date: "February 19, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+### Remark: 
+
+- You can download the complete [ipython notebook](./ipynb/RandomForest.ipynb) for this tutorial session.
+
+### 1. Set up spark context and SparkSession
+
+```{python eval=FALSE}
+from pyspark.sql import SparkSession
+
+spark = SparkSession \
+    .builder \
+    .appName("Python Spark Random Forest Regression") \
+    .config("spark.some.config.option", "some-value") \
+    .getOrCreate()
+```
+
+### 2. Load dataset
+```{python eval=FALSE}
+df = spark.read.format('com.databricks.spark.csv').\
+                               options(header='true', \
+                               inferschema='true').load("./data/WineData.csv",header=True);
+```
+
+```{python eval=FALSE}
+df.printSchema()
+```
+```{python eval=FALSE}
+#output
+root
+ |-- fixed acidity: double (nullable = true)
+ |-- volatile acidity: double (nullable = true)
+ |-- citric acid: double (nullable = true)
+ |-- residual sugar: double (nullable = true)
+ |-- chlorides: double (nullable = true)
+ |-- free sulfur dioxide: double (nullable = true)
+ |-- total sulfur dioxide: double (nullable = true)
+ |-- density: double (nullable = true)
+ |-- pH: double (nullable = true)
+ |-- sulphates: double (nullable = true)
+ |-- alcohol: double (nullable = true)
+ |-- quality: integer (nullable = true)
+```
+
+
+### 3. Convert the data to dense vector
+```{python eval=FALSE}
+from pyspark.sql import Row
+from pyspark.ml.linalg import Vectors
+```
+```{python eval=FALSE}
+def transData(data):
+    return data.rdd.map(lambda r: [Vectors.dense(r[:-1]),r[-1]]).toDF(['features','label'])
+```
+
+```{python eval=FALSE}
+transformed= transData(df)
+transformed.show(6)
+```
+
+```{python eval=FALSE}
+#output
++--------------------+-----+
+|            features|label|
++--------------------+-----+
+|[7.4,0.7,0.0,1.9,...|    5|
+|[7.8,0.88,0.0,2.6...|    5|
+|[7.8,0.76,0.04,2....|    5|
+|[11.2,0.28,0.56,1...|    6|
+|[7.4,0.7,0.0,1.9,...|    5|
+|[7.4,0.66,0.0,1.8...|    5|
++--------------------+-----+
+only showing top 6 rows
+```
+
+```{python eval=FALSE}
+from pyspark.ml import Pipeline
+from pyspark.ml.regression import RandomForestRegressor
+from pyspark.ml.feature import VectorIndexer
+from pyspark.ml.evaluation import RegressionEvaluator
+```
+### 4. Split the data into training and test sets (30% held out for testing)
+```{python eval=FALSE}
+# Split the data into training and test sets (30% held out for testing)
+(trainingData, testData) = transformed.randomSplit([0.7, 0.3])
+```
+### 5. Train a RandomForest model.
+
+```{python eval=FALSE}
+# Train a RandomForest model.
+rf = RandomForestRegressor()
+model = rf.fit(trainingData)
+```
+### 6. Make predictions.
+
+```{python eval=FALSE}
+# Make predictions.
+predictions = model.transform(testData)
+```
+### 6. Show esults 
+```{python eval=FALSE}
+# Select example rows to display.
+predictions.select("prediction", "label", "features").show(5)
+```
+
+```{python eval=FALSE}
+#output
++------------------+-----+--------------------+
+|        prediction|label|            features|
++------------------+-----+--------------------+
+| 6.489667556875804|    7|[4.9,0.42,0.0,2.1...|
+| 6.267301910170284|    7|[5.1,0.42,0.0,1.8...|
+|6.0526786505470245|    7|[5.1,0.585,0.0,1....|
+| 5.257985010985523|    5|[5.2,0.32,0.25,1....|
+| 5.943264423589821|    7|[5.2,0.48,0.04,1....|
++------------------+-----+--------------------+
+```
+
+### 7. Model Evaluation
+```{python eval=FALSE}
+# Select (prediction, true label) and compute test error
+evaluator = RegressionEvaluator(
+    labelCol="label", predictionCol="prediction", metricName="rmse")
+rmse = evaluator.evaluate(predictions)
+print("Root Mean Squared Error (RMSE) on test data = %g" % rmse)
+```
+
+```{python eval=FALSE}
+Root Mean Squared Error (RMSE) on test data = 0.659148
+```
+
+

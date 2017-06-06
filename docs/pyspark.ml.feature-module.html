@@ -209,41 +209,28 @@ $(document).ready(function () {
     <li>
       <a href="spark-on-jetstream-cloud.html">Spark on jetstream cloud</a>
     </li>
-    <li class="divider"></li>
-    <li class="dropdown-header">Data Preprocessing Template</li>
-    <li>
-      <a href="data-preprocessing-template.html">Data Preprocessing Template</a>
-    </li>
   </ul>
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
     <span class="fa fa-gear"></span>
      
-    Data Wrangling
+    Data Preparation
      
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="data-manipulation.html">Basic DataFrame Manipulation</a>
+      <a href="01_entry_points_to_spark.html">Entry points to spark</a>
     </li>
     <li>
-      <a href="pyspark-vectors.html">Pyspark Vectors</a>
+      <a href="02_rdd_object.html">RDD object</a>
     </li>
     <li>
-      <a href="featuresCol-and-labelCol.html">featuresCol &amp; labelCol</a>
+      <a href="03_dataframe_object.html">DataFrame object</a>
     </li>
     <li>
-      <a href="StringIndexer-and-VectorIndexer.html">StringIndexer &amp; VectorIndexer</a>
-    </li>
-    <li class="divider"></li>
-    <li class="dropdown-header">pyspark.RDD object</li>
-    <li>
-      <a href="aggregate-function.html">Aggregate Functions</a>
-    </li>
-    <li>
-      <a href="reduce-functions.html">Reduce Functions</a>
+      <a href="categorical-data.html">Categorial data</a>
     </li>
     <li>
       <a href="HashingTF-and-CountVectorizer.html">HashingTF and CountVectorizer</a>
@@ -262,15 +249,11 @@ $(document).ready(function () {
     <li class="divider"></li>
     <li class="dropdown-header">Regression</li>
     <li>
-      <a href="linearRegression.html">Linear Regression</a>
+      <a href="linear-regression.html">Linear regression</a>
     </li>
     <li>
-      <a href="dttreeR.html">Decision tree Regression</a>
+      <a href="generalized-linear-regression.html">Generalized linear regression</a>
     </li>
-    <li>
-      <a href="randomforest.html">Random Forest Regression</a>
-    </li>
-    <li class="divider"></li>
     <li class="dropdown-header">Classification</li>
     <li>
       <a href="kmeans.html">Kmeans Classification</a>
@@ -403,7 +386,7 @@ $(document).ready(function () {
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>

@@ -1,0 +1,84 @@
+---
+title: "DataFrame object"
+author: "Ming Chen"
+date: "6/4/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+
+# Content
+
+* [Create a DataFrame object](#create-a-dataframe-object)
+* [Column instance](#column-instance)
+* [DataFrame column methods](#dataframe-column-methods)
+
+## Create a DataFrame object
+
+```{python}
+mtcars = spark.read.csv(path='data/mtcars.csv',
+                        sep=',',
+                        encoding='UTF-8',
+                        comment=None,
+                        header=True, 
+                        inferSchema=True)
+```
+
+```{python}
+mtcars.show(n=5, truncate=False)
+```
+
+```{python}
++-----------------+----+---+-----+---+----+-----+-----+---+---+----+----+
+|model            |mpg |cyl|disp |hp |drat|wt   |qsec |vs |am |gear|carb|
++-----------------+----+---+-----+---+----+-----+-----+---+---+----+----+
+|Mazda RX4        |21.0|6  |160.0|110|3.9 |2.62 |16.46|0  |1  |4   |4   |
+|Mazda RX4 Wag    |21.0|6  |160.0|110|3.9 |2.875|17.02|0  |1  |4   |4   |
+|Datsun 710       |22.8|4  |108.0|93 |3.85|2.32 |18.61|1  |1  |4   |1   |
+|Hornet 4 Drive   |21.4|6  |258.0|110|3.08|3.215|19.44|1  |0  |3   |1   |
+|Hornet Sportabout|18.7|8  |360.0|175|3.15|3.44 |17.02|0  |0  |3   |2   |
++-----------------+----+---+-----+---+----+-----+-----+---+---+----+----+
+only showing top 5 rows
+```
+
+
+## Column instance
+
+Column instances can be created in two ways:
+
+1. directly select a column out of a *DataFrame*: `df.colName`
+2. create from a column expression: `df.colName + 1`
+
+Technically, there is only one way to create a column instance. Column expressions start from a column instance.
+
+**Remember how to create column instances, because this is usually the starting point if we want to operate DataFrame columns.**
+
+The column classes come with some methods that can operate on a column instance. ***However, almost all functions from the `pyspark.sql.functions` module take one or more column instances as argument(s)***. These functions are important for data manipulation tools.
+
+## DataFrame column methods
+
+### Methods that take column names as arguments:
+
+* `corr(col1, col2)`: two column names.
+* `cov(col1, col2)`: two column names.
+* `crosstab(col1, col2)`: two column names.
+* `describe(*cols)`: ***`*cols` refers to only column names (strings).***
+
+### Methods that take column names or column expressions or **both** as arguments:
+
+* `cube(*cols)`: column names (string) or column expressions or **both**.
+* `drop(*cols)`: ***a list of column names OR a single column expression.***
+* `groupBy(*cols)`: column name (string) or column expression or **both**.
+* `rollup(*cols)`: column name (string) or column expression or **both**.
+* `select(*cols)`: column name (string) or column expression or **both**.
+* `sort(*cols, **kwargs)`: column name (string) or column expression or **both**.
+* `sortWithinPartitions(*cols, **kwargs)`: column name (string) or column expression or **both**.
+* `orderBy(*cols, **kwargs)`: column name (string) or column expression or **both**.
+* `sampleBy(col, fractions, sed=None)`: a column name.
+* `toDF(*cols)`: **a list of column names (string).**
+* `withColumn(colName, col)`: `colName` refers to column name; `col` refers to a column expression.
+* `withColumnRenamed(existing, new)`: takes column names as arguments.
+* `filter(condition)`: ***condition** refers to a column expression that returns `types.BooleanType` of values. 

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Ming Chen" />
+
+
+<title>Categorical Data</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-inverse  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Learning Apache Spark</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">
+    <span class="fa fa-home"></span>
+     
+    Home
+  </a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    Getting Start
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="divider"></li>
+    <li class="dropdown-header">Installations</li>
+    <li>
+      <a href="install.html">Installations</a>
+    </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">Integrate Spark</li>
+    <li>
+      <a href="pyspark-on-rodeo.html">Integrate spark with Rodeo</a>
+    </li>
+    <li>
+      <a href="pyspark-on-jupyter.html">Integrate spark with Jupyter</a>
+    </li>
+    <li>
+      <a href="spark-on-jetstream-cloud.html">Spark on jetstream cloud</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    Data Preparation
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="01_entry_points_to_spark.html">Entry points to spark</a>
+    </li>
+    <li>
+      <a href="02_rdd_object.html">RDD object</a>
+    </li>
+    <li>
+      <a href="03_dataframe_object.html">DataFrame object</a>
+    </li>
+    <li>
+      <a href="categorical-data.html">Categorial data</a>
+    </li>
+    <li>
+      <a href="HashingTF-and-CountVectorizer.html">HashingTF and CountVectorizer</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    Machine Learning
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="divider"></li>
+    <li class="dropdown-header">Regression</li>
+    <li>
+      <a href="linear-regression.html">Linear regression</a>
+    </li>
+    <li>
+      <a href="generalized-linear-regression.html">Generalized linear regression</a>
+    </li>
+    <li class="dropdown-header">Classification</li>
+    <li>
+      <a href="kmeans.html">Kmeans Classification</a>
+    </li>
+    <li>
+      <a href="dttreeC.html">Decision tree Classification</a>
+    </li>
+    <li>
+      <a href="randomforestC.html">Random Forest Classification</a>
+    </li>
+    <li>
+      <a href="logistic-regression.html">Logistic Regression</a>
+    </li>
+    <li>
+      <a href="svm.html">Support Vector Machine</a>
+    </li>
+    <li>
+      <a href="naive-baye.html">Naive Bayes</a>
+    </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">Neural Network</li>
+    <li>
+      <a href="fnn.html">Feedforward Neural Network</a>
+    </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">Natural Language Processing</li>
+    <li>
+      <a href="nlpC.html">Text Classification</a>
+    </li>
+    <li>
+      <a href="nlpLDA.html">Topic Model LDA</a>
+    </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">Social Network Analysis</li>
+    <li>
+      <a href="sna.html">Social Network Analysis</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    Module Tuning and Evaluation
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="divider"></li>
+    <li class="dropdown-header">Module Tuning</li>
+    <li>
+      <a href="regularization.html">Regularization</a>
+    </li>
+    <li>
+      <a href="k-folds-cross-validation.html">K-folds Cross Validation</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/MingChen0919/learning-apache-spark">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="https://twitter.com/mingchen0919">
+    <span class="fa fa-twitter"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Categorical Data</h1>
+<h4 class="author"><em>Ming Chen</em></h4>
+<h4 class="date"><em>6/6/2017</em></h4>
+
+</div>
+
+
+<div id="content" class="section level1">
+<h1>Content</h1>
+<ul>
+<li><a href="#create-some-data">Create some data</a></li>
+<li><a href="#stringindexer">StringIndexer</a></li>
+<li><a href="#onehotencoder">OneHotEncoder</a></li>
+<li><a href="#process-all-categorical-columns-with-pipeline">Process all categorical columns with Pipeline</a></li>
+<li><a href="#vectorassembler">VectorAssembler</a></li>
+</ul>
+<div id="create-some-data" class="section level2">
+<h2>Create some data</h2>
+<p>x1 and x2 are categorical columns in strings. x3 is a categorical column in integers. x4 is a numerical column. y1 is a categorical column in integer. y2 is a column in string. This data frame will be used to demonstrate how to use <code>StingIndexer</code>, <code>OneHotEncoder</code>, <code>VectorAssember</code> and so on.</p>
+<pre class="python"><code>import pandas as pd
+pdf = pd.DataFrame({
+        &#39;x1&#39;: [&#39;a&#39;,&#39;a&#39;,&#39;b&#39;,&#39;b&#39;, &#39;b&#39;, &#39;c&#39;],
+        &#39;x2&#39;: [&#39;apple&#39;, &#39;orange&#39;, &#39;orange&#39;,&#39;orange&#39;, &#39;peach&#39;, &#39;peach&#39;],
+        &#39;x3&#39;: [1, 1, 2, 2, 2, 4],
+        &#39;x4&#39;: [2.4, 2.5, 3.5, 1.4, 2.1,1.5],
+        &#39;y1&#39;: [1, 0, 1, 0, 0, 1],
+        &#39;y2&#39;: [&#39;yes&#39;, &#39;no&#39;, &#39;no&#39;, &#39;yes&#39;, &#39;yes&#39;, &#39;yes&#39;]
+    })
+df = spark.createDataFrame(pdf)
+df.show()
+
++---+------+---+---+---+---+
+| x1|    x2| x3| x4| y1| y2|
++---+------+---+---+---+---+
+|  a| apple|  1|2.4|  1|yes|
+|  a|orange|  1|2.5|  0| no|
+|  b|orange|  2|3.5|  1| no|
+|  b|orange|  2|1.4|  0|yes|
+|  b| peach|  2|2.1|  0|yes|
+|  c| peach|  4|1.5|  1|yes|
++---+------+---+---+---+---+</code></pre>
+</div>
+<div id="stringindexer" class="section level2">
+<h2>StringIndexer</h2>
+<p><code>StringIndexer</code> maps a string column to a index column that will be treated as a categorical column by spark. The indices start with 0 and are ordered by label frequencies. <strong>If it is a numerical column, the column will first be casted to a string column and then indexed by <code>StringIndexer</code>.</strong></p>
+<p>There are three steps to implement the <code>StringIndexer</code></p>
+<ol style="list-style-type: decimal">
+<li>Build the StringIndexer model: specify the input column and output column names.</li>
+<li>Learn the StringIndexer model: <code>fit</code> the model with your data.</li>
+<li>Execute the indexing: call the <code>transform</code> function to execute the indexing process.</li>
+</ol>
+<pre class="python"><code>from pyspark.ml.feature import StringIndexer
+
+# build indexer
+string_indexer = StringIndexer(inputCol=&#39;x1&#39;, outputCol=&#39;indexed_x1&#39;)
+
+# learn the model
+string_indexer_model = string_indexer.fit(df)
+
+# transform the data
+df_stringindexer = string_indexer_model.transform(df)
+
+# resulting df
+df_stringindexer.show()
+
++---+------+---+---+---+---+----------+
+| x1|    x2| x3| x4| y1| y2|indexed_x1|
++---+------+---+---+---+---+----------+
+|  a| apple|  1|2.4|  1|yes|       1.0|
+|  a|orange|  1|2.5|  0| no|       1.0|
+|  b|orange|  2|3.5|  1| no|       0.0|
+|  b|orange|  2|1.4|  0|yes|       0.0|
+|  b| peach|  2|2.1|  0|yes|       0.0|
+|  c| peach|  4|1.5|  1|yes|       2.0|
++---+------+---+---+---+---+----------+</code></pre>
+<p>From the result above, we can see that (a, b, c) in column x1 are converted to (1.0, 0.0, 2.0). They are ordered by their frequencies in column x1.</p>
+</div>
+<div id="onehotencoder" class="section level2">
+<h2>OneHotEncoder</h2>
+<p>In R, categorical variables are automatically <strong>dummy-coded</strong> in data analysis, but pyspark doesn’t do this automatically. We will need to implement the <code>OneHotEncoder</code> to convert categorical variables to dummy variables.</p>
+<p><code>OneHotEncoder</code> maps a column of <strong>categorical indices</strong> to a column of of <strong>binary vectors</strong>. Each index is converted to a <strong>vector</strong>. However, in spark the vector is represented by a <strong>sparse vector</strong>, becase <strong>sparse vector</strong> can save a lot of memory.</p>
+<div id="sparse-vector" class="section level3">
+<h3>Sparse vector</h3>
+<p><strong>Sparse vector</strong> has three elements.</p>
+<ul>
+<li>The first element is the length of regular vector.</li>
+<li>The second element is a list of positions of non-zero elements in the regular vector.</li>
+<li>The third element is a list of non-zero elements in the regular vector.</li>
+</ul>
+<p>For example with a regular vector <code>[0, 2, 0, 1, 0]</code>, its sparse vector is <code>[5, [1, 3], [2, 1]]</code>.</p>
+<p>*<strong>When using <code>OneHotEncoder</code> to dummy code a column of categorical indices, the last category is NOT included by default</strong>.</p>
+<p>For example, with a categorical column of 3 indices, the following shows how the indices would be mapped to vectors:</p>
+<ul>
+<li><code>0.0 -&gt; [1.0, 0.0, 0.0] -&gt; [2, [0], [1.0]]</code></li>
+<li><code>1.0 -&gt; [0.0, 1.0, 0.0] -&gt; [2, [1], [1.0]]</code></li>
+<li><code>2.0 -&gt; [0.0, 0.0, 1.0] -&gt; [2, [], []]</code> (<strong>the last category is not included!</strong>)</li>
+</ul>
+<p><strong>Note that in a dummy coding vector, only one element is non-zero, and it is always 1. Therefore, after applying the <code>OneHotEncoder</code>, the third element is always 1.0 in all vectors.</strong></p>
+<p>The process of using <code>OneHotEncoder</code> is different to using <code>StingIndexer</code>. There are only two steps.</p>
+<ol style="list-style-type: decimal">
+<li>Build an indexer model</li>
+<li>Execute the indexing by calling <code>transform</code></li>
+</ol>
+<p>Let’s see an implementing example.</p>
+<pre class="python"><code>from pyspark.ml.feature import OneHotEncoder
+
+# build indexer
+onehotencoder = OneHotEncoder(inputCol=&#39;indexed_x1&#39;, outputCol=&#39;onehotencoded_x1&#39;)
+
+# transform the data
+df_onehotencoder = onehotencoder.transform(df_stringindexer)
+
+# resulting df
+df_onehotencoder.show()
+
++---+------+---+---+---+---+----------+----------------+
+| x1|    x2| x3| x4| y1| y2|indexed_x1|onehotencoded_x1|
++---+------+---+---+---+---+----------+----------------+
+|  a| apple|  1|2.4|  1|yes|       1.0|   (2,[1],[1.0])|
+|  a|orange|  1|2.5|  0| no|       1.0|   (2,[1],[1.0])|
+|  b|orange|  2|3.5|  1| no|       0.0|   (2,[0],[1.0])|
+|  b|orange|  2|1.4|  0|yes|       0.0|   (2,[0],[1.0])|
+|  b| peach|  2|2.1|  0|yes|       0.0|   (2,[0],[1.0])|
+|  c| peach|  4|1.5|  1|yes|       2.0|       (2,[],[])|
++---+------+---+---+---+---+----------+----------------+</code></pre>
+</div>
+</div>
+<div id="process-all-categorical-columns-with-pipeline" class="section level2">
+<h2>Process all categorical columns with Pipeline</h2>
+<p>A <strong>Pipeline</strong> is a sequence of stages. A stage is an instance which has the property of either <code>fit()</code> or <code>transform()</code>. When fitting a Pipeline, the stages get executed in order. The example below shows how to use pipeline to process all categorical columns.</p>
+<pre class="python"><code>categorical_columns = [&#39;x1&#39;, &#39;x2&#39;, &#39;x3&#39;]
+
+##=== build stages ======
+stringindexer_stages = [StringIndexer(inputCol=c, outputCol=&#39;stringindexed_&#39; + c) for c in categorical_columns]
+onehotencoder_stages = [OneHotEncoder(inputCol=&#39;stringindexed_&#39; + c, outputCol=&#39;onehotencoded_&#39; + c) for c in categorical_columns]
+all_stages = stringindexer_stages + onehotencoder_stages
+
+## build pipeline model
+from pyspark.ml import Pipeline
+pipeline = Pipeline(stages=all_stages)
+
+## fit pipeline model
+pipeline_mode = pipeline.fit(df)
+
+## transform data
+df_coded = pipeline_mode.transform(df)
+
+## remove uncoded columns
+selected_columns = [&#39;onehotencoded_&#39; + c for c in categorical_columns] + [&#39;x4&#39;, &#39;y1&#39;, &#39;y2&#39;]
+df_coded = df_coded.select(selected_columns)
+
++----------------+----------------+----------------+---+---+---+
+|onehotencoded_x1|onehotencoded_x2|onehotencoded_x3| x4| y1| y2|
++----------------+----------------+----------------+---+---+---+
+|   (2,[1],[1.0])|       (2,[],[])|   (2,[1],[1.0])|2.4|  1|yes|
+|   (2,[1],[1.0])|   (2,[0],[1.0])|   (2,[1],[1.0])|2.5|  0| no|
+|   (2,[0],[1.0])|   (2,[0],[1.0])|   (2,[0],[1.0])|3.5|  1| no|
+|   (2,[0],[1.0])|   (2,[0],[1.0])|   (2,[0],[1.0])|1.4|  0|yes|
+|   (2,[0],[1.0])|   (2,[1],[1.0])|   (2,[0],[1.0])|2.1|  0|yes|
+|       (2,[],[])|   (2,[1],[1.0])|       (2,[],[])|1.5|  1|yes|
++----------------+----------------+----------------+---+---+---+</code></pre>
+</div>
+<div id="vectorassembler" class="section level2">
+<h2>VectorAssembler</h2>
+<p>To fit a ML model in pyspark, we need to combine all feature columns into one single column of vectors: the <strong>featuresCol</strong>. The <code>VectorAssembler</code> can be used to combine multiple <code>OneHotEncoder</code> columns and other columns into one single column.</p>
+<p>The example below shows how to combine three <code>OneHotEncoder</code> columns and one numeric column into a <strong>featureCol</strong> column.</p>
+<p><code>VectorAssembler</code> is similar to <code>OneHotEncoder</code>, there is not <code>fit</code> process.</p>
+<pre class="python"><code>from pyspark.ml.feature import VectorAssembler
+
+# feature columns
+feature_columns = df_coded.columns[0:4]
+
+# build VectorAssembler instance
+vectorassembler = VectorAssembler(inputCols=feature_columns, outputCol=&#39;features&#39;)
+
+# transform data
+df_features = vectorassembler.transform(df_coded)
+
+df_features.show(truncate=False)
+
++----------------+----------------+----------------+---+---+---+-----------------------------+
+|onehotencoded_x1|onehotencoded_x2|onehotencoded_x3|x4 |y1 |y2 |features                     |
++----------------+----------------+----------------+---+---+---+-----------------------------+
+|(2,[1],[1.0])   |(2,[],[])       |(2,[1],[1.0])   |2.4|1  |yes|(7,[1,5,6],[1.0,1.0,2.4])    |
+|(2,[1],[1.0])   |(2,[0],[1.0])   |(2,[1],[1.0])   |2.5|0  |no |[0.0,1.0,1.0,0.0,0.0,1.0,2.5]|
+|(2,[0],[1.0])   |(2,[0],[1.0])   |(2,[0],[1.0])   |3.5|1  |no |[1.0,0.0,1.0,0.0,1.0,0.0,3.5]|
+|(2,[0],[1.0])   |(2,[0],[1.0])   |(2,[0],[1.0])   |1.4|0  |yes|[1.0,0.0,1.0,0.0,1.0,0.0,1.4]|
+|(2,[0],[1.0])   |(2,[1],[1.0])   |(2,[0],[1.0])   |2.1|0  |yes|[1.0,0.0,0.0,1.0,1.0,0.0,2.1]|
+|(2,[],[])       |(2,[1],[1.0])   |(2,[],[])       |1.5|1  |yes|(7,[3,6],[1.0,1.5])          |
++----------------+----------------+----------------+---+---+---+-----------------------------+</code></pre>
+</div>
+</div>
+
+<center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,260 @@
+---
+title: "Decision tree Classification"
+author: "Wenqiang Feng & Ming Chen"
+date: "2/17/2017"
+output: html_document
+---
+
+
+### Remark:
+
+- You can download the complete [ipython notebook (3 classes)](./ipynb/DecisionTreeC3.ipynb) and [ipython notebook (7 classes)](./ipynb/DecisionTreeC7.ipynb) for the this session.
+
+- More details can be found on the offical website for [pyspark.ml package](https://spark.apache.org/docs/latest/ml-classification-regression.html)
+
+[Wikipedia](https://en.wikipedia.org/wiki/Decision_tree): A decision tree is a decision support tool that uses a tree-like graph or model of decisions and their possible consequences, including chance event outcomes, resource costs, and utility. It is one way to display an algorithm. 
+
+Decision trees are commonly used in operations research, specifically in decision analysis, to help identify a strategy most likely to reach a goal, but are also a popular tool in machine learning.
+
+Decision tree learning is a method commonly used in data mining.[1] The goal is to create a model that predicts the value of a target variable based on several input variables.It can be used to do the regression and classfication. 
+
+
+###  1. Set up spark context and SparkSession
+
+```{python eval=FALSE}
+from pyspark.sql import SparkSession
+
+spark = SparkSession \
+    .builder \
+    .appName("Python Spark Decision tree Classification") \
+    .config("spark.some.config.option", "some-value") \
+    .getOrCreate()
+```
+### 2. Load dataset
+
+```{python eval=FALSE}
+df = spark.read.format('com.databricks.spark.csv').\
+                               options(header='true', \
+                               inferschema='true').\
+                 load("./data/WineData.csv",header=True);
+```
+
+- define UDF (User Defined Function)
+```{python eval=FALSE}
+# Convert to float format
+def string_to_float(x):
+    return float(x)
+
+# 
+def condition(r):
+    if (0<= r <= 4):
+        label = "low" 
+    elif(4< r <= 6):
+        label = "medium"
+    else: 
+        label = "high" 
+    return label
+```
+
+- reqired library
+```{python eval=FALSE}
+from pyspark.sql.functions import udf
+from pyspark.sql.types import StringType, DoubleType
+string_to_float_udf = udf(string_to_float, DoubleType())
+quality_udf = udf(lambda x: condition(x), StringType())
+```
+
+- convert to 3 classes
+```{python eval=FALSE}
+df = df.withColumn("quality", quality_udf("quality"))
+```
+
+- check the schema
+```{python eval=FALSE}
+df.printSchema()
+```
+
+
+```{python eval=FALSE}
+# output 
+root
+ |-- fixed acidity: double (nullable = true)
+ |-- volatile acidity: double (nullable = true)
+ |-- citric acid: double (nullable = true)
+ |-- residual sugar: double (nullable = true)
+ |-- chlorides: double (nullable = true)
+ |-- free sulfur dioxide: double (nullable = true)
+ |-- total sulfur dioxide: double (nullable = true)
+ |-- density: double (nullable = true)
+ |-- pH: double (nullable = true)
+ |-- sulphates: double (nullable = true)
+ |-- alcohol: double (nullable = true)
+ |-- quality: string (nullable = true)
+
+```
+
+- preview the dataset
+```{python eval=FALSE}
+df.show(4)
+```
+```{python eval=FALSE}
+#output 
++-------------+----------------+-----------+--------------+---------+-------------------+--------------------+-------+----+---------+-------+-------+
+|fixed acidity|volatile acidity|citric acid|residual sugar|chlorides|free sulfur dioxide|total sulfur dioxide|density|  pH|sulphates|alcohol|quality|
++-------------+----------------+-----------+--------------+---------+-------------------+--------------------+-------+----+---------+-------+-------+
+|          7.4|             0.7|        0.0|           1.9|    0.076|               11.0|                34.0| 0.9978|3.51|     0.56|    9.4|   high|
+|          7.8|            0.88|        0.0|           2.6|    0.098|               25.0|                67.0| 0.9968| 3.2|     0.68|    9.8|   high|
+|          7.8|            0.76|       0.04|           2.3|    0.092|               15.0|                54.0|  0.997|3.26|     0.65|    9.8|   high|
+|         11.2|            0.28|       0.56|           1.9|    0.075|               17.0|                60.0|  0.998|3.16|     0.58|    9.8|   high|
++-------------+----------------+-----------+--------------+---------+-------------------+--------------------+-------+----+---------+-------+-------+
+only showing top 4 rows
+```
+
+- load the required library for the model
+```{python eval=FALSE}
+from pyspark.ml.linalg import Vectors # !!!!caution: not from pyspark.mllib.linalg import Vectors
+from pyspark.ml import Pipeline
+from pyspark.ml.feature import IndexToString,StringIndexer, VectorIndexer
+from pyspark.ml.classification import DecisionTreeClassifier
+from pyspark.ml.tuning import CrossValidator, ParamGridBuilder
+from pyspark.ml.evaluation import MulticlassClassificationEvaluator
+```
+
+- convert data to PySpark ML data framework 
+```{python eval=FALSE}
+def transData(data):
+    return data.rdd.map(lambda r: [Vectors.dense(r[:-1]),r[-1]]).toDF(['features','label'])
+```
+
+```{python eval=FALSE}
+data = transData(df)
+```
+
+- check data framework
+```{python eval=FALSE}
+data.show(3)
+```
+```{python eval=FALSE}
+# output 
++--------------------+-----+
+|            features|label|
++--------------------+-----+
+|[7.4,0.7,0.0,1.9,...| high|
+|[7.8,0.88,0.0,2.6...| high|
+|[7.8,0.76,0.04,2....| high|
++--------------------+-----+
+only showing top 3 rows
+```
+
+- Index labels, adding metadata to the label column
+```{python eval=FALSE}
+# Index labels, adding metadata to the label column
+labelIndexer = StringIndexer(inputCol='label',
+                             outputCol='indexedLabel').fit(data)
+labelIndexer.transform(data).show(6)
+```
+```{python eval=FALSE}
+# output 
++--------------------+-----+------------+
+|            features|label|indexedLabel|
++--------------------+-----+------------+
+|[7.4,0.7,0.0,1.9,...| high|         0.0|
+|[7.8,0.88,0.0,2.6...| high|         0.0|
+|[7.8,0.76,0.04,2....| high|         0.0|
+|[11.2,0.28,0.56,1...| high|         0.0|
+|[7.4,0.7,0.0,1.9,...| high|         0.0|
+|[7.4,0.66,0.0,1.8...| high|         0.0|
++--------------------+-----+------------+
+only showing top 6 rows
+```
+
+- convert the features to ML data framework
+```{python eval=FALSE}
+# Automatically identify categorical features, and index them.
+# Set maxCategories so features with > 4 distinct values are treated as continuous.
+featureIndexer =VectorIndexer(inputCol="features", \
+                              outputCol="indexedFeatures", \
+                              maxCategories=4).fit(data)
+
+featureIndexer.transform(data).show(6) 
+```
+```{python eval=FALSE}
++--------------------+-----+--------------------+
+|            features|label|     indexedFeatures|
++--------------------+-----+--------------------+
+|[7.4,0.7,0.0,1.9,...| high|[7.4,0.7,0.0,1.9,...|
+|[7.8,0.88,0.0,2.6...| high|[7.8,0.88,0.0,2.6...|
+|[7.8,0.76,0.04,2....| high|[7.8,0.76,0.04,2....|
+|[11.2,0.28,0.56,1...| high|[11.2,0.28,0.56,1...|
+|[7.4,0.7,0.0,1.9,...| high|[7.4,0.7,0.0,1.9,...|
+|[7.4,0.66,0.0,1.8...| high|[7.4,0.66,0.0,1.8...|
++--------------------+-----+--------------------+
+only showing top 6 rows
+```
+
+### Train a DecisionTree model
+```{python eval=FALSE}
+# Train a DecisionTree model
+dTree = DecisionTreeClassifier(labelCol='indexedLabel', featuresCol='indexedFeatures')
+```
+
+```{python eval=FALSE}
+# Convert indexed labels back to original labels.
+labelConverter = IndexToString(inputCol="prediction", outputCol="predictedLabel",
+                               labels=labelIndexer.labels)
+```
+
+
+```{python eval=FALSE}
+# Chain indexers and tree in a Pipeline
+pipeline = Pipeline(stages=[labelIndexer, featureIndexer, dTree,labelConverter])
+```
+
+
+
+
+```{python eval=FALSE}
+# Split the data into training and test sets (30% held out for testing)
+(trainingData, testData) = data.randomSplit([0.6, 0.4])
+```
+
+
+```{python eval=FALSE}
+# Train model.  This also runs the indexers.
+model = pipeline.fit(trainingData)
+```
+
+
+```{python eval=FALSE}
+# Make predictions.
+predictions = model.transform(testData)
+```
+
+```{python eval=FALSE}
+# Select example rows to display.
+predictions.select("features","label","predictedLabel").show(5)
+```
+
+
+```{python eval=FALSE}
+#output
++--------------------+-----+--------------+
+|            features|label|predictedLabel|
++--------------------+-----+--------------+
+|[4.6,0.52,0.15,2....| high|          high|
+|[4.9,0.42,0.0,2.1...| high|          high|
+|[5.0,0.4,0.5,4.3,...| high|          high|
+|[5.0,0.42,0.24,2....| high|          high|
+|[5.0,1.02,0.04,1....| high|          high|
++--------------------+-----+--------------+
+only showing top 5 rows
+```
+
+
+```{python eval=FALSE}
+# Select (prediction, true label) and compute test error
+evaluator = MulticlassClassificationEvaluator(
+    labelCol="indexedLabel", predictionCol="prediction", metricName="accuracy")
+accuracy = evaluator.evaluate(predictions)
+print("Predictions accuracy = %g, Test Error = %g" % (accuracy,(1.0 - accuracy)))
+```

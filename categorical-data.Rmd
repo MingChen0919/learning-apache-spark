@@ -1,0 +1,221 @@
+---
+title: "Categorical Data"
+author: "Ming Chen"
+date: "6/6/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+# Content
+
+* [Create some data](#create-some-data)
+* [StringIndexer](#stringindexer)
+* [OneHotEncoder](#onehotencoder)
+* [Process all categorical columns with Pipeline](#process-all-categorical-columns-with-pipeline)
+* [VectorAssembler](#vectorassembler)
+
+## Create some data
+
+x1 and x2 are categorical columns in strings. x3 is a categorical column in integers. x4 is a numerical column.
+y1 is a categorical column in integer. y2 is a column in string. This data frame will be used to demonstrate how to use `StingIndexer`, `OneHotEncoder`, `VectorAssember` and so on.
+
+```{python}
+import pandas as pd
+pdf = pd.DataFrame({
+        'x1': ['a','a','b','b', 'b', 'c'],
+        'x2': ['apple', 'orange', 'orange','orange', 'peach', 'peach'],
+        'x3': [1, 1, 2, 2, 2, 4],
+        'x4': [2.4, 2.5, 3.5, 1.4, 2.1,1.5],
+        'y1': [1, 0, 1, 0, 0, 1],
+        'y2': ['yes', 'no', 'no', 'yes', 'yes', 'yes']
+    })
+df = spark.createDataFrame(pdf)
+df.show()
+
++---+------+---+---+---+---+
+| x1|    x2| x3| x4| y1| y2|
++---+------+---+---+---+---+
+|  a| apple|  1|2.4|  1|yes|
+|  a|orange|  1|2.5|  0| no|
+|  b|orange|  2|3.5|  1| no|
+|  b|orange|  2|1.4|  0|yes|
+|  b| peach|  2|2.1|  0|yes|
+|  c| peach|  4|1.5|  1|yes|
++---+------+---+---+---+---+
+```
+
+## StringIndexer
+
+`StringIndexer` maps a string column to a index column that will be treated as a categorical column by spark. The indices start with 0 and are ordered by label frequencies. **If it is a numerical column, the column will first be casted to a string column and then indexed by `StringIndexer`.**
+
+There are three steps to implement the `StringIndexer`
+
+1. Build the StringIndexer model: specify the input column and output column names.
+2. Learn the StringIndexer model: `fit` the model with your data.
+3. Execute the indexing: call the `transform` function to execute the indexing process.
+
+```{python}
+from pyspark.ml.feature import StringIndexer
+
+# build indexer
+string_indexer = StringIndexer(inputCol='x1', outputCol='indexed_x1')
+
+# learn the model
+string_indexer_model = string_indexer.fit(df)
+
+# transform the data
+df_stringindexer = string_indexer_model.transform(df)
+
+# resulting df
+df_stringindexer.show()
+
++---+------+---+---+---+---+----------+
+| x1|    x2| x3| x4| y1| y2|indexed_x1|
++---+------+---+---+---+---+----------+
+|  a| apple|  1|2.4|  1|yes|       1.0|
+|  a|orange|  1|2.5|  0| no|       1.0|
+|  b|orange|  2|3.5|  1| no|       0.0|
+|  b|orange|  2|1.4|  0|yes|       0.0|
+|  b| peach|  2|2.1|  0|yes|       0.0|
+|  c| peach|  4|1.5|  1|yes|       2.0|
++---+------+---+---+---+---+----------+
+```
+
+From the result above, we can see that (a, b, c) in column x1 are converted to (1.0, 0.0, 2.0). They are ordered by their frequencies in column x1.
+
+## OneHotEncoder
+
+In R, categorical variables are automatically **dummy-coded** in data analysis, but pyspark doesn't do this automatically. We will need to implement the `OneHotEncoder` to convert categorical variables to dummy variables.
+
+`OneHotEncoder` maps a column of **categorical indices** to a column of of **binary vectors**. Each index is converted to a **vector**. However, in spark the vector is represented by a **sparse vector**, becase **sparse vector** can save a lot of memory.
+
+### Sparse vector
+
+**Sparse vector** has three elements. 
+
+* The first element is the length of regular vector. 
+* The second element is a list of positions of non-zero elements in the regular vector.
+* The third element is a list of non-zero elements in the regular vector. 
+
+
+For example with a regular vector `[0, 2, 0, 1, 0]`, its sparse vector is `[5, [1, 3], [2, 1]]`.
+
+***When using `OneHotEncoder` to dummy code a column of categorical indices, the last category is NOT included by default**. 
+
+For example, with a categorical column of 3 indices, the following shows how the indices would be mapped to vectors:
+
+* `0.0 -> [1.0, 0.0, 0.0] -> [2, [0], [1.0]]`
+* `1.0 -> [0.0, 1.0, 0.0] -> [2, [1], [1.0]]`
+* `2.0 -> [0.0, 0.0, 1.0] -> [2, [], []]` (**the last category is not included!**)
+
+**Note that in a dummy coding vector, only one element is non-zero, and it is always 1. Therefore, after applying the `OneHotEncoder`, the third element is always 1.0 in all vectors.** 
+
+The process of using `OneHotEncoder` is different to using `StingIndexer`. There are only two steps.
+
+1. Build an indexer model
+2. Execute the indexing by calling `transform`
+
+Let's see an implementing example.
+```{python}
+from pyspark.ml.feature import OneHotEncoder
+
+# build indexer
+onehotencoder = OneHotEncoder(inputCol='indexed_x1', outputCol='onehotencoded_x1')
+
+# transform the data
+df_onehotencoder = onehotencoder.transform(df_stringindexer)
+
+# resulting df
+df_onehotencoder.show()
+
++---+------+---+---+---+---+----------+----------------+
+| x1|    x2| x3| x4| y1| y2|indexed_x1|onehotencoded_x1|
++---+------+---+---+---+---+----------+----------------+
+|  a| apple|  1|2.4|  1|yes|       1.0|   (2,[1],[1.0])|
+|  a|orange|  1|2.5|  0| no|       1.0|   (2,[1],[1.0])|
+|  b|orange|  2|3.5|  1| no|       0.0|   (2,[0],[1.0])|
+|  b|orange|  2|1.4|  0|yes|       0.0|   (2,[0],[1.0])|
+|  b| peach|  2|2.1|  0|yes|       0.0|   (2,[0],[1.0])|
+|  c| peach|  4|1.5|  1|yes|       2.0|       (2,[],[])|
++---+------+---+---+---+---+----------+----------------+
+```
+
+
+## Process all categorical columns with Pipeline
+
+A **Pipeline** is a sequence of stages. A stage is an instance which has the property of either `fit()` or `transform()`. When fitting a Pipeline, the stages get executed in order. The example below shows how to use pipeline to process all categorical columns.
+
+```{python}
+categorical_columns = ['x1', 'x2', 'x3']
+
+##=== build stages ======
+stringindexer_stages = [StringIndexer(inputCol=c, outputCol='stringindexed_' + c) for c in categorical_columns]
+onehotencoder_stages = [OneHotEncoder(inputCol='stringindexed_' + c, outputCol='onehotencoded_' + c) for c in categorical_columns]
+all_stages = stringindexer_stages + onehotencoder_stages
+
+## build pipeline model
+from pyspark.ml import Pipeline
+pipeline = Pipeline(stages=all_stages)
+
+## fit pipeline model
+pipeline_mode = pipeline.fit(df)
+
+## transform data
+df_coded = pipeline_mode.transform(df)
+
+## remove uncoded columns
+selected_columns = ['onehotencoded_' + c for c in categorical_columns] + ['x4', 'y1', 'y2']
+df_coded = df_coded.select(selected_columns)
+
++----------------+----------------+----------------+---+---+---+
+|onehotencoded_x1|onehotencoded_x2|onehotencoded_x3| x4| y1| y2|
++----------------+----------------+----------------+---+---+---+
+|   (2,[1],[1.0])|       (2,[],[])|   (2,[1],[1.0])|2.4|  1|yes|
+|   (2,[1],[1.0])|   (2,[0],[1.0])|   (2,[1],[1.0])|2.5|  0| no|
+|   (2,[0],[1.0])|   (2,[0],[1.0])|   (2,[0],[1.0])|3.5|  1| no|
+|   (2,[0],[1.0])|   (2,[0],[1.0])|   (2,[0],[1.0])|1.4|  0|yes|
+|   (2,[0],[1.0])|   (2,[1],[1.0])|   (2,[0],[1.0])|2.1|  0|yes|
+|       (2,[],[])|   (2,[1],[1.0])|       (2,[],[])|1.5|  1|yes|
++----------------+----------------+----------------+---+---+---+
+```
+
+
+## VectorAssembler
+
+To fit a ML model in pyspark, we need to combine all feature columns into one single column of vectors: the **featuresCol**. The `VectorAssembler` can be used to combine multiple `OneHotEncoder` columns and other columns into one single column.
+
+The example below shows how to combine three `OneHotEncoder` columns and one numeric column into a **featureCol** column.
+
+`VectorAssembler` is similar to `OneHotEncoder`, there is not `fit` process.
+
+```{python}
+from pyspark.ml.feature import VectorAssembler
+
+# feature columns
+feature_columns = df_coded.columns[0:4]
+
+# build VectorAssembler instance
+vectorassembler = VectorAssembler(inputCols=feature_columns, outputCol='features')
+
+# transform data
+df_features = vectorassembler.transform(df_coded)
+
+df_features.show(truncate=False)
+
++----------------+----------------+----------------+---+---+---+-----------------------------+
+|onehotencoded_x1|onehotencoded_x2|onehotencoded_x3|x4 |y1 |y2 |features                     |
++----------------+----------------+----------------+---+---+---+-----------------------------+
+|(2,[1],[1.0])   |(2,[],[])       |(2,[1],[1.0])   |2.4|1  |yes|(7,[1,5,6],[1.0,1.0,2.4])    |
+|(2,[1],[1.0])   |(2,[0],[1.0])   |(2,[1],[1.0])   |2.5|0  |no |[0.0,1.0,1.0,0.0,0.0,1.0,2.5]|
+|(2,[0],[1.0])   |(2,[0],[1.0])   |(2,[0],[1.0])   |3.5|1  |no |[1.0,0.0,1.0,0.0,1.0,0.0,3.5]|
+|(2,[0],[1.0])   |(2,[0],[1.0])   |(2,[0],[1.0])   |1.4|0  |yes|[1.0,0.0,1.0,0.0,1.0,0.0,1.4]|
+|(2,[0],[1.0])   |(2,[1],[1.0])   |(2,[0],[1.0])   |2.1|0  |yes|[1.0,0.0,0.0,1.0,1.0,0.0,2.1]|
+|(2,[],[])       |(2,[1],[1.0])   |(2,[],[])       |1.5|1  |yes|(7,[3,6],[1.0,1.5])          |
++----------------+----------------+----------------+---+---+---+-----------------------------+
+```
+
+
+
