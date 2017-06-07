@@ -1,7 +1,7 @@
 ---
-title: "Logistic Regression"
+title: "Decision Tree"
 author: "Ming Chen"
-date: "6/5/2017"
+date: "6/6/2017"
 output: html_document
 ---
 
@@ -9,8 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
 ```
 
-
-## Logistic regression with pyspark
+## Decision tree with pyspark
 
 **Import data**
 
@@ -99,24 +98,23 @@ training, test = cuse_df.randomSplit([0.8, 0.2], seed=1234)
 
 # estimator
 from pyspark.ml.regression import GeneralizedLinearRegression
-from pyspark.ml.classification import LogisticRegression
+from pyspark.ml.classification import LogisticRegression, DecisionTreeClassifier
 
-logr = LogisticRegression(featuresCol='features', labelCol='label')
+dt = DecisionTreeClassifier(featuresCol='features', labelCol='label')
 
 # parameter grid
 from pyspark.ml.tuning import ParamGridBuilder
 param_grid = ParamGridBuilder().\
-    addGrid(logr.regParam, [0, 0.5, 1, 2]).\
-    addGrid(logr.elasticNetParam, [0, 0.5, 1]).\
+    addGrid(dt.maxDepth, [2,3,4,5]).\
     build()
     
 # evaluator
 from pyspark.ml.evaluation import BinaryClassificationEvaluator
-evaluator = BinaryClassificationEvaluator(rawPredictionCol="rawPrediction")
+evaluator = BinaryClassificationEvaluator(rawPredictionCol="rawPrediction", metricName="areaUnderROC")
 
 # build cross-validation model
 from pyspark.ml.tuning import CrossValidator
-cv = CrossValidator(estimator=logr, estimatorParamMaps=param_grid, evaluator=evaluator, numFolds=4)
+cv = CrossValidator(estimator=dt, estimatorParamMaps=param_grid, evaluator=evaluator, numFolds=4)
 ```
 
 **Fit model**
@@ -139,70 +137,65 @@ pred_test_cv = cv_model.transform(test)
 pred_training_cv.select(show_columns).show(5, truncate=False)
 pred_test_cv.select(show_columns).show(5, truncate=False)
 
-+---------+-----+----------+------------------------------------------+---------------------------------------+
-|features |label|prediction|rawPrediction                             |probability                            |
-+---------+-----+----------+------------------------------------------+---------------------------------------+
-|(5,[],[])|0.0  |1.0       |[-0.05602431718564116,0.05602431718564116]|[0.4859975829890087,0.5140024170109914]|
-|(5,[],[])|0.0  |1.0       |[-0.05602431718564116,0.05602431718564116]|[0.4859975829890087,0.5140024170109914]|
-|(5,[],[])|0.0  |1.0       |[-0.05602431718564116,0.05602431718564116]|[0.4859975829890087,0.5140024170109914]|
-|(5,[],[])|0.0  |1.0       |[-0.05602431718564116,0.05602431718564116]|[0.4859975829890087,0.5140024170109914]|
-|(5,[],[])|0.0  |1.0       |[-0.05602431718564116,0.05602431718564116]|[0.4859975829890087,0.5140024170109914]|
-+---------+-----+----------+------------------------------------------+---------------------------------------+
++---------+-----+----------+-------------+----------------------------------------+
+|features |label|prediction|rawPrediction|probability                             |
++---------+-----+----------+-------------+----------------------------------------+
+|(5,[],[])|0.0  |1.0       |[203.0,237.0]|[0.46136363636363636,0.5386363636363637]|
+|(5,[],[])|0.0  |1.0       |[203.0,237.0]|[0.46136363636363636,0.5386363636363637]|
+|(5,[],[])|0.0  |1.0       |[203.0,237.0]|[0.46136363636363636,0.5386363636363637]|
+|(5,[],[])|0.0  |1.0       |[203.0,237.0]|[0.46136363636363636,0.5386363636363637]|
+|(5,[],[])|0.0  |1.0       |[203.0,237.0]|[0.46136363636363636,0.5386363636363637]|
++---------+-----+----------+-------------+----------------------------------------+
 only showing top 5 rows
 
-+---------+-----+----------+------------------------------------------+---------------------------------------+
-|features |label|prediction|rawPrediction                             |probability                            |
-+---------+-----+----------+------------------------------------------+---------------------------------------+
-|(5,[],[])|0.0  |1.0       |[-0.05602431718564116,0.05602431718564116]|[0.4859975829890087,0.5140024170109914]|
-|(5,[],[])|0.0  |1.0       |[-0.05602431718564116,0.05602431718564116]|[0.4859975829890087,0.5140024170109914]|
-|(5,[],[])|0.0  |1.0       |[-0.05602431718564116,0.05602431718564116]|[0.4859975829890087,0.5140024170109914]|
-|(5,[],[])|0.0  |1.0       |[-0.05602431718564116,0.05602431718564116]|[0.4859975829890087,0.5140024170109914]|
-|(5,[],[])|0.0  |1.0       |[-0.05602431718564116,0.05602431718564116]|[0.4859975829890087,0.5140024170109914]|
-+---------+-----+----------+------------------------------------------+---------------------------------------+
++---------+-----+----------+-------------+----------------------------------------+
+|features |label|prediction|rawPrediction|probability                             |
++---------+-----+----------+-------------+----------------------------------------+
+|(5,[],[])|0.0  |1.0       |[203.0,237.0]|[0.46136363636363636,0.5386363636363637]|
+|(5,[],[])|0.0  |1.0       |[203.0,237.0]|[0.46136363636363636,0.5386363636363637]|
+|(5,[],[])|0.0  |1.0       |[203.0,237.0]|[0.46136363636363636,0.5386363636363637]|
+|(5,[],[])|0.0  |1.0       |[203.0,237.0]|[0.46136363636363636,0.5386363636363637]|
+|(5,[],[])|0.0  |1.0       |[203.0,237.0]|[0.46136363636363636,0.5386363636363637]|
++---------+-----+----------+-------------+----------------------------------------+
 only showing top 5 rows
 ```
 
 
-**Estimated intercept and coefficients**
+**Confusion matrix**
+
+Pyspark doesn't have a function to calculate the confusion matrix automatically, but we can still easily get a confusion matrix.
+
+From the results below, we can see that pyspark and R got exactly the same confusion matrix.
 
 ```{python}
-print('Intercept: ' + str(cv_model.bestModel.intercept) + "\n"
-     'coefficients: ' + str(cv_model.bestModel.coefficients))
-     
-Intercept: 0.0560243171856
-coefficients: [-0.280625539774,-0.799857435517,-1.18923909827,0.324994746147,-0.832954766261]
+label_and_pred = cv_model.transform(cuse_df).select('label', 'prediction')
+label_and_pred.rdd.zipWithIndex().countByKey()
+
+# confusion matrix from pyspark
+defaultdict(int,
+            {Row(label=0.0, prediction=0.0): 897,
+             Row(label=0.0, prediction=1.0): 203,
+             Row(label=1.0, prediction=0.0): 270,
+             Row(label=1.0, prediction=1.0): 237})
+             
+# confusion matrix from R
+          Reference
+Prediction   1   0
+         1 237 203
+         0 270 897
 ```
 
-See results from R
 
-```{python}
-glm_cuse$coefficients
-
- (Intercept)     age25-29       age<25     age40-49 educationlow  wantsMoreno 
-   0.7325613    0.5192319    0.9086135   -0.2806254    0.3249947   -0.8329548 
-```
-
-
-## Generalized linear regression with R
+## Decision tree classification with R
 
 ```{r}
-#====== This is R code! =========
-cuse = read.table('http://data.princeton.edu/wws509/datasets/cuse.dat', header = T)
+library(rpart)
+library(caret)
 
-# convert count data to binary data
-not_using = rep(1:nrow(cuse), times=cuse$notUsing)
-using = rep(1:nrow(cuse), times=cuse$using)
-cuse_binary = cuse[c(not_using, using), 1:3]
-cuse_binary$y = c(rep(0, length(not_using)), rep(1, length(using)))
+# import data
+cuse_binary = read.csv('data/cuse_binary.csv', header = TRUE)
 
-# write data into a file
-write.csv(cuse_binary, file='data/cuse_binary.csv', row.names = FALSE)
-```
-
-**Process categorical variables so they have the same pattern as in pyspar. Element levels are in the descending order of element frequencies.**
-
-```{r}
-#====== This is R code! =========
+# encode categorical columns in the same way as pyspark
 cuse_binary$age = factor(cuse_binary$age, 
                          levels = names(sort(table(cuse_binary$age), decreasing = TRUE)))
 cuse_binary$education = factor(cuse_binary$education,
@@ -213,16 +206,40 @@ cuse_binary$wantsMore = factor(cuse_binary$wantsMore,
 # encode label column
 cuse_binary$y = factor(cuse_binary$y,
                                levels = names(sort(table(cuse_binary$y))))
-glm_cuse = glm(y~age + education + wantsMore, data = cuse_binary, family = binomial(link = "logit"))
-```
 
-**Resulting coefficients**
+# fit decision tree
+dt_fit = rpart(y ~ age + education + wantsMore, 
+               data = cuse_binary, method = 'class')
+
+# confusion matrix
+pred_y = predict(dt_fit, type = 'class')
+confusionMatrix(data = pred_y, reference = cuse_binary$y)
+```
 
 ```{python}
-#====== This is R code! =========
-glm_cuse$coefficients
+Confusion Matrix and Statistics
 
- (Intercept)     age25-29       age<25     age40-49 educationlow  wantsMoreno 
-   0.7325613    0.5192319    0.9086135   -0.2806254    0.3249947   -0.8329548 
+          Reference
+Prediction   1   0
+         1 237 203
+         0 270 897
+                                          
+               Accuracy : 0.7057          
+                 95% CI : (0.6827, 0.7279)
+    No Information Rate : 0.6845          
+    P-Value [Acc > NIR] : 0.035460        
+                                          
+                  Kappa : 0.2934          
+ Mcnemar's Test P-Value : 0.002408        
+                                          
+            Sensitivity : 0.4675          
+            Specificity : 0.8155          
+         Pos Pred Value : 0.5386          
+         Neg Pred Value : 0.7686          
+             Prevalence : 0.3155          
+         Detection Rate : 0.1475          
+   Detection Prevalence : 0.2738          
+      Balanced Accuracy : 0.6415          
+                                          
+       'Positive' Class : 1  
 ```
-

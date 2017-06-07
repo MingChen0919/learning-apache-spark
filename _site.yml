@@ -47,6 +47,8 @@ navbar:
         - text: "Classification"      
         - text: "Logistic regression"
           href: logistic-regression.html
+        - text: "Decision tree"
+          href: decision-tree.html
         - text: "------------"
         - text: "More ML methods coming soon"
         - text: "------------"
