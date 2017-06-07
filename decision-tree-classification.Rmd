@@ -1,5 +1,5 @@
 ---
-title: "Decision Tree"
+title: "Decision Tree Classification"
 author: "Ming Chen"
 date: "6/6/2017"
 output: html_document
