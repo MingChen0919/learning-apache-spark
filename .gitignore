@@ -6,3 +6,4 @@
 *.ipybn
 /.ipynb_checkpoints
 /.idea
+.Rproj.user

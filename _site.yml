@@ -33,6 +33,8 @@ navbar:
           href: 03_dataframe_object.html
         - text: "Categorial data"
           href: categorical-data.html
+        - text: "Continuous variables to categorical variables"
+          href: continuous-to-categorical-variable.html
         - text: "HashingTF and CountVectorizer"
           href: HashingTF-and-CountVectorizer.html
         

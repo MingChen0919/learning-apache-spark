@@ -1,0 +1,83 @@
+---
+title: "Continuous to categorical data"
+author: "Ming Chen"
+date: "6/9/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+## Convert continuous variables to categorical variables
+
+There are two functions we can use to split a continuous variable into categories:
+
+* `pyspark.ml.feature.Binarizer`: split a column of continuous features given a threshold
+* `pyspark.ml.feature.Bucktizer`: split a column of continuous features into categories given several breaking points.
+    + with $n + 1$ split points, there are n categories (buckets).
+    
+**Create some data**
+
+```{python}
+import numpy as np
+import pandas as pd
+np.random.seed(seed=1234)
+pdf = pd.DataFrame({
+        'x1': np.random.randn(10),
+        'x2': np.random.rand(10)*10
+    })
+np.random.seed(seed=None)
+df = spark.createDataFrame(pdf)
+df.show()
+
++--------------------+------------------+
+|                  x1|                x2|
++--------------------+------------------+
+| 0.47143516373249306| 6.834629351721363|
+| -1.1909756947064645| 7.127020269829002|
+|  1.4327069684260973|3.7025075479039495|
+| -0.3126518960917129| 5.611961860656249|
+| -0.7205887333650116| 5.030831653078097|
+|  0.8871629403077386|0.1376844959068224|
+|  0.8595884137174165| 7.728266216123741|
+| -0.6365235044173491| 8.826411906361166|
+|0.015696372114428918| 3.648859839013723|
+| -2.2426849541854055| 6.153961784334937|
++--------------------+------------------+
+```
+
+**`Binarize` the column `x1` and `Bucketize` the column `x2`**
+
+```{python}
+from pyspark.ml.feature import Binarizer, Bucketizer
+# threshold = 0 for binarizer
+binarizer = Binarizer(threshold=0, inputCol='x1', outputCol='x1_new')
+# provide 5 split points to generate 4 buckets
+bucketizer = Bucketizer(splits=[0, 2.5, 5, 7.5, 10], inputCol='x2', outputCol='x2_new')
+
+# pipeline stages
+from pyspark.ml import Pipeline
+stages = [binarizer, bucketizer]
+pipeline = Pipeline(stages=stages)
+
+# fit the pipeline model and transform the data
+pipeline.fit(df).transform(df).show()
+
++--------------------+------------------+------+------+
+|                  x1|                x2|x1_new|x2_new|
++--------------------+------------------+------+------+
+| 0.47143516373249306| 6.834629351721363|   1.0|   2.0|
+| -1.1909756947064645| 7.127020269829002|   0.0|   2.0|
+|  1.4327069684260973|3.7025075479039495|   1.0|   1.0|
+| -0.3126518960917129| 5.611961860656249|   0.0|   2.0|
+| -0.7205887333650116| 5.030831653078097|   0.0|   2.0|
+|  0.8871629403077386|0.1376844959068224|   1.0|   0.0|
+|  0.8595884137174165| 7.728266216123741|   1.0|   3.0|
+| -0.6365235044173491| 8.826411906361166|   0.0|   3.0|
+|0.015696372114428918| 3.648859839013723|   1.0|   1.0|
+| -2.2426849541854055| 6.153961784334937|   0.0|   2.0|
++--------------------+------------------+------+------+
+```
+
+
