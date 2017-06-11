@@ -42,7 +42,9 @@ pdf = pd.DataFrame({
     
 df = spark.createDataFrame(pdf)
 df.show(truncate=False)
+```
 
+```
 +----------------------------------------+
 |texts                                   |
 +----------------------------------------+
@@ -76,7 +78,7 @@ texts_ngrams.select('3-grams').show(truncate=False)
 texts_ngrams.select('4-grams').show(truncate=False)
 ```
 
-```{python}
+```
 +------------------------------------------------------------------+
 |2-grams                                                           |
 +------------------------------------------------------------------+
@@ -113,7 +115,7 @@ gutenberg_fileids = gutenberg.fileids()
 gutenberg_fileids
 ```
 
-```{python}
+```
 [u'austen-emma.txt',
  u'austen-persuasion.txt',
  u'austen-sense.txt',
@@ -148,29 +150,41 @@ FileSystemPathPointer(u'/Users/mingchen/nltk_data/corpora/gutenberg/austen-emma.
 gutenberg.raw(gutenberg_fileids[0])[:200]
 ```
 
-```{python}
+```
 u'[Emma by Jane Austen 1816]\n\nVOLUME I\n\nCHAPTER I\n\n\nEmma Woodhouse, handsome, clever, and rich, with a comfortable home\nand happy disposition, seemed to unite some of the best blessings\nof existence; an'
 ```
 
 ```{python}
 ## the words of the whole corpus
 gutenberg.words()
+```
 
+```
 [u'[', u'Emma', u'by', u'Jane', u'Austen', u'1816', ...]
+```
 
+```{python}
 len(gutenberg.words())
+```
 
+```
 2621613
 ```
 
 ```{python}
 ## the sentences of a speficied file
 gutenberg.sents(gutenberg_fileids[0])
+```
 
+```
 [[u'[', u'Emma', u'by', u'Jane', u'Austen', u'1816', u']'], [u'VOLUME', u'I'], ...]
+```
 
+```{python}
 len(gutenberg.sents(gutenberg_fileids[0]))
+```
 
+```
 7752
 ```
 
@@ -188,7 +202,9 @@ Files in the corpus *corpus_data*
 ```{python}
 data_fileids = corpus_data.fileids()
 data_fileids
+```
 
+```
 ['Advertising.csv',
  'Credit.csv',
  'WineData.csv',
@@ -210,7 +226,7 @@ Raw text in *twitter.txt*
 corpus_data.raw('twitter.txt')
 ```
 
-```{python}
+```
 u'Fresh install of XP on new computer. Sweet relief! fuck vista\t1018769417\t1.0\nWell. Now I know where to go when I want my knives. #ChiChevySXSW http://post.ly/RvDl\t10284216536\t1.0\n"Literally six weeks before I can take off ""SSC Chair"" off my email. Its like the torturous 4th mile before everything stops hurting."\t10298589026\t1.0\nMitsubishi i MiEV - Wikipedia, the free encyclopedia - http://goo.gl/xipe Cutest car ever!\t109017669432377344\t1.0\n\'Cheap Eats in SLP\' - http://t.co/4w8gRp7\t109642968603963392\t1.0\nTeenage Mutant Ninja Turtle art is never a bad thing... http://bit.ly/aDMHyW\t10995492579\t1.0\nNew demographic survey of online video viewers: http://bit.ly/cx8b7I via @KellyOlexa\t11713360136\t1.0\nhi all - i\'m going to be tweeting things lookstat at the @lookstat twitter account. please follow me there\t1208319583\t1.0\nHoly carp, no. That movie will seriously suffer for it. RT @MouseInfo: Anyone excited for The Little Mermaid in 3D?\t121330835726155776\t1.0\n"Did I really need to learn ""I bought a box and put in it things"" in arabic? This is the most random book ever."\t12358025545\t1.0\n'
 ```
 
@@ -219,19 +235,33 @@ Words and sentences in file *twitter.txt*.
 
 ```{python}
 corpus_data.words(fileids='twitter.txt')
+```
 
+```
 [u'Fresh', u'install', u'of', u'XP', u'on', u'new', ...]
+```
 
+```{python}
 len(corpus_data.words(fileids='twitter.txt'))
+```
 
+```
 253
+```
 
+```{python}
 corpus_data.sents(fileids='twitter.txt')
+```
 
+```
 [[u'Fresh', u'install', u'of', u'XP', u'on', u'new', u'computer', u'.'], [u'Sweet', u'relief', u'!'], ...]
+```
 
+```{python}
 len(corpus_data.sents(fileids='twitter.txt'))
+```
 
+```
 14
 ```
 
@@ -250,7 +280,7 @@ df = spark.createDataFrame(pdf)
 df.show()
 ```
 
-```{python}
+```
 +--------------+
 |   car_synsets|
 +--------------+
@@ -277,7 +307,9 @@ df_lemmas = df.select('car_synsets', synset_lemmas_udf(df.car_synsets).alias('le
 ```{python}
 ## display result
 df_lemmas.show(truncate=False)
+```
 
+```
 +--------------+------------------------------------------+
 |car_synsets   |lemma_names                               |
 +--------------+------------------------------------------+
@@ -299,9 +331,12 @@ df_2 = df_lemmas.select('car_synsets',
                         synset_definition_udf(df.car_synsets).alias('definition'))
 ```
 
+
 ```{python}
 df_2.show()
+```
 
+```
 +--------------+--------------------+--------------------+
 |   car_synsets|         lemma_names|          definition|
 +--------------+--------------------+--------------------+
