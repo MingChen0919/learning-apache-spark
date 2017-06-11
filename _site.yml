@@ -69,7 +69,7 @@ navbar:
       icon: fa-gear
       menu:
         - text: "NLP and NLTK basics"
-        - href: hlp-and-nltk-basics.html
+          href: nlp-and-nltk-basics.html
   right:
     - icon: fa-github
       href: https://github.com/MingChen0919/learning-apache-spark
