@@ -12,7 +12,7 @@
 <meta name="author" content="Ming Chen" />
 
 
-<title>Regularization</title>
+<title>NLP and NLTK basics</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -321,46 +321,90 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Regularization</h1>
+<h1 class="title toc-ignore">NLP and NLTK basics</h1>
 <h4 class="author"><em>Ming Chen</em></h4>
-<h4 class="date"><em>6/5/2017</em></h4>
+<h4 class="date"><em>6/11/2017</em></h4>
 
 </div>
 
 
-<div id="regularization" class="section level2">
-<h2>Regularization</h2>
-<p>Regularization is the technique used to solve the overfitting problem. An overfitted model means that the model can predict very well with the training data, but perform poorly with independent validation data.</p>
-<p>When we add more predictors to our model, we will almost neccessarily decrease the <strong>Residual Sum of Squares</strong> (RSS; smaller RSS indicates better model). This increases the complexity of our model and makes our model only perform well on the training data (overfitting).</p>
-<p>To balance the RSS and model overfitting, we introduce penalty for adding new predictors (coefficient <span class="math inline">\(\beta \neq 0\)</span>) to the model.</p>
-</div>
-<div id="lasso-regularization-and-ridge-regularization" class="section level2">
-<h2>LASSO regularization and Ridge regularization</h2>
+<div id="basic-terminology" class="section level2">
+<h2>Basic terminology</h2>
 <ul>
-<li><strong>LASSO</strong>: <span class="math inline">\(min \{RSS + \lambda\sum_{j=1}^{p}|\beta|\}\)</span></li>
-<li><strong>Ridge</strong>: <span class="math inline">\(min \{RSS + \lambda\sum_{j=1}^{p}\beta^2_j\}\)</span></li>
+<li><strong>text</strong>: a sequence of words and punctuation.</li>
+<li><strong>frequency distribution</strong>: the frequency of words in a text object.</li>
+<li><strong>collocation</strong>: a <strong>sequence of words</strong> that occur together unusually often.</li>
+<li><strong>bigrams</strong>: word pairs. High frequent bigrams are collocations.</li>
+<li><strong>corpus</strong>: a large body of text</li>
+<li><strong>wordnet</strong>: a lexical database in which english words are grouped into sets of synonyms (<strong>also called synsets</strong>).</li>
+<li><strong>text normalization</strong>: the process of transforming text into a single canonical form, e.g., converting text to lowercase, removing punctuations and so on.</li>
+<li><strong>Lemmatization</strong>: the process of grouping variant forms of the same word so that they can be analyzed as a single item.</li>
+<li><strong>Stemming</strong>: the process of reducing inflected words to their <strong>word stem</strong>.</li>
+<li><strong>tokenization</strong>:</li>
+<li><strong>segmentation</strong>:</li>
+<li><strong>chunking</strong>:</li>
 </ul>
 </div>
-<div id="elastic-net-regularization" class="section level2">
-<h2>Elastic Net regularization</h2>
-<p>Elastic net is a regularized method that linearly combines penalities of the lasso and ridge methods.</p>
-<ul>
-<li><strong>elastic net</strong>: <span class="math inline">\(min \{RSS + \lambda_1\sum_{j=1}^{p}|\beta| + \lambda_2\sum_{j=1}^{p}\beta^2_j\}\)</span></li>
-</ul>
+<div id="texts-as-lists-of-words" class="section level2">
+<h2>Texts as lists of words</h2>
+<p>Create a data frame consisting of text elements.</p>
+<pre class="python"><code>import pandas as pd
+pdf = pd.DataFrame({
+        &#39;texts&#39;: [[&#39;I&#39;, &#39;like&#39;, &#39;playing&#39;, &#39;basketball&#39;],
+                 [&#39;I&#39;, &#39;like&#39;, &#39;coding&#39;],
+                 [&#39;I&#39;, &#39;like&#39;, &#39;machine&#39;, &#39;learning&#39;, &#39;very&#39;, &#39;much&#39;]]
+    })
+    
+df = spark.createDataFrame(pdf)
+df.show(truncate=False)
+
++----------------------------------------+
+|texts                                   |
++----------------------------------------+
+|[I, like, playing, basketball]          |
+|[I, like, coding]                       |
+|[I, like, machine, learning, very, much]|
++----------------------------------------+</code></pre>
 </div>
-<div id="regparam-and-elasticnetparam-parameters-in-regression-models" class="section level2">
-<h2><em>regParam</em> and <em>elasticNetParam</em> parameters in regression models</h2>
-<ul>
-<li><strong>regParam</strong>: regularization parameter <span class="math inline">\(\lambda\)</span></li>
-<li><strong>elasticNetParam</strong>: <span class="math inline">\(\lambda_2\)</span> ridge penalty</li>
-<li><strong>Scenarios</strong>:
-<ul>
-<li><em>regParam</em> = <span class="math inline">\(0\)</span>, <em>elasticNetParam</em> = <span class="math inline">\(0\)</span>: no regularization applied, <span class="math inline">\(\lambda = 0\)</span></li>
-<li><em>regParam</em> <span class="math inline">\(\neq 0\)</span>, <em>elasticNetParam</em> = <span class="math inline">\(1\)</span>: lasso regularization applied</li>
-<li><em>regParam</em> <span class="math inline">\(\neq 0\)</span>, <em>elasticNetParam</em> = <span class="math inline">\(0\)</span>: ridge regularization applied</li>
-<li><em>regParam</em> <span class="math inline">\(\neq 0\)</span>, <span class="math inline">\(0 &lt; elasticNetParam &lt; 1\)</span>: elastic net regularization applied</li>
-</ul></li>
-</ul>
+<div id="ngrams-and-collocations" class="section level2">
+<h2>Ngrams and collocations</h2>
+<p>Transform texts to 2-grams, 3-grams and 4-grams collocations.</p>
+<pre class="python"><code>from pyspark.ml.feature import NGram
+from pyspark.ml import Pipeline
+ngrams = [NGram(n=n, inputCol=&#39;texts&#39;, outputCol=str(n)+&#39;-grams&#39;) for n in [2,3,4]]
+
+# build pipeline model
+pipeline = Pipeline(stages=ngrams)
+
+# transform data
+texts_ngrams = pipeline.fit(df).transform(df)</code></pre>
+<pre class="python"><code># display result
+texts_ngrams.select(&#39;2-grams&#39;).show(truncate=False)
+texts_ngrams.select(&#39;3-grams&#39;).show(truncate=False)
+texts_ngrams.select(&#39;4-grams&#39;).show(truncate=False)</code></pre>
+<pre class="python"><code>+------------------------------------------------------------------+
+|2-grams                                                           |
++------------------------------------------------------------------+
+|[I like, like playing, playing basketball]                        |
+|[I like, like coding]                                             |
+|[I like, like machine, machine learning, learning very, very much]|
++------------------------------------------------------------------+
+
++----------------------------------------------------------------------------------+
+|3-grams                                                                           |
++----------------------------------------------------------------------------------+
+|[I like playing, like playing basketball]                                         |
+|[I like coding]                                                                   |
+|[I like machine, like machine learning, machine learning very, learning very much]|
++----------------------------------------------------------------------------------+
+
++---------------------------------------------------------------------------------+
+|4-grams                                                                          |
++---------------------------------------------------------------------------------+
+|[I like playing basketball]                                                      |
+|[]                                                                               |
+|[I like machine learning, like machine learning very, machine learning very much]|
++---------------------------------------------------------------------------------+</code></pre>
 </div>
 
 <center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>

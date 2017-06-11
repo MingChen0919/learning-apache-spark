@@ -1,0 +1,102 @@
+---
+title: "NLP and NLTK basics"
+author: "Ming Chen"
+date: "6/11/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+## Basic terminology
+
+* **text**: a sequence of words and punctuation.
+* **frequency distribution**: the frequency of words in a text object.
+* **collocation**: a **sequence of words** that occur together unusually often.
+* **bigrams**: word pairs. High frequent bigrams are collocations.
+* **corpus**: a large body of text
+* **wordnet**: a lexical database in which english words are grouped into sets of synonyms (**also called synsets**).
+* **text normalization**: the process of transforming text into a single canonical form, e.g., converting text to lowercase, removing punctuations and so on.
+* **Lemmatization**: the process of grouping variant forms of the same word so that they can be analyzed as a single item.
+* **Stemming**: the process of reducing inflected words to their **word stem**.
+* **tokenization**:
+* **segmentation**:
+* **chunking**:
+
+## Texts as lists of words
+
+Create a data frame consisting of text elements.
+
+```{python}
+import pandas as pd
+pdf = pd.DataFrame({
+        'texts': [['I', 'like', 'playing', 'basketball'],
+                 ['I', 'like', 'coding'],
+                 ['I', 'like', 'machine', 'learning', 'very', 'much']]
+    })
+    
+df = spark.createDataFrame(pdf)
+df.show(truncate=False)
+
++----------------------------------------+
+|texts                                   |
++----------------------------------------+
+|[I, like, playing, basketball]          |
+|[I, like, coding]                       |
+|[I, like, machine, learning, very, much]|
++----------------------------------------+
+```
+
+
+## Ngrams and collocations
+
+Transform texts to 2-grams, 3-grams and 4-grams collocations.
+
+```{python}
+from pyspark.ml.feature import NGram
+from pyspark.ml import Pipeline
+ngrams = [NGram(n=n, inputCol='texts', outputCol=str(n)+'-grams') for n in [2,3,4]]
+
+# build pipeline model
+pipeline = Pipeline(stages=ngrams)
+
+# transform data
+texts_ngrams = pipeline.fit(df).transform(df)
+```
+
+```{python}
+# display result
+texts_ngrams.select('2-grams').show(truncate=False)
+texts_ngrams.select('3-grams').show(truncate=False)
+texts_ngrams.select('4-grams').show(truncate=False)
+```
+
+```{python}
++------------------------------------------------------------------+
+|2-grams                                                           |
++------------------------------------------------------------------+
+|[I like, like playing, playing basketball]                        |
+|[I like, like coding]                                             |
+|[I like, like machine, machine learning, learning very, very much]|
++------------------------------------------------------------------+
+
++----------------------------------------------------------------------------------+
+|3-grams                                                                           |
++----------------------------------------------------------------------------------+
+|[I like playing, like playing basketball]                                         |
+|[I like coding]                                                                   |
+|[I like machine, like machine learning, machine learning very, learning very much]|
++----------------------------------------------------------------------------------+
+
++---------------------------------------------------------------------------------+
+|4-grams                                                                          |
++---------------------------------------------------------------------------------+
+|[I like playing basketball]                                                      |
+|[]                                                                               |
+|[I like machine learning, like machine learning very, machine learning very much]|
++---------------------------------------------------------------------------------+
+```
+
+
+

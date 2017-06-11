@@ -65,11 +65,14 @@ navbar:
           href: regularization.html
         - text: "K-folds Cross Validation"
           href: k-folds-cross-validation.html
+    - text: "NLP"
+      icon: fa-gear
+      menu:
+        - text: "NLP and NLTK basics"
+        - href: hlp-and-nltk-basics.html
   right:
     - icon: fa-github
       href: https://github.com/MingChen0919/learning-apache-spark
-    - icon: fa-twitter
-      href: https://twitter.com/mingchen0919
 output:
   html_document:
     theme: cosmo
