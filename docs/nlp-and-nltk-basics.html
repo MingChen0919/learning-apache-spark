@@ -494,6 +494,61 @@ len(corpus_data.sents(fileids=&#39;twitter.txt&#39;))
 
 14</code></pre>
 </div>
+<div id="wordnet" class="section level2">
+<h2>WordNet</h2>
+<p>The <code>nltk.corpus.wordnet.synsets()</code> function load all synsents with a given lemma and part of speech tag.</p>
+<p>Load all synsets into a spark data frame given the lemma <code>car</code>.</p>
+<pre class="python"><code>pdf = pd.DataFrame({
+        &#39;car_synsets&#39;: [synsets._name for synsets in wordnet.synsets(&#39;car&#39;)]
+    })
+df = spark.createDataFrame(pdf)
+df.show()</code></pre>
+<pre class="python"><code>+--------------+
+|   car_synsets|
++--------------+
+|      car.n.01|
+|      car.n.02|
+|      car.n.03|
+|      car.n.04|
+|cable_car.n.01|
++--------------+</code></pre>
+<p><strong>Get lemma names given a synset</strong></p>
+<pre class="python"><code>from pyspark.sql.functions import udf
+from pyspark.sql.types import *
+from nltk.corpus import wordnet
+
+returntype = ArrayType(StringType())
+synset_lemmas_udf = udf(lambda x: wordnet.synset(x).lemma_names(), returnType=returntype)
+df_lemmas = df.select(&#39;car_synsets&#39;, synset_lemmas_udf(df.car_synsets).alias(&#39;lemma_names&#39;))</code></pre>
+<pre class="python"><code>## display result
+df_lemmas.show(truncate=False)
+
++--------------+------------------------------------------+
+|car_synsets   |lemma_names                               |
++--------------+------------------------------------------+
+|car.n.01      |[car, auto, automobile, machine, motorcar]|
+|car.n.02      |[car, railcar, railway_car, railroad_car] |
+|car.n.03      |[car, gondola]                            |
+|car.n.04      |[car, elevator_car]                       |
+|cable_car.n.01|[cable_car, car]                          |
++--------------+------------------------------------------+</code></pre>
+<p><strong>Get synset definition</strong></p>
+<pre class="python"><code>synset_definition_udf = udf(lambda x: wordnet.synset(x).definition(), StringType())
+df_2 = df_lemmas.select(&#39;car_synsets&#39;,
+                        &#39;lemma_names&#39;,
+                        synset_definition_udf(df.car_synsets).alias(&#39;definition&#39;))</code></pre>
+<pre class="python"><code>df_2.show()
+
++--------------+--------------------+--------------------+
+|   car_synsets|         lemma_names|          definition|
++--------------+--------------------+--------------------+
+|      car.n.01|[car, auto, autom...|a motor vehicle w...|
+|      car.n.02|[car, railcar, ra...|a wheeled vehicle...|
+|      car.n.03|      [car, gondola]|the compartment t...|
+|      car.n.04| [car, elevator_car]|where passengers ...|
+|cable_car.n.01|    [cable_car, car]|a conveyance for ...|
++--------------+--------------------+--------------------+</code></pre>
+</div>
 
 <center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>
 

@@ -235,3 +235,81 @@ len(corpus_data.sents(fileids='twitter.txt'))
 14
 ```
 
+
+## WordNet
+
+The `nltk.corpus.wordnet.synsets()` function load all synsents with a given lemma and part of speech tag.
+
+Load all synsets into a spark data frame given the lemma `car`.
+
+```{python}
+pdf = pd.DataFrame({
+        'car_synsets': [synsets._name for synsets in wordnet.synsets('car')]
+    })
+df = spark.createDataFrame(pdf)
+df.show()
+```
+
+```{python}
++--------------+
+|   car_synsets|
++--------------+
+|      car.n.01|
+|      car.n.02|
+|      car.n.03|
+|      car.n.04|
+|cable_car.n.01|
++--------------+
+```
+
+**Get lemma names given a synset**
+
+```{python}
+from pyspark.sql.functions import udf
+from pyspark.sql.types import *
+from nltk.corpus import wordnet
+
+returntype = ArrayType(StringType())
+synset_lemmas_udf = udf(lambda x: wordnet.synset(x).lemma_names(), returnType=returntype)
+df_lemmas = df.select('car_synsets', synset_lemmas_udf(df.car_synsets).alias('lemma_names'))
+```
+
+```{python}
+## display result
+df_lemmas.show(truncate=False)
+
++--------------+------------------------------------------+
+|car_synsets   |lemma_names                               |
++--------------+------------------------------------------+
+|car.n.01      |[car, auto, automobile, machine, motorcar]|
+|car.n.02      |[car, railcar, railway_car, railroad_car] |
+|car.n.03      |[car, gondola]                            |
+|car.n.04      |[car, elevator_car]                       |
+|cable_car.n.01|[cable_car, car]                          |
++--------------+------------------------------------------+
+```
+
+
+**Get synset definition**
+
+```{python}
+synset_definition_udf = udf(lambda x: wordnet.synset(x).definition(), StringType())
+df_2 = df_lemmas.select('car_synsets',
+                        'lemma_names',
+                        synset_definition_udf(df.car_synsets).alias('definition'))
+```
+
+```{python}
+df_2.show()
+
++--------------+--------------------+--------------------+
+|   car_synsets|         lemma_names|          definition|
++--------------+--------------------+--------------------+
+|      car.n.01|[car, auto, autom...|a motor vehicle w...|
+|      car.n.02|[car, railcar, ra...|a wheeled vehicle...|
+|      car.n.03|      [car, gondola]|the compartment t...|
+|      car.n.04| [car, elevator_car]|where passengers ...|
+|cable_car.n.01|    [cable_car, car]|a conveyance for ...|
++--------------+--------------------+--------------------+
+```
+
