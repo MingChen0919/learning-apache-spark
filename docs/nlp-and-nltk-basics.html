@@ -327,6 +327,8 @@ $(document).ready(function () {
 </div>
 
 
+<p>A lot of examples in this article are borrowed from the book written by <strong>Bird et al. (2009)</strong>. Here I tried to implement the examples from the book with spark as much as possible.</p>
+<p>Refer to the book for more details: *Bird, Steven, Ewan Klein, and Edward Loper. Natural language processing with Python: analyzing text with the natural language toolkit. &quot; O’Reilly Media, Inc.“, 2009.*</p>
 <div id="basic-terminology" class="section level2">
 <h2>Basic terminology</h2>
 <ul>
@@ -404,6 +406,93 @@ texts_ngrams.select(&#39;4-grams&#39;).show(truncate=False)</code></pre>
 |[]                                                                               |
 |[I like machine learning, like machine learning very, machine learning very much]|
 +---------------------------------------------------------------------------------+</code></pre>
+</div>
+<div id="access-corpora-from-the-nltk-package" class="section level2">
+<h2>Access corpora from the NLTK package</h2>
+<p><strong>The <em>gutenberg</em> corpus</strong></p>
+<pre class="python"><code>## get file ids in gutenberg corpus
+gutenberg_fileids = gutenberg.fileids()
+gutenberg_fileids</code></pre>
+<pre class="python"><code>[u&#39;austen-emma.txt&#39;,
+ u&#39;austen-persuasion.txt&#39;,
+ u&#39;austen-sense.txt&#39;,
+ u&#39;bible-kjv.txt&#39;,
+ u&#39;blake-poems.txt&#39;,
+ u&#39;bryant-stories.txt&#39;,
+ u&#39;burgess-busterbrown.txt&#39;,
+ u&#39;carroll-alice.txt&#39;,
+ u&#39;chesterton-ball.txt&#39;,
+ u&#39;chesterton-brown.txt&#39;,
+ u&#39;chesterton-thursday.txt&#39;,
+ u&#39;edgeworth-parents.txt&#39;,
+ u&#39;melville-moby_dick.txt&#39;,
+ u&#39;milton-paradise.txt&#39;,
+ u&#39;shakespeare-caesar.txt&#39;,
+ u&#39;shakespeare-hamlet.txt&#39;,
+ u&#39;shakespeare-macbeth.txt&#39;,
+ u&#39;whitman-leaves.txt&#39;]</code></pre>
+<pre class="python"><code>## absolute path of a file
+gutenberg.abspath(gutenberg_fileids[0])</code></pre>
+<pre class="python"><code>FileSystemPathPointer(u&#39;/Users/mingchen/nltk_data/corpora/gutenberg/austen-emma.txt&#39;)</code></pre>
+<pre class="python"><code>## raw text
+gutenberg.raw(gutenberg_fileids[0])[:200]</code></pre>
+<pre class="python"><code>u&#39;[Emma by Jane Austen 1816]\n\nVOLUME I\n\nCHAPTER I\n\n\nEmma Woodhouse, handsome, clever, and rich, with a comfortable home\nand happy disposition, seemed to unite some of the best blessings\nof existence; an&#39;</code></pre>
+<pre class="python"><code>## the words of the whole corpus
+gutenberg.words()
+
+[u&#39;[&#39;, u&#39;Emma&#39;, u&#39;by&#39;, u&#39;Jane&#39;, u&#39;Austen&#39;, u&#39;1816&#39;, ...]
+
+len(gutenberg.words())
+
+2621613</code></pre>
+<pre class="python"><code>## the sentences of a speficied file
+gutenberg.sents(gutenberg_fileids[0])
+
+[[u&#39;[&#39;, u&#39;Emma&#39;, u&#39;by&#39;, u&#39;Jane&#39;, u&#39;Austen&#39;, u&#39;1816&#39;, u&#39;]&#39;], [u&#39;VOLUME&#39;, u&#39;I&#39;], ...]
+
+len(gutenberg.sents(gutenberg_fileids[0]))
+
+7752</code></pre>
+<p><strong>Loading custom corpus</strong></p>
+<p>Let’s create a corpus consisting all files from the <strong>./data</strong> directory.</p>
+<pre class="python"><code>from nltk.corpus import PlaintextCorpusReader
+corpus_data = PlaintextCorpusReader(&#39;./data&#39;, &#39;.*&#39;)</code></pre>
+<p>Files in the corpus <em>corpus_data</em></p>
+<pre class="python"><code>data_fileids = corpus_data.fileids()
+data_fileids
+
+[&#39;Advertising.csv&#39;,
+ &#39;Credit.csv&#39;,
+ &#39;WineData.csv&#39;,
+ &#39;churn-bigml-20.csv&#39;,
+ &#39;churn-bigml-80.csv&#39;,
+ &#39;cuse_binary.csv&#39;,
+ &#39;horseshoe_crab.csv&#39;,
+ &#39;hsb2.csv&#39;,
+ &#39;hsb2_modified.csv&#39;,
+ &#39;iris.csv&#39;,
+ &#39;mtcars.csv&#39;,
+ &#39;prostate.csv&#39;,
+ &#39;twitter.txt&#39;]</code></pre>
+<p>Raw text in <em>twitter.txt</em></p>
+<pre class="python"><code>corpus_data.raw(&#39;twitter.txt&#39;)</code></pre>
+<pre class="python"><code>u&#39;Fresh install of XP on new computer. Sweet relief! fuck vista\t1018769417\t1.0\nWell. Now I know where to go when I want my knives. #ChiChevySXSW http://post.ly/RvDl\t10284216536\t1.0\n&quot;Literally six weeks before I can take off &quot;&quot;SSC Chair&quot;&quot; off my email. Its like the torturous 4th mile before everything stops hurting.&quot;\t10298589026\t1.0\nMitsubishi i MiEV - Wikipedia, the free encyclopedia - http://goo.gl/xipe Cutest car ever!\t109017669432377344\t1.0\n\&#39;Cheap Eats in SLP\&#39; - http://t.co/4w8gRp7\t109642968603963392\t1.0\nTeenage Mutant Ninja Turtle art is never a bad thing... http://bit.ly/aDMHyW\t10995492579\t1.0\nNew demographic survey of online video viewers: http://bit.ly/cx8b7I via @KellyOlexa\t11713360136\t1.0\nhi all - i\&#39;m going to be tweeting things lookstat at the @lookstat twitter account. please follow me there\t1208319583\t1.0\nHoly carp, no. That movie will seriously suffer for it. RT @MouseInfo: Anyone excited for The Little Mermaid in 3D?\t121330835726155776\t1.0\n&quot;Did I really need to learn &quot;&quot;I bought a box and put in it things&quot;&quot; in arabic? This is the most random book ever.&quot;\t12358025545\t1.0\n&#39;</code></pre>
+<p>Words and sentences in file <em>twitter.txt</em>.</p>
+<pre class="python"><code>corpus_data.words(fileids=&#39;twitter.txt&#39;)
+
+[u&#39;Fresh&#39;, u&#39;install&#39;, u&#39;of&#39;, u&#39;XP&#39;, u&#39;on&#39;, u&#39;new&#39;, ...]
+
+len(corpus_data.words(fileids=&#39;twitter.txt&#39;))
+
+253
+
+corpus_data.sents(fileids=&#39;twitter.txt&#39;)
+
+[[u&#39;Fresh&#39;, u&#39;install&#39;, u&#39;of&#39;, u&#39;XP&#39;, u&#39;on&#39;, u&#39;new&#39;, u&#39;computer&#39;, u&#39;.&#39;], [u&#39;Sweet&#39;, u&#39;relief&#39;, u&#39;!&#39;], ...]
+
+len(corpus_data.sents(fileids=&#39;twitter.txt&#39;))
+
+14</code></pre>
 </div>
 
 <center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>

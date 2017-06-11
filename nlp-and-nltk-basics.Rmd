@@ -9,6 +9,10 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
 ```
 
+A lot of examples in this article are borrowed from the book written by **Bird et al. (2009)**. Here I tried to implement the examples from the book with spark as much as possible.
+
+Refer to the book for more details: *Bird, Steven, Ewan Klein, and Edward Loper. Natural language processing with Python: analyzing text with the natural language toolkit. " O'Reilly Media, Inc.", 2009.*
+
 ## Basic terminology
 
 * **text**: a sequence of words and punctuation.
@@ -99,4 +103,135 @@ texts_ngrams.select('4-grams').show(truncate=False)
 ```
 
 
+## Access corpora from the NLTK package
+
+**The *gutenberg* corpus**
+
+```{python}
+## get file ids in gutenberg corpus
+gutenberg_fileids = gutenberg.fileids()
+gutenberg_fileids
+```
+
+```{python}
+[u'austen-emma.txt',
+ u'austen-persuasion.txt',
+ u'austen-sense.txt',
+ u'bible-kjv.txt',
+ u'blake-poems.txt',
+ u'bryant-stories.txt',
+ u'burgess-busterbrown.txt',
+ u'carroll-alice.txt',
+ u'chesterton-ball.txt',
+ u'chesterton-brown.txt',
+ u'chesterton-thursday.txt',
+ u'edgeworth-parents.txt',
+ u'melville-moby_dick.txt',
+ u'milton-paradise.txt',
+ u'shakespeare-caesar.txt',
+ u'shakespeare-hamlet.txt',
+ u'shakespeare-macbeth.txt',
+ u'whitman-leaves.txt']
+```
+
+```{python}
+## absolute path of a file
+gutenberg.abspath(gutenberg_fileids[0])
+```
+
+```{python}
+FileSystemPathPointer(u'/Users/mingchen/nltk_data/corpora/gutenberg/austen-emma.txt')
+```
+
+```{python}
+## raw text
+gutenberg.raw(gutenberg_fileids[0])[:200]
+```
+
+```{python}
+u'[Emma by Jane Austen 1816]\n\nVOLUME I\n\nCHAPTER I\n\n\nEmma Woodhouse, handsome, clever, and rich, with a comfortable home\nand happy disposition, seemed to unite some of the best blessings\nof existence; an'
+```
+
+```{python}
+## the words of the whole corpus
+gutenberg.words()
+
+[u'[', u'Emma', u'by', u'Jane', u'Austen', u'1816', ...]
+
+len(gutenberg.words())
+
+2621613
+```
+
+```{python}
+## the sentences of a speficied file
+gutenberg.sents(gutenberg_fileids[0])
+
+[[u'[', u'Emma', u'by', u'Jane', u'Austen', u'1816', u']'], [u'VOLUME', u'I'], ...]
+
+len(gutenberg.sents(gutenberg_fileids[0]))
+
+7752
+```
+
+**Loading custom corpus**
+
+Let's create a corpus consisting all files from the **./data** directory.
+
+```{python}
+from nltk.corpus import PlaintextCorpusReader
+corpus_data = PlaintextCorpusReader('./data', '.*')
+```
+
+Files in the corpus *corpus_data*
+
+```{python}
+data_fileids = corpus_data.fileids()
+data_fileids
+
+['Advertising.csv',
+ 'Credit.csv',
+ 'WineData.csv',
+ 'churn-bigml-20.csv',
+ 'churn-bigml-80.csv',
+ 'cuse_binary.csv',
+ 'horseshoe_crab.csv',
+ 'hsb2.csv',
+ 'hsb2_modified.csv',
+ 'iris.csv',
+ 'mtcars.csv',
+ 'prostate.csv',
+ 'twitter.txt']
+```
+
+Raw text in *twitter.txt*
+
+```{python}
+corpus_data.raw('twitter.txt')
+```
+
+```{python}
+u'Fresh install of XP on new computer. Sweet relief! fuck vista\t1018769417\t1.0\nWell. Now I know where to go when I want my knives. #ChiChevySXSW http://post.ly/RvDl\t10284216536\t1.0\n"Literally six weeks before I can take off ""SSC Chair"" off my email. Its like the torturous 4th mile before everything stops hurting."\t10298589026\t1.0\nMitsubishi i MiEV - Wikipedia, the free encyclopedia - http://goo.gl/xipe Cutest car ever!\t109017669432377344\t1.0\n\'Cheap Eats in SLP\' - http://t.co/4w8gRp7\t109642968603963392\t1.0\nTeenage Mutant Ninja Turtle art is never a bad thing... http://bit.ly/aDMHyW\t10995492579\t1.0\nNew demographic survey of online video viewers: http://bit.ly/cx8b7I via @KellyOlexa\t11713360136\t1.0\nhi all - i\'m going to be tweeting things lookstat at the @lookstat twitter account. please follow me there\t1208319583\t1.0\nHoly carp, no. That movie will seriously suffer for it. RT @MouseInfo: Anyone excited for The Little Mermaid in 3D?\t121330835726155776\t1.0\n"Did I really need to learn ""I bought a box and put in it things"" in arabic? This is the most random book ever."\t12358025545\t1.0\n'
+```
+
+
+Words and sentences in file *twitter.txt*.
+
+```{python}
+corpus_data.words(fileids='twitter.txt')
+
+[u'Fresh', u'install', u'of', u'XP', u'on', u'new', ...]
+
+len(corpus_data.words(fileids='twitter.txt'))
+
+253
+
+corpus_data.sents(fileids='twitter.txt')
+
+[[u'Fresh', u'install', u'of', u'XP', u'on', u'new', u'computer', u'.'], [u'Sweet', u'relief', u'!'], ...]
+
+len(corpus_data.sents(fileids='twitter.txt'))
+
+14
+```
 
