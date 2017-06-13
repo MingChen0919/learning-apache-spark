@@ -9,10 +9,10 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="author" content="Wenqiang Feng &amp; Ming Chen" />
+<meta name="author" content="Ming Chen" />
 
 
-<title>Spark on Jetstream Cloud</title>
+<title>Information extraction</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -323,34 +323,76 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Spark on Jetstream Cloud</h1>
-<h4 class="author"><em>Wenqiang Feng &amp; Ming Chen</em></h4>
-<h4 class="date"><em>3/8/2017</em></h4>
+<h1 class="title toc-ignore">Information extraction</h1>
+<h4 class="author"><em>Ming Chen</em></h4>
+<h4 class="date"><em>6/13/2017</em></h4>
 
 </div>
 
 
-<div id="set-up-apache-spark-on-jetstream" class="section level2">
-<h2>Set up apache spark on jetstream</h2>
-<ul>
-<li>Install linuxbrew and spark</li>
-</ul>
-<pre class="python"><code>sudo apt-get install -y ruby
-ruby -e &quot;$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install)&quot;
+<div id="simple-nlp-pipeline-architecture" class="section level2">
+<h2>Simple NLP pipeline architecture</h2>
+<div class="figure">
+<img src="images/simple-nlp-pipeline.png" />
 
-echo &#39;export PATH=&quot;/home/mchen33/.linuxbrew/bin:$PATH&quot;&#39; &gt;&gt;~/.bash_profile
-echo &#39;export MANPATH=&quot;/home/mchen33/.linuxbrew/share/man:$MANPATH&quot;&#39; &gt;&gt;~/.bash_profile
-echo &#39;export INFOPATH=&quot;/home/mchen33/.linuxbrew/share/info:$INFOPATH&quot;&#39; &gt;&gt;~/.bash_profile
+</div>
+<p><strong>Reference:</strong> Bird, Steven, Ewan Klein, and Edward Loper. Natural language processing with Python: analyzing text with the natural language toolkit. &quot; O’Reilly Media, Inc.“, 2009.</p>
+</div>
+<div id="example-data" class="section level2">
+<h2>Example data</h2>
+<p>The raw text is from the gutenberg corpus from the nltk package. The fileid is <em>milton-paradise.txt</em>.</p>
+<div id="get-the-data" class="section level3">
+<h3>Get the data</h3>
+<p><strong>Raw text</strong></p>
+<pre class="python"><code>import nltk
+from nltk.corpus import gutenberg
 
-source ~/.bash_profile
-  
-sudo apt-get install build-essential
-
-brew install apache-spark
-
-## install java
-sudo apt-get install -y default-jre</code></pre>
-<pre class="python"><code>export SPARK_LOCAL_IP=&quot;127.0.0.1&quot;</code></pre>
+milton_paradise = gutenberg.raw(&#39;milton-paradise.txt&#39;)</code></pre>
+<p><strong>Create a spark data frame to store raw text</strong> * Use the <code>nltk.sent_tokenize()</code> function to split text into sentences.</p>
+<pre class="python"><code>pdf = pd.DataFrame({
+        &#39;sentences&#39;: nltk.sent_tokenize(milton_paradise)
+    })
+df = spark.createDataFrame(pdf)
+df.show(n=5)</code></pre>
+<pre><code>+--------------------+
+|           sentences|
++--------------------+
+|[Paradise Lost by...|
+|And chiefly thou,...|
+|Say first--for He...|
+|Who first seduced...|
+|Th&#39; infernal Serp...|
++--------------------+
+only showing top 5 rows</code></pre>
+<p><strong>Word-tokenize and POS tag each words</strong></p>
+<pre class="python"><code>## define udf function
+def sent_to_tag_words(sent):
+    wordlist = nltk.word_tokenize(sent)
+    tagged_words = nltk.pos_tag(wordlist)
+    return(tagged_words)
+## define schema for returned result from the udf function
+## the returned result is a list of tuples.
+schema = ArrayType(StructType([
+            StructField(&#39;f1&#39;, StringType()),
+            StructField(&#39;f2&#39;, StringType())
+        ]))
+        
+## the udf function
+sent_to_tag_words_udf = udf(sent_to_tag_words, schema)</code></pre>
+<p>Transform data</p>
+<pre class="python"><code>df_tagged_words = df.select(sent_to_tag_words_udf(df.sentences).alias(&#39;tagged_words&#39;))
+df_tagged_words.show(5)</code></pre>
+<pre><code>+--------------------+
+|        tagged_words|
++--------------------+
+|[[[,JJ], [Paradis...|
+|[[And,CC], [chief...|
+|[[Say,NNP], [firs...|
+|[[Who,WP], [first...|
+|[[Th,NNP], [&#39;,POS...|
++--------------------+
+only showing top 5 rows</code></pre>
+</div>
 </div>
 
 <center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>

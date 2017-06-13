@@ -1,0 +1,95 @@
+---
+title: "Information extraction"
+author: "Ming Chen"
+date: "6/13/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+
+## Simple NLP pipeline architecture
+
+![](images/simple-nlp-pipeline.png)
+
+**Reference:** Bird, Steven, Ewan Klein, and Edward Loper. Natural language processing with Python: analyzing text with the natural language toolkit. " O'Reilly Media, Inc.", 2009.
+
+## Example data
+
+The raw text is from the gutenberg corpus from the nltk package. The fileid is *milton-paradise.txt*.
+
+### Get the data
+
+**Raw text**
+
+```{python}
+import nltk
+from nltk.corpus import gutenberg
+
+milton_paradise = gutenberg.raw('milton-paradise.txt')
+```
+
+**Create a spark data frame to store raw text**
+    * Use the `nltk.sent_tokenize()` function to split text into sentences.
+    
+```{python}
+pdf = pd.DataFrame({
+        'sentences': nltk.sent_tokenize(milton_paradise)
+    })
+df = spark.createDataFrame(pdf)
+df.show(n=5)
+```
+
+```
++--------------------+
+|           sentences|
++--------------------+
+|[Paradise Lost by...|
+|And chiefly thou,...|
+|Say first--for He...|
+|Who first seduced...|
+|Th' infernal Serp...|
++--------------------+
+only showing top 5 rows
+```
+
+**Word-tokenize and POS tag each words**
+
+```{python}
+## define udf function
+def sent_to_tag_words(sent):
+    wordlist = nltk.word_tokenize(sent)
+    tagged_words = nltk.pos_tag(wordlist)
+    return(tagged_words)
+## define schema for returned result from the udf function
+## the returned result is a list of tuples.
+schema = ArrayType(StructType([
+            StructField('f1', StringType()),
+            StructField('f2', StringType())
+        ]))
+        
+## the udf function
+sent_to_tag_words_udf = udf(sent_to_tag_words, schema)
+```
+
+Transform data
+
+```{python}
+df_tagged_words = df.select(sent_to_tag_words_udf(df.sentences).alias('tagged_words'))
+df_tagged_words.show(5)
+```
+
+```
++--------------------+
+|        tagged_words|
++--------------------+
+|[[[,JJ], [Paradis...|
+|[[And,CC], [chief...|
+|[[Say,NNP], [firs...|
+|[[Who,WP], [first...|
+|[[Th,NNP], [',POS...|
++--------------------+
+only showing top 5 rows
+```

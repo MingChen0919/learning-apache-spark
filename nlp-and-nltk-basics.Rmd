@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
 
 A lot of examples in this article are borrowed from the book written by **Bird et al. (2009)**. Here I tried to implement the examples from the book with spark as much as possible.
 
-Refer to the book for more details: *Bird, Steven, Ewan Klein, and Edward Loper. Natural language processing with Python: analyzing text with the natural language toolkit. " O'Reilly Media, Inc.", 2009.*
+Refer to the book for more details: Bird, Steven, Ewan Klein, and Edward Loper. Natural language processing with Python: analyzing text with the natural language toolkit. " O'Reilly Media, Inc.", 2009.
 
 ## Basic terminology
 

@@ -70,6 +70,8 @@ navbar:
       menu:
         - text: "NLP and NLTK basics"
           href: nlp-and-nltk-basics.html
+        - text: "Information extraction"
+          href: information-extraction.html
   right:
     - icon: fa-github
       href: https://github.com/MingChen0919/learning-apache-spark
