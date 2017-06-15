@@ -348,7 +348,10 @@ $(document).ready(function () {
 from nltk.corpus import gutenberg
 
 milton_paradise = gutenberg.raw(&#39;milton-paradise.txt&#39;)</code></pre>
-<p><strong>Create a spark data frame to store raw text</strong> * Use the <code>nltk.sent_tokenize()</code> function to split text into sentences.</p>
+<p><strong>Create a spark data frame to store raw text</strong></p>
+<ul>
+<li>Use the <code>nltk.sent_tokenize()</code> function to split text into sentences.</li>
+</ul>
 <pre class="python"><code>pdf = pd.DataFrame({
         &#39;sentences&#39;: nltk.sent_tokenize(milton_paradise)
     })
@@ -364,7 +367,7 @@ df.show(n=5)</code></pre>
 |Th&#39; infernal Serp...|
 +--------------------+
 only showing top 5 rows</code></pre>
-<p><strong>Word-tokenize and POS tag each words</strong></p>
+<p><strong>Tokenize and POS-tag each words</strong></p>
 <pre class="python"><code>## define udf function
 def sent_to_tag_words(sent):
     wordlist = nltk.word_tokenize(sent)
@@ -392,6 +395,250 @@ df_tagged_words.show(5)</code></pre>
 |[[Th,NNP], [&#39;,POS...|
 +--------------------+
 only showing top 5 rows</code></pre>
+<p><strong>Chunking</strong></p>
+<p>Chunking is the process of segmenting and labeling multitokens. The following example shows how to do a noun phrase chunking on the tagged words data frame from the previous step.</p>
+<p>First we define a <em>udf</em> function which chunk noun phrases from a list of pos-tagged words.</p>
+<pre class="python"><code>import nltk
+from pyspark.sql.functions import udf
+from pyspark.sql.types import *
+
+# define a udf function to chunk noun phrases from pos-tagged words
+grammar = &quot;NP: {&lt;DT&gt;?&lt;JJ&gt;*&lt;NN&gt;}&quot;
+chunk_parser = nltk.RegexpParser(grammar)
+chunk_parser_udf = udf(lambda x: str(chunk_parser.parse(x)), StringType())</code></pre>
+<p>Transform the data.</p>
+<pre class="python"><code>df_NP_chunks = df_tagged_words.select(chunk_parser_udf(df_tagged_words.tagged_words).alias(&#39;NP_chunk&#39;))</code></pre>
+<p>Part of the result.</p>
+<pre><code>...
+...
+(S
+  [/JJ
+  Paradise/NNP
+  Lost/VBN
+  by/IN
+  John/NNP
+  Milton/NNP
+  1667/CD
+  ]/NNP
+  Book/NNP
+  I/PRP
+  Of/IN
+  Man/NNP
+  &#39;s/POS
+  (NP first/JJ disobedience/NN)
+  ,/,
+  and/CC
+  (NP the/DT fruit/NN)
+  Of/IN
+  (NP that/DT forbidden/JJ tree/NN)
+  whose/WP$
+  (NP mortal/JJ taste/NN)
+  Brought/NNP
+  (NP death/NN)
+  into/IN
+  the/DT
+  World/NNP
+  ,/,
+  and/CC
+  all/DT
+  our/PRP$
+  (NP woe/NN)
+  ,/,
+  With/IN
+  (NP loss/NN)
+  of/IN
+  Eden/NNP
+  ,/,
+  till/VB
+  one/CD
+  greater/JJR
+  (NP Man/NN)
+  Restore/NNP
+  us/PRP
+  ,/,
+  and/CC
+  regain/VB
+  (NP the/DT blissful/JJ seat/NN)
+  ,/,
+  Sing/NNP
+  ,/,
+  Heavenly/NNP
+  Muse/NNP
+  ,/,
+  that/WDT
+  ,/,
+  on/IN
+  (NP the/DT secret/JJ top/NN)
+  Of/IN
+  Oreb/NNP
+  ,/,
+  or/CC
+  of/IN
+  Sinai/NNP
+  ,/,
+  (NP didst/NN)
+  (NP inspire/NN)
+  That/WDT
+  (NP shepherd/NN)
+  who/WP
+  first/RB
+  taught/VBD
+  (NP the/DT chosen/NN)
+  (NP seed/NN)
+  In/IN
+  (NP the/DT beginning/NN)
+  how/WRB
+  the/DT
+  heavens/NNS
+  and/CC
+  (NP earth/NN)
+  Rose/NNP
+  out/IN
+  of/IN
+  (NP Chaos/NN)
+  :/:
+  or/CC
+  ,/,
+  if/IN
+  Sion/NNP
+  (NP hill/NN)
+  Delight/NNP
+  (NP thee/NN)
+  more/RBR
+  ,/,
+  and/CC
+  Siloa/NNP
+  &#39;s/POS
+  (NP brook/NN)
+  that/WDT
+  flowed/VBD
+  Fast/NNP
+  by/IN
+  (NP the/DT oracle/NN)
+  of/IN
+  God/NNP
+  ,/,
+  I/PRP
+  thence/VBP
+  Invoke/NNP
+  (NP thy/NN)
+  (NP aid/NN)
+  to/TO
+  my/PRP$
+  (NP adventurous/JJ song/NN)
+  ,/,
+  That/IN
+  with/IN
+  (NP no/DT middle/JJ flight/NN)
+  intends/VBZ
+  to/TO
+  soar/VB
+  Above/NNP
+  (NP th/NN)
+  &#39;/&#39;&#39;
+  (NP Aonian/JJ mount/NN)
+  ,/,
+  while/IN
+  it/PRP
+  pursues/VBZ
+  Things/NNP
+  unattempted/JJ
+  yet/RB
+  in/IN
+  (NP prose/NN)
+  or/CC
+  (NP rhyme/NN)
+  ./.)|
+|(S
+  And/CC
+  (NP chiefly/NN)
+  (NP thou/NN)
+  ,/,
+  O/NNP
+  Spirit/NNP
+  ,/,
+  that/IN
+  (NP dost/NN)
+  (NP prefer/NN)
+  Before/IN
+  all/DT
+  temples/NNS
+  th/VBP
+  &#39;/&#39;&#39;
+  (NP upright/JJ heart/NN)
+  and/CC
+  (NP pure/NN)
+  ,/,
+  Instruct/NNP
+  me/PRP
+  ,/,
+  for/IN
+  (NP thou/JJ know&#39;st/NN)
+  ;/:
+  thou/CC
+  from/IN
+  the/DT
+  first/JJ
+  Wast/NNP
+  (NP present/NN)
+  ,/,
+  and/CC
+  ,/,
+  with/IN
+  mighty/JJ
+  wings/NNS
+  outspread/VBP
+  ,/,
+  Dove-like/NNP
+  (NP sat&#39;st/NN)
+  brooding/VBG
+  on/IN
+  the/DT
+  vast/JJ
+  Abyss/NNP
+  ,/,
+  And/CC
+  mad&#39;st/VB
+  it/PRP
+  pregnant/JJ
+  :/:
+  what/WP
+  in/IN
+  me/PRP
+  is/VBZ
+  dark/JJ
+  Illumine/NNP
+  ,/,
+  what/WP
+  is/VBZ
+  (NP low/JJ raise/NN)
+  and/CC
+  (NP support/NN)
+  ;/:
+  That/DT
+  ,/,
+  to/TO
+  (NP the/DT height/NN)
+  of/IN
+  (NP this/DT great/JJ argument/NN)
+  ,/,
+  I/PRP
+  may/MD
+  assert/VB
+  Eternal/NNP
+  Providence/NNP
+  ,/,
+  And/CC
+  justify/VB
+  the/DT
+  ways/NNS
+  of/IN
+  God/NNP
+  to/TO
+  men/NNS
+  ./.)  
+...
+...</code></pre>
 </div>
 </div>
 
