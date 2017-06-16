@@ -1,5 +1,5 @@
 ---
-title: "TF-IDF"
+title: "TF-IDF, HashingTF and CountVectorizer"
 author: "Ming Chen"
 date: "6/15/2017"
 output: html_document
