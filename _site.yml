@@ -35,8 +35,8 @@ navbar:
           href: categorical-data.html
         - text: "Continuous variables to categorical variables"
           href: continuous-to-categorical-variable.html
-        - text: "HashingTF and CountVectorizer"
-          href: HashingTF-and-CountVectorizer.html
+        - text: "TF, IDF, HashingTF and CountVectorizer"
+          href: tf-idf.html
         
     - text: "Machine Learning"
       icon: fa-gear

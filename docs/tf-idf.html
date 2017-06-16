@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Ming Chen" />
+
+
+<title>TF-IDF</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-inverse  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Learning Apache Spark</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">
+    <span class="fa fa-home"></span>
+     
+    Home
+  </a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    Getting Start
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="divider"></li>
+    <li class="dropdown-header">Installations</li>
+    <li>
+      <a href="install.html">Installations</a>
+    </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">Integrate Spark</li>
+    <li>
+      <a href="pyspark-on-rodeo.html">Integrate spark with Rodeo</a>
+    </li>
+    <li>
+      <a href="pyspark-on-jupyter.html">Integrate spark with Jupyter</a>
+    </li>
+    <li>
+      <a href="spark-on-jetstream-cloud.html">Spark on jetstream cloud</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    Data Preparation
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="01_entry_points_to_spark.html">Entry points to spark</a>
+    </li>
+    <li>
+      <a href="02_rdd_object.html">RDD object</a>
+    </li>
+    <li>
+      <a href="03_dataframe_object.html">DataFrame object</a>
+    </li>
+    <li>
+      <a href="categorical-data.html">Categorial data</a>
+    </li>
+    <li>
+      <a href="continuous-to-categorical-variable.html">Continuous variables to categorical variables</a>
+    </li>
+    <li>
+      <a href="tf-idf.html">TF, IDF, HashingTF and CountVectorizer</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    Machine Learning
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="divider"></li>
+    <li class="dropdown-header">Regression</li>
+    <li>
+      <a href="linear-regression.html">Linear regression</a>
+    </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">Classification</li>
+    <li>
+      <a href="logistic-regression.html">Logistic regression</a>
+    </li>
+    <li>
+      <a href="decision-tree-classification.html">Decision tree classification</a>
+    </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">More ML methods coming soon</li>
+    <li class="divider"></li>
+    <li>
+      <a href="https://github.com/MingChen0919/learning-apache-spark/tree/master/legacy">Legacy</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    Module Tuning and Evaluation
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="divider"></li>
+    <li class="dropdown-header">Module Tuning</li>
+    <li>
+      <a href="regularization.html">Regularization</a>
+    </li>
+    <li>
+      <a href="k-folds-cross-validation.html">K-folds Cross Validation</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    NLP
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="nlp-and-nltk-basics.html">NLP and NLTK basics</a>
+    </li>
+    <li>
+      <a href="information-extraction.html">Information extraction</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/MingChen0919/learning-apache-spark">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">TF-IDF</h1>
+<h4 class="author"><em>Ming Chen</em></h4>
+<h4 class="date"><em>6/15/2017</em></h4>
+
+</div>
+
+
+<div id="tf-idf-and-tf-idf" class="section level2">
+<h2>TF, IDF and TF-IDF</h2>
+<ul>
+<li><p>TF is the short for <strong>Term Frequency</strong>. It is simply the frequency of a term in a document. The higher the TF is for a specific term, the more important that term is to that document.</p></li>
+<li><p>IDF is the short for <strong>Inverse Document Frequency</strong>. It is the frequency of documents that contain a specific term. If a term exists in every single document, then the <em>Document Frequency</em> is the largest and is 1. And the Inverse Document Frequency will be the smallest. In the situation, this term is <strong>non-informative</strong> for classifying the documents.The IDF is a measure of the relevance of a term. The higher the IDF is, the more relavant the term is.</p></li>
+<li><p>TF-IDF is the product of TF and IDF. A high TF-IDF is obtained when the <strong>The Term Frequency is high and the Document Frequency is low (IDF is high)</strong>.</p></li>
+</ul>
+</div>
+<div id="term-frequency-hashingtf-and-countvectorizer" class="section level2">
+<h2>Term Frequency, <code>HashingTF</code> and <code>CountVectorizer</code></h2>
+<p>Pyspark has two functions to calculate term frequencies from documents: the <code>HashingTF()</code> and the <code>CountVectorizer()</code>. These two functions do two things:</p>
+<ol style="list-style-type: decimal">
+<li>Indexing terms: converting words to numbers.</li>
+<li>Calculate term frequencies for each documents.</li>
+</ol>
+<p>The <code>HashingTF()</code> utilizes the <strong>Murmurhash 3</strong> function to map a raw feature (a term) into an index (a number). Hashing is the process of transforming data of arbitrary size to <strong>size-fixed</strong>, usually shorter data. The term frequencies are calculated based on the generated indices. For the <code>HashingTF()</code> method, the mapping process is very cheap. Because each term-to-index mapping is independent of other term-to-index mapping. The hashing function takes a unique input and gerenate a “unique result”. However, hashing collision may occur, which means different features (terms) may be hased to the same index.</p>
+<p>The <code>CountVectorizer()</code> indexes terms by descending order of <strong>term frequencies in the entire corpus</strong>, NOT the term frequencies in the document. After the indexing process, the term frequencies are calculated by documents.</p>
+<p><strong>Create some data</strong></p>
+<pre class="python"><code>pdf = pd.DataFrame({
+        &#39;terms&#39;: [
+            [&#39;spark&#39;, &#39;spark&#39;, &#39;spark&#39;, &#39;is&#39;, &#39;awesome&#39;, &#39;awesome&#39;],
+            [&#39;I&#39;, &#39;love&#39;, &#39;spark&#39;, &#39;very&#39;, &#39;very&#39;, &#39;much&#39;],
+            [&#39;everyone&#39;, &#39;should&#39;, &#39;use&#39;, &#39;spark&#39;]
+        ]
+    })
+df = spark.createDataFrame(pdf)
+df.show(truncate=False)</code></pre>
+<pre><code>+-------------------------------------------+
+|terms                                      |
++-------------------------------------------+
+|[spark, spark, spark, is, awesome, awesome]|
+|[I, love, spark, very, very, much]         |
+|[everyone, should, use, spark]             |
++-------------------------------------------+</code></pre>
+<p><strong>HashingTF</strong></p>
+<ul>
+<li>The <strong>numFeatures</strong> paramter takes an integer, which should be larger than the total number of terms in the corpus. And it should be a power of two so that features are mapped evenly to columns.</li>
+</ul>
+<pre class="python"><code>from pyspark.ml.feature import HashingTF
+from pyspark.ml import Pipeline
+
+hashtf = HashingTF(numFeatures=pow(2, 4), inputCol=&#39;terms&#39;, outputCol=&#39;features(numFeatures), [index], [term frequency]&#39;)
+stages = [hashtf]
+pipeline = Pipeline(stages=stages)</code></pre>
+<pre class="python"><code>pipeline.fit(df).transform(df).show(truncate=False)</code></pre>
+<p>You may note that the first document has three terms, but only two term frequencies are obtained. This is because <strong>the last category is NOT included by default</strong>. This is similar to the <strong><code>StringIndexer()</code></strong>. The mismatch between the tf number and the terms number in document one indicates that there is a feature (term) mapped to the last column of the feature matrix.</p>
+<pre><code>+-------------------------------------------+------------------------------------------------+
+|terms                                      |features(numFeatures), [index], [term frequency]|
++-------------------------------------------+------------------------------------------------+
+|[spark, spark, spark, is, awesome, awesome]|(16,[1,15],[4.0,2.0])                           |
+|[I, love, spark, very, very, much]         |(16,[0,1,2,8,12],[1.0,1.0,1.0,2.0,1.0])         |
+|[everyone, should, use, spark]             |(16,[1,9,13],[2.0,1.0,1.0])                     |
++-------------------------------------------+------------------------------------------------+</code></pre>
+<p><strong>CountVectorizer</strong></p>
+<p>The <code>CountVectorizer()</code> function has three parameters to control which terms will be kept as features.</p>
+<ul>
+<li><code>minTF</code>: features that has term frequency less than <em>minTF</em> will be removed. If <span class="math inline">\(minTF = 1\)</span>, then no features will be removed.</li>
+<li><code>minDF</code>: features that has document frequency less than <em>minDF</em> will be removed. If <span class="math inline">\(minDF = 1\)</span>, then no features will be removed.</li>
+<li><code>vocabSize</code>: keep terms of the top <em>vocabSize</em> frequencies.</li>
+</ul>
+<p>In the example below, the <span class="math inline">\(minTF=1.0, minDF=1.0\)</span> and <span class="math inline">\(vocabSize = 20\)</span>, which is larger than the total number of terms. Therefore, all features (terms) will be kept.</p>
+<pre class="python"><code>from pyspark.ml.feature import CountVectorizer
+from pyspark.ml import Pipeline
+
+countvectorizer = CountVectorizer(minTF=1.0, minDF=1.0, vocabSize=20, 
+                                  inputCol=&#39;terms&#39;, outputCol=&#39;features(vocabSize), [index], [term frequency]&#39;)
+stages = [countvectorizer]
+pipeline = Pipeline(stages=stages)</code></pre>
+<pre class="python"><code>pipeline.fit(df).transform(df).show(truncate=False)</code></pre>
+<pre><code>+-------------------------------------------+----------------------------------------------+
+|terms                                      |features(vocabSize), [index], [term frequency]|
++-------------------------------------------+----------------------------------------------+
+|[spark, spark, spark, is, awesome, awesome]|(10,[0,1,7],[3.0,2.0,1.0])                    |
+|[I, love, spark, very, very, much]         |(10,[0,2,5,8,9],[1.0,2.0,1.0,1.0,1.0])        |
+|[everyone, should, use, spark]             |(10,[0,3,4,6],[1.0,1.0,1.0,1.0])              |
++-------------------------------------------+----------------------------------------------+</code></pre>
+<p>Now, lets use the <code>StringIndexer()</code> to index the corpus and see if the results is consistant with the <code>CountVectorizer()</code> method.</p>
+<ul>
+<li><strong><code>flatMap</code> documents so that each row has a single term.</strong></li>
+</ul>
+<pre class="python"><code>from pyspark.sql.types import StringType
+df_vocab = df.select(&#39;terms&#39;).rdd.\
+            flatMap(lambda x: x[0]).\
+            toDF(schema=StringType()).toDF(&#39;terms&#39;)
+df_vocab.show()</code></pre>
+<pre><code>+--------+
+|   terms|
++--------+
+|   spark|
+|   spark|
+|   spark|
+|      is|
+| awesome|
+| awesome|
+|       I|
+|    love|
+|   spark|
+|    very|
+|    very|
+|    much|
+|everyone|
+|  should|
+|     use|
+|   spark|
++--------+</code></pre>
+<ul>
+<li><strong>Calculate term frequencies in the corpus</strong></li>
+</ul>
+<pre class="python"><code>vocab_freq = df_vocab.rdd.countByValue()
+pdf = pd.DataFrame({
+        &#39;term&#39;: vocab_freq.keys(),
+        &#39;frequency&#39;: vocab_freq.values()
+    })
+tf = spark.createDataFrame(pdf).orderBy(&#39;frequency&#39;, ascending=False)
+tf.show()</code></pre>
+<pre><code>+---------+----------+
+|frequency|      term|
++---------+----------+
+|        5|   [spark]|
+|        2| [awesome]|
+|        2|    [very]|
+|        1|[everyone]|
+|        1|  [should]|
+|        1|    [much]|
+|        1|    [love]|
+|        1|      [is]|
+|        1|     [use]|
+|        1|       [I]|
++---------+----------+</code></pre>
+<ul>
+<li><strong>Apply <code>StringIndexer()</code> to <em>df_vocab</em>.</strong></li>
+</ul>
+<pre class="python"><code>from pyspark.ml.feature import StringIndexer
+stringindexer = StringIndexer(inputCol=&#39;terms&#39;, outputCol=&#39;StringIndexer(index)&#39;)</code></pre>
+<pre class="python"><code>stringindexer.fit(df_vocab).transform(df_vocab).\
+    distinct().\
+    orderBy(&#39;StringIndexer(index)&#39;).show()</code></pre>
+<p>The indexing result is consistant for the first three terms. The rest of terms have the same frequency which is 1. These terms can not be sorted by frequency. This might be the reason that their indices don’t match the results from the <code>CountVectorizer()</code> method.</p>
+<pre><code>+--------+--------------------+
+|   terms|StringIndexer(index)|
++--------+--------------------+
+|   spark|                 0.0|
+| awesome|                 1.0|
+|    very|                 2.0|
+|      is|                 3.0|
+|everyone|                 4.0|
+|       I|                 5.0|
+|    love|                 6.0|
+|  should|                 7.0|
+|    much|                 8.0|
+|     use|                 9.0|
++--------+--------------------+</code></pre>
+</div>
+
+<center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
