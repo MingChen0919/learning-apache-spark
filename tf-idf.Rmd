@@ -6,7 +6,10 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+knitr::opts_chunk$set(
+  echo = TRUE, 
+  eval = FALSE
+)
 ```
 
 
@@ -214,3 +217,4 @@ The indexing result is consistant for the first three terms. The rest of terms h
 |     use|                 9.0|
 +--------+--------------------+
 ```
+

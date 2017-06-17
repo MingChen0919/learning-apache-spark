@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Ming Chen" />
+
+
+<title>Conversion bewteen RDD and DataFrame</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-inverse  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Learning Apache Spark</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">
+    <span class="fa fa-home"></span>
+     
+    Home
+  </a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    Getting Start
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="divider"></li>
+    <li class="dropdown-header">Installations</li>
+    <li>
+      <a href="install.html">Installations</a>
+    </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">Integrate Spark</li>
+    <li>
+      <a href="pyspark-on-rodeo.html">Integrate spark with Rodeo</a>
+    </li>
+    <li>
+      <a href="pyspark-on-jupyter.html">Integrate spark with Jupyter</a>
+    </li>
+    <li>
+      <a href="spark-on-jetstream-cloud.html">Spark on jetstream cloud</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    Data Preparation
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="01_entry_points_to_spark.html">Entry points to spark</a>
+    </li>
+    <li>
+      <a href="02_rdd_object.html">RDD object</a>
+    </li>
+    <li>
+      <a href="03_dataframe_object.html">DataFrame object</a>
+    </li>
+    <li>
+      <a href="categorical-data.html">Categorial data</a>
+    </li>
+    <li>
+      <a href="continuous-to-categorical-variable.html">Continuous variables to categorical variables</a>
+    </li>
+    <li>
+      <a href="tf-idf.html">TF, IDF, HashingTF and CountVectorizer</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    Machine Learning
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="divider"></li>
+    <li class="dropdown-header">Regression</li>
+    <li>
+      <a href="linear-regression.html">Linear regression</a>
+    </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">Classification</li>
+    <li>
+      <a href="logistic-regression.html">Logistic regression</a>
+    </li>
+    <li>
+      <a href="decision-tree-classification.html">Decision tree classification</a>
+    </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">More ML methods coming soon</li>
+    <li class="divider"></li>
+    <li>
+      <a href="https://github.com/MingChen0919/learning-apache-spark/tree/master/legacy">Legacy</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    Module Tuning and Evaluation
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="divider"></li>
+    <li class="dropdown-header">Module Tuning</li>
+    <li>
+      <a href="regularization.html">Regularization</a>
+    </li>
+    <li>
+      <a href="k-folds-cross-validation.html">K-folds Cross Validation</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    NLP
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="nlp-and-nltk-basics.html">NLP and NLTK basics</a>
+    </li>
+    <li>
+      <a href="information-extraction.html">Information extraction</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/MingChen0919/learning-apache-spark">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Conversion bewteen RDD and DataFrame</h1>
+<h4 class="author"><em>Ming Chen</em></h4>
+<h4 class="date"><em>6/17/2017</em></h4>
+
+</div>
+
+
+<style>
+pre code, pre, code {
+  white-space: pre !important;
+  overflow-x: scroll !important;
+  word-break: keep-all !important;
+  word-wrap: initial !important;
+}
+</style>
+<div id="create-sparkcontext-sparksession" class="section level2">
+<h2>Create SparkContext &amp; SparkSession</h2>
+<p><strong>SparkContext</strong></p>
+<pre class="python"><code>from pyspark import SparkContext
+sc = SparkContext(master = &#39;local&#39;)</code></pre>
+<p><strong>SparkSession</strong></p>
+<pre class="python"><code>from pyspark.sql import SparkSession
+spark = SparkSession.builder \
+          .appName(&quot;Learning Apach Spark&quot;) \
+          .config(&quot;spark.some.config.option&quot;, &quot;some-value&quot;) \
+          .getOrCreate()</code></pre>
+</div>
+<div id="example-dataframe" class="section level2">
+<h2>Example DataFrame</h2>
+<pre class="python"><code>mtcars = spark.read.csv(path=&#39;data/mtcars.csv&#39;,
+                        sep=&#39;,&#39;,
+                        encoding=&#39;UTF-8&#39;,
+                        comment=None,
+                        header=True, 
+                        inferSchema=True)</code></pre>
+</div>
+<div id="dataframe-to-rdd" class="section level2">
+<h2>DataFrame to RDD</h2>
+<p>A <strong>DataFrame</strong> can be easily converted to an <strong>RDD</strong> by calling the <code>pyspark.sql.DataFrame.rdd()</code> function.</p>
+<pre class="python"><code>mtcars.rdd.take(2)</code></pre>
+<p>Each element in the returned RDD is an <strong>pyspark.sql.Row</strong> object. An <em>Row</em> is a list of key-value pairs.</p>
+<pre><code>[Row(_c0=&#39;Mazda RX4&#39;, mpg=21.0, cyl=6, disp=160.0, hp=110, drat=3.9, wt=2.62, qsec=16.46, vs=0, am=1, gear=4, carb=4),
+ Row(_c0=&#39;Mazda RX4 Wag&#39;, mpg=21.0, cyl=6, disp=160.0, hp=110, drat=3.9, wt=2.875, qsec=17.02, vs=0, am=1, gear=4, carb=4)]</code></pre>
+<p>With an RDD object, we can apply a set of mapping functions, such as <code>map</code>, <code>mapValues</code>, <code>flatMap</code>, <code>flatMapValues</code> and a lot of other methods that come from RDD.</p>
+<pre class="python"><code>mtcars_map = mtcars.rdd.map(lambda x: (x[&#39;_c0&#39;], x[&#39;mpg&#39;]))
+mtcars_map.take(5)</code></pre>
+<pre><code>[(&#39;Mazda RX4&#39;, 21.0),
+ (&#39;Mazda RX4 Wag&#39;, 21.0),
+ (&#39;Datsun 710&#39;, 22.8),
+ (&#39;Hornet 4 Drive&#39;, 21.4),
+ (&#39;Hornet Sportabout&#39;, 18.7)]</code></pre>
+<pre class="python"><code>mtcars_mapvalues = mtcars_map.mapValues(lambda x: [x, x * 10])
+mtcars_mapvalues.take(5)</code></pre>
+<pre><code>[(&#39;Mazda RX4&#39;, [21.0, 210.0]),
+ (&#39;Mazda RX4 Wag&#39;, [21.0, 210.0]),
+ (&#39;Datsun 710&#39;, [22.8, 228.0]),
+ (&#39;Hornet 4 Drive&#39;, [21.4, 214.0]),
+ (&#39;Hornet Sportabout&#39;, [18.7, 187.0])]</code></pre>
+</div>
+<div id="rdd-to-dataframe" class="section level2">
+<h2>RDD to DataFrame</h2>
+<p>To convert an <strong>RDD</strong> to a <strong>DataFrame</strong>, we can use the <code>SparkSession.createDataFrame()</code> function. Every element in the RDD has be to an <strong>Row</strong>.</p>
+<p><strong>Create an RDD</strong></p>
+<pre class="python"><code>rdd_raw = sc.textFile(&#39;data/mtcars.csv&#39;)
+rdd_raw.take(5)</code></pre>
+<pre><code>[&#39;,mpg,cyl,disp,hp,drat,wt,qsec,vs,am,gear,carb&#39;,
+ &#39;Mazda RX4,21,6,160,110,3.9,2.62,16.46,0,1,4,4&#39;,
+ &#39;Mazda RX4 Wag,21,6,160,110,3.9,2.875,17.02,0,1,4,4&#39;,
+ &#39;Datsun 710,22.8,4,108,93,3.85,2.32,18.61,1,1,4,1&#39;,
+ &#39;Hornet 4 Drive,21.4,6,258,110,3.08,3.215,19.44,1,0,3,1&#39;]</code></pre>
+<p><strong>Save the first row to a variable</strong></p>
+<pre class="python"><code>header = rdd_raw.map(lambda x: x.split(&#39;,&#39;)).filter(lambda x: x[1] == &#39;mpg&#39;).collect()[0]
+header[0] = &#39;model&#39;
+header</code></pre>
+<pre><code>[&#39;model&#39;,
+ &#39;mpg&#39;,
+ &#39;cyl&#39;,
+ &#39;disp&#39;,
+ &#39;hp&#39;,
+ &#39;drat&#39;,
+ &#39;wt&#39;,
+ &#39;qsec&#39;,
+ &#39;vs&#39;,
+ &#39;am&#39;,
+ &#39;gear&#39;,
+ &#39;carb&#39;]</code></pre>
+<p><strong>Save the rest to a new RDD</strong></p>
+<pre class="python"><code>rdd = rdd_raw.map(lambda x: x.split(&#39;,&#39;)).filter(lambda x: x[1] != &#39;mpg&#39;)
+rdd.take(2)</code></pre>
+<pre><code>[[&#39;Mazda RX4&#39;,
+  &#39;21&#39;,
+  &#39;6&#39;,
+  &#39;160&#39;,
+  &#39;110&#39;,
+  &#39;3.9&#39;,
+  &#39;2.62&#39;,
+  &#39;16.46&#39;,
+  &#39;0&#39;,
+  &#39;1&#39;,
+  &#39;4&#39;,
+  &#39;4&#39;],
+ [&#39;Mazda RX4 Wag&#39;,
+  &#39;21&#39;,
+  &#39;6&#39;,
+  &#39;160&#39;,
+  &#39;110&#39;,
+  &#39;3.9&#39;,
+  &#39;2.875&#39;,
+  &#39;17.02&#39;,
+  &#39;0&#39;,
+  &#39;1&#39;,
+  &#39;4&#39;,
+  &#39;4&#39;]]</code></pre>
+<p><strong>Convert RDD elements to RDD <code>Row</code> objects</strong></p>
+<p>First we define a function which takes a list of column names and a list of values and create a <code>Row</code> of key-value pairs. <strong>Since keys in an Row object are variable names, we can’t simply pass a dictionary to the <code>Row()</code> function</strong>. We can think of a dictionary as an argument list and use the <code>**</code> to unpack the argument list.</p>
+<p>See an example.</p>
+<pre class="python"><code>my_dict = dict(zip([&#39;a&#39;, &#39;b&#39;, &#39;c&#39;], range(1:4)))
+Row(**my_dict)</code></pre>
+<p>An <strong>Row</strong> is very like a function call expression.</p>
+<pre><code>Row(a=1, b=2, c=3)</code></pre>
+<p>Let’s define the function.</p>
+<pre class="python"><code>def list_to_row(keys, values):
+    row_dict = dict(zip(keys, values))
+    return Row(**row_dict)</code></pre>
+<p>Convert elements to RDD objects.</p>
+<pre class="python"><code>rdd_rows = rdd.map(lambda x: list_to_row(header, x))
+rdd_rows.take(3)</code></pre>
+<pre><code>[Row(am=&#39;1&#39;, carb=&#39;4&#39;, cyl=&#39;6&#39;, disp=&#39;160&#39;, drat=&#39;3.9&#39;, gear=&#39;4&#39;, hp=&#39;110&#39;, model=&#39;Mazda RX4&#39;, mpg=&#39;21&#39;, qsec=&#39;16.46&#39;, vs=&#39;0&#39;, wt=&#39;2.62&#39;),
+ Row(am=&#39;1&#39;, carb=&#39;4&#39;, cyl=&#39;6&#39;, disp=&#39;160&#39;, drat=&#39;3.9&#39;, gear=&#39;4&#39;, hp=&#39;110&#39;, model=&#39;Mazda RX4 Wag&#39;, mpg=&#39;21&#39;, qsec=&#39;17.02&#39;, vs=&#39;0&#39;, wt=&#39;2.875&#39;),
+ Row(am=&#39;1&#39;, carb=&#39;1&#39;, cyl=&#39;4&#39;, disp=&#39;108&#39;, drat=&#39;3.85&#39;, gear=&#39;4&#39;, hp=&#39;93&#39;, model=&#39;Datsun 710&#39;, mpg=&#39;22.8&#39;, qsec=&#39;18.61&#39;, vs=&#39;1&#39;, wt=&#39;2.32&#39;)]</code></pre>
+<p>Now we can convert the RDD to a DataFrame.</p>
+<pre class="python"><code>df = spark.createDataFrame(rdd_rows)
+df.show(5)</code></pre>
+<pre><code>+---+----+---+----+----+----+---+-----------------+----+-----+---+-----+
+| am|carb|cyl|disp|drat|gear| hp|            model| mpg| qsec| vs|   wt|
++---+----+---+----+----+----+---+-----------------+----+-----+---+-----+
+|  1|   4|  6| 160| 3.9|   4|110|        Mazda RX4|  21|16.46|  0| 2.62|
+|  1|   4|  6| 160| 3.9|   4|110|    Mazda RX4 Wag|  21|17.02|  0|2.875|
+|  1|   1|  4| 108|3.85|   4| 93|       Datsun 710|22.8|18.61|  1| 2.32|
+|  0|   1|  6| 258|3.08|   3|110|   Hornet 4 Drive|21.4|19.44|  1|3.215|
+|  0|   2|  8| 360|3.15|   3|175|Hornet Sportabout|18.7|17.02|  0| 3.44|
++---+----+---+----+----+----+---+-----------------+----+-----+---+-----+</code></pre>
+</div>
+
+<center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
