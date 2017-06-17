@@ -450,7 +450,7 @@ Row(**my_dict)</code></pre>
 <pre class="python"><code>def list_to_row(keys, values):
     row_dict = dict(zip(keys, values))
     return Row(**row_dict)</code></pre>
-<p>Convert elements to RDD objects.</p>
+<p><strong>Convert elements to RDD objects</strong></p>
 <pre class="python"><code>rdd_rows = rdd.map(lambda x: list_to_row(header, x))
 rdd_rows.take(3)</code></pre>
 <pre><code>[Row(am=&#39;1&#39;, carb=&#39;4&#39;, cyl=&#39;6&#39;, disp=&#39;160&#39;, drat=&#39;3.9&#39;, gear=&#39;4&#39;, hp=&#39;110&#39;, model=&#39;Mazda RX4&#39;, mpg=&#39;21&#39;, qsec=&#39;16.46&#39;, vs=&#39;0&#39;, wt=&#39;2.62&#39;),
@@ -468,6 +468,49 @@ df.show(5)</code></pre>
 |  0|   1|  6| 258|3.08|   3|110|   Hornet 4 Drive|21.4|19.44|  1|3.215|
 |  0|   2|  8| 360|3.15|   3|175|Hornet Sportabout|18.7|17.02|  0| 3.44|
 +---+----+---+----+----+----+---+-----------------+----+-----+---+-----+</code></pre>
+</div>
+<div id="merge-and-split-columns" class="section level2">
+<h2>Merge and split columns</h2>
+<p>Sometimes we need to merge multiple columns in a Dataframe into one column, or split a column into multiple columns. We can easily achieve this by converting a DataFrame to RDD, applying map functions to manipulate elements, and then converting the RDD back to a DataFrame.</p>
+<p><strong>Convert DataFrame to RDD and merge values</strong></p>
+<pre class="python"><code>rdd_merged = df.rdd.map(lambda x: Row(model=x[7], values=list(map(float, x[:7] + x[8:]))))
+rdd_merged.take(4)</code></pre>
+<pre><code>[Row(model=&#39;Mazda RX4&#39;, values=[1.0, 4.0, 6.0, 160.0, 3.9, 4.0, 110.0, 21.0, 16.46, 0.0, 2.62]),
+ Row(model=&#39;Mazda RX4 Wag&#39;, values=[1.0, 4.0, 6.0, 160.0, 3.9, 4.0, 110.0, 21.0, 17.02, 0.0, 2.875]),
+ Row(model=&#39;Datsun 710&#39;, values=[1.0, 1.0, 4.0, 108.0, 3.85, 4.0, 93.0, 22.8, 18.61, 1.0, 2.32]),
+ Row(model=&#39;Hornet 4 Drive&#39;, values=[0.0, 1.0, 6.0, 258.0, 3.08, 3.0, 110.0, 21.4, 19.44, 1.0, 3.215])]</code></pre>
+<p><strong>Convert RDD back to DataFrame</strong></p>
+<pre class="python"><code>df_merged = spark.createDataFrame(rdd_merged)
+df_merged.show(5, truncate=False)</code></pre>
+<pre><code>+-----------------+-----------------------------------------------------------------+
+|model            |values                                                           |
++-----------------+-----------------------------------------------------------------+
+|Mazda RX4        |[1.0, 4.0, 6.0, 160.0, 3.9, 4.0, 110.0, 21.0, 16.46, 0.0, 2.62]  |
+|Mazda RX4 Wag    |[1.0, 4.0, 6.0, 160.0, 3.9, 4.0, 110.0, 21.0, 17.02, 0.0, 2.875] |
+|Datsun 710       |[1.0, 1.0, 4.0, 108.0, 3.85, 4.0, 93.0, 22.8, 18.61, 1.0, 2.32]  |
+|Hornet 4 Drive   |[0.0, 1.0, 6.0, 258.0, 3.08, 3.0, 110.0, 21.4, 19.44, 1.0, 3.215]|
+|Hornet Sportabout|[0.0, 2.0, 8.0, 360.0, 3.15, 3.0, 175.0, 18.7, 17.02, 0.0, 3.44] |
++-----------------+-----------------------------------------------------------------+
+only showing top 5 rows</code></pre>
+<p><strong>Split the <em>values</em> column to two columns</strong></p>
+<pre class="python"><code>df_3_columns = df_merged.rdd.map(lambda x: Row(model=x[0], x1=x[1][:4], x2=x[1][4:]))
+df_3_columns.take(5)</code></pre>
+<pre><code>[Row(model=&#39;Mazda RX4&#39;, x1=[1.0, 4.0, 6.0, 160.0], x2=[3.9, 4.0, 110.0, 21.0, 16.46, 0.0, 2.62]),
+ Row(model=&#39;Mazda RX4 Wag&#39;, x1=[1.0, 4.0, 6.0, 160.0], x2=[3.9, 4.0, 110.0, 21.0, 17.02, 0.0, 2.875]),
+ Row(model=&#39;Datsun 710&#39;, x1=[1.0, 1.0, 4.0, 108.0], x2=[3.85, 4.0, 93.0, 22.8, 18.61, 1.0, 2.32]),
+ Row(model=&#39;Hornet 4 Drive&#39;, x1=[0.0, 1.0, 6.0, 258.0], x2=[3.08, 3.0, 110.0, 21.4, 19.44, 1.0, 3.215]),
+ Row(model=&#39;Hornet Sportabout&#39;, x1=[0.0, 2.0, 8.0, 360.0], x2=[3.15, 3.0, 175.0, 18.7, 17.02, 0.0, 3.44])]</code></pre>
+<pre class="python"><code>spark.createDataFrame(df_3_columns).show(5, truncate=False)</code></pre>
+<pre><code>+-----------------+----------------------+-------------------------------------------+
+|model            |x1                    |x2                                         |
++-----------------+----------------------+-------------------------------------------+
+|Mazda RX4        |[1.0, 4.0, 6.0, 160.0]|[3.9, 4.0, 110.0, 21.0, 16.46, 0.0, 2.62]  |
+|Mazda RX4 Wag    |[1.0, 4.0, 6.0, 160.0]|[3.9, 4.0, 110.0, 21.0, 17.02, 0.0, 2.875] |
+|Datsun 710       |[1.0, 1.0, 4.0, 108.0]|[3.85, 4.0, 93.0, 22.8, 18.61, 1.0, 2.32]  |
+|Hornet 4 Drive   |[0.0, 1.0, 6.0, 258.0]|[3.08, 3.0, 110.0, 21.4, 19.44, 1.0, 3.215]|
+|Hornet Sportabout|[0.0, 2.0, 8.0, 360.0]|[3.15, 3.0, 175.0, 18.7, 17.02, 0.0, 3.44] |
++-----------------+----------------------+-------------------------------------------+
+only showing top 5 rows</code></pre>
 </div>
 
 <center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>
