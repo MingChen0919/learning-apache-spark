@@ -31,6 +31,8 @@ navbar:
           href: 02_rdd_object.html
         - text: "DataFrame object"
           href: 03_dataframe_object.html
+        - text: "RDD and DataFrame conversion"
+          href: conversion-between-rdd-and-dataframe.html
         - text: "Categorial data"
           href: categorical-data.html
         - text: "Continuous variables to categorical variables"
