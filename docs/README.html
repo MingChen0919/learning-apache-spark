@@ -182,131 +182,6 @@ $(document).ready(function () {
     Home
   </a>
 </li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    <span class="fa fa-gear"></span>
-     
-    Getting Start
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li class="divider"></li>
-    <li class="dropdown-header">Installations</li>
-    <li>
-      <a href="install.html">Installations</a>
-    </li>
-    <li class="divider"></li>
-    <li class="dropdown-header">Integrate Spark</li>
-    <li>
-      <a href="pyspark-on-rodeo.html">Integrate spark with Rodeo</a>
-    </li>
-    <li>
-      <a href="pyspark-on-jupyter.html">Integrate spark with Jupyter</a>
-    </li>
-    <li>
-      <a href="spark-on-jetstream-cloud.html">Spark on jetstream cloud</a>
-    </li>
-  </ul>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    <span class="fa fa-gear"></span>
-     
-    Data Preparation
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="01_entry_points_to_spark.html">Entry points to spark</a>
-    </li>
-    <li>
-      <a href="02_rdd_object.html">RDD object</a>
-    </li>
-    <li>
-      <a href="03_dataframe_object.html">DataFrame object</a>
-    </li>
-    <li>
-      <a href="conversion-between-rdd-and-dataframe.html">RDD and DataFrame conversion</a>
-    </li>
-    <li>
-      <a href="categorical-data.html">Categorial data</a>
-    </li>
-    <li>
-      <a href="continuous-to-categorical-variable.html">Continuous variables to categorical variables</a>
-    </li>
-    <li>
-      <a href="tf-idf.html">TF, IDF, HashingTF and CountVectorizer</a>
-    </li>
-  </ul>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    <span class="fa fa-gear"></span>
-     
-    Machine Learning
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li class="divider"></li>
-    <li class="dropdown-header">Regression</li>
-    <li>
-      <a href="linear-regression.html">Linear regression</a>
-    </li>
-    <li class="divider"></li>
-    <li class="dropdown-header">Classification</li>
-    <li>
-      <a href="logistic-regression.html">Logistic regression</a>
-    </li>
-    <li>
-      <a href="decision-tree-classification.html">Decision tree classification</a>
-    </li>
-    <li class="divider"></li>
-    <li class="dropdown-header">More ML methods coming soon</li>
-    <li class="divider"></li>
-    <li>
-      <a href="https://github.com/MingChen0919/learning-apache-spark/tree/master/legacy">Legacy</a>
-    </li>
-  </ul>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    <span class="fa fa-gear"></span>
-     
-    Module Tuning and Evaluation
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li class="divider"></li>
-    <li class="dropdown-header">Module Tuning</li>
-    <li>
-      <a href="regularization.html">Regularization</a>
-    </li>
-    <li>
-      <a href="k-folds-cross-validation.html">K-folds Cross Validation</a>
-    </li>
-  </ul>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    <span class="fa fa-gear"></span>
-     
-    NLP
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="nlp-and-nltk-basics.html">NLP and NLTK basics</a>
-    </li>
-    <li>
-      <a href="information-extraction.html">Information extraction</a>
-    </li>
-  </ul>
-</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -346,17 +221,24 @@ $(document).ready(function () {
 <li><a href="01_entry_points_to_spark.Rmd">Entry Points to Spark</a></li>
 <li><a href="02_rdd_object.Rmd">RDD Object</a></li>
 <li><a href="03_dataframe_object.Rmd">DataFrame Object</a></li>
-<li><a href="categorical-data.Rmd">Categorical Data</a></li>
+<li><a href="conversion-between-rdd-and-dataframe.ipynb">RDD and DataFrame conversion</a></li>
+<li><a href="categorical-data.ipynb">Categorical Data</a></li>
+<li><a href="Continuous-variable-to-categorical-variable.ipynb">Continuous variables to categorical variables</a></li>
+<li><a href="TF-IDF.ipynb">TF-IDF, HashingTF and CountVectorizer</a></li>
 </ul></li>
 <li><strong><em>Machine Learning</em></strong>
 <ul>
 <li><a href="machine-learning-framework.Rmd">Machine Learning Framework</a></li>
-<li><strong>Regression</strong>
+<li><p><strong>Regression</strong></p>
 <ul>
-<li><a href="linear-regression.Rmd">Linear Regression</a></li>
-<li><a href="generalized-linear-regression.Rmd">Generalized Linear Regression</a></li>
+<li><a href="linear-regression.ipynb">Linear regression</a></li>
+<li><a href="logistic-regression.ipynb">Logistic regression</a></li>
 </ul></li>
-<li><strong>Classification</strong></li>
+<li><p><strong>Classification</strong></p>
+<ul>
+<li><a href="naive-bayes-classification.ipynb">Naive bayes classification</a></li>
+<li><a href="decision-tree-classification.ipynb">Decision tree</a></li>
+</ul></li>
 </ul></li>
 <li>*<strong>Model Tuning</strong>
 <ul>
@@ -375,7 +257,6 @@ $(document).ready(function () {
 </div>
 </div>
 
-<center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>
 
 
 

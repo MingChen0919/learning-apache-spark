@@ -9,7 +9,6 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="author" content="Wenqiang Feng &amp; Ming Chen" />
 
 
 <title>Learning Apache Spark</title>
@@ -184,131 +183,6 @@ $(document).ready(function () {
     Home
   </a>
 </li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    <span class="fa fa-gear"></span>
-     
-    Getting Start
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li class="divider"></li>
-    <li class="dropdown-header">Installations</li>
-    <li>
-      <a href="install.html">Installations</a>
-    </li>
-    <li class="divider"></li>
-    <li class="dropdown-header">Integrate Spark</li>
-    <li>
-      <a href="pyspark-on-rodeo.html">Integrate spark with Rodeo</a>
-    </li>
-    <li>
-      <a href="pyspark-on-jupyter.html">Integrate spark with Jupyter</a>
-    </li>
-    <li>
-      <a href="spark-on-jetstream-cloud.html">Spark on jetstream cloud</a>
-    </li>
-  </ul>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    <span class="fa fa-gear"></span>
-     
-    Data Preparation
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="01_entry_points_to_spark.html">Entry points to spark</a>
-    </li>
-    <li>
-      <a href="02_rdd_object.html">RDD object</a>
-    </li>
-    <li>
-      <a href="03_dataframe_object.html">DataFrame object</a>
-    </li>
-    <li>
-      <a href="conversion-between-rdd-and-dataframe.html">RDD and DataFrame conversion</a>
-    </li>
-    <li>
-      <a href="categorical-data.html">Categorial data</a>
-    </li>
-    <li>
-      <a href="continuous-to-categorical-variable.html">Continuous variables to categorical variables</a>
-    </li>
-    <li>
-      <a href="tf-idf.html">TF, IDF, HashingTF and CountVectorizer</a>
-    </li>
-  </ul>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    <span class="fa fa-gear"></span>
-     
-    Machine Learning
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li class="divider"></li>
-    <li class="dropdown-header">Regression</li>
-    <li>
-      <a href="linear-regression.html">Linear regression</a>
-    </li>
-    <li class="divider"></li>
-    <li class="dropdown-header">Classification</li>
-    <li>
-      <a href="logistic-regression.html">Logistic regression</a>
-    </li>
-    <li>
-      <a href="decision-tree-classification.html">Decision tree classification</a>
-    </li>
-    <li class="divider"></li>
-    <li class="dropdown-header">More ML methods coming soon</li>
-    <li class="divider"></li>
-    <li>
-      <a href="https://github.com/MingChen0919/learning-apache-spark/tree/master/legacy">Legacy</a>
-    </li>
-  </ul>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    <span class="fa fa-gear"></span>
-     
-    Module Tuning and Evaluation
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li class="divider"></li>
-    <li class="dropdown-header">Module Tuning</li>
-    <li>
-      <a href="regularization.html">Regularization</a>
-    </li>
-    <li>
-      <a href="k-folds-cross-validation.html">K-folds Cross Validation</a>
-    </li>
-  </ul>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    <span class="fa fa-gear"></span>
-     
-    NLP
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="nlp-and-nltk-basics.html">NLP and NLTK basics</a>
-    </li>
-    <li>
-      <a href="information-extraction.html">Information extraction</a>
-    </li>
-  </ul>
-</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -327,31 +201,12 @@ $(document).ready(function () {
 
 
 <h1 class="title toc-ignore">Learning Apache Spark</h1>
-<h4 class="author"><em>Wenqiang Feng &amp; Ming Chen</em></h4>
-<h4 class="date"><em>2/5/2017</em></h4>
 
 </div>
 
 
-<div id="about" class="section level3">
-<h3>About</h3>
-<div class="figure">
-<img src="logo.jpg" alt="Learning Apache Spark with Python." />
-<p class="caption">Learning Apache Spark with Python.</p>
-</div>
-<p>This is the shared repository for Learning Apache Spark Notes. This shared repository mainly contains notes and projects which from Ming’s Big data class and Wenqiang’s IMA Data Fellows’ projects.</p>
-<p>In this repository, we try to use the detailed demo code and examples to show how to use each main functions. <strong>If you find your work wasn’t cited in this note, please feel free to let us know.</strong></p>
-</div>
-<div id="acknowledgement" class="section level3">
-<h3>Acknowledgement</h3>
-<p>At here, we would like to thank Jian Sun and Zhongbo Li at the University of Tennessee at Knoxville for the valuable disscussion and thank the generous anonymous authors for providing the detailed solutions and source code on the internet. Without those help, this repository would not have been possible to be made. Wenqiang also would like to thank the Institute for Mathematics and Its Applications (IMA) at University of Minnesota, Twin Cities for support during his IMA Data Scientist Fellow visit.</p>
-</div>
-<div id="feedback-and-suggestions" class="section level3">
-<h3>Feedback and suggestions</h3>
-<p>Your comments and suggestions are highly appreciated. We are more than happy to receive corrections, suggestions or feedbacks through email (Ming Chen: <a href="mailto:mchen33@utk.edu">mchen33@utk.edu</a>, Wenqiang Feng: <a href="mailto:wfeng1@utk.edu">wfeng1@utk.edu</a>) for improvements.</p>
-</div>
+<p><strong>All materials are converted to notebooks (in ipynb format) and moved to the github repository. Click here to go to the <a href="https://github.com/MingChen0919/learning-apache-spark/blob/master/README.md">repository</a>.</strong></p>
 
-<center>Copyright &copy; 2017 Ming Chen  & Wenqiang Feng. All rights reserved.</center>
 
 
 
