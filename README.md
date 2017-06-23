@@ -10,7 +10,7 @@ This repository contains mainly notes from learning Apache Spark by [Ming Chen](
 
 * ***Data Preparation***
     + [Entry Points to Spark](entry-points-to-spark.ipynb)
-    + [RDD Object](02_rdd_object.Rmd)
+    + [RDD Object](rdd-object.ipynb)
     + [DataFrame Object](03_dataframe_object.Rmd)
     + [RDD and DataFrame conversion](conversion-between-rdd-and-dataframe.ipynb)
     + [Categorical Data](categorical-data.ipynb)
