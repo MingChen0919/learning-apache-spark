@@ -22,8 +22,8 @@ In this repository, we try to use the detailed demo code and examples to show ho
 * ***Machine Learning***
     + [Machine Learning Framework](machine-learning-framework.Rmd)
     + **Regression**
-        - [Linear Regression](linear-regression.ipynb)
-        - [Generalized Linear Regression](generalized-linear-regression.Rmd)
+        - [Linear regression](linear-regression.ipynb)
+        - [Logistic regression](logistic-regression.Rmd)
     + **Classification**
     
 * ***Model Tuning**
