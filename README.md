@@ -15,7 +15,7 @@ In this repository, we try to use the detailed demo code and examples to show ho
     + [RDD Object](02_rdd_object.Rmd)
     + [DataFrame Object](03_dataframe_object.Rmd)
     + [RDD and DataFrame conversion](conversion-between-rdd-and-dataframe.ipynb)
-    + [Categorical Data](categorical-data.Rmd)
+    + [Categorical Data](categorical-data.ipynb)
     + [Continuous to categorical data](continuous-to-categorical-variable.ipynb)
     + [TF-IDF, HashingTF and CountVectorizer](TF-IDF.ipynb)
 
