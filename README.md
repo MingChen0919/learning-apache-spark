@@ -2,11 +2,9 @@
 
 **Ming Chen & Wenqiang Feng**
 
-### About
+## Introduction
 
-This is the shared repository for Learning Apache Spark Notes. This shared repository mainly contains notes and projects which from Ming's Big data class and Wenqiang's IMA Data Fellows' projects. 
-
-In this repository, we try to use the detailed demo code and examples to show how to use each main functions. **If you find your work wasn't cited in this note, please feel free to let us know.**
+This repository contains mainly notes from learning Apache Spark by Ming Chen[https://github.com/MingChen0919] & Wenqiang Feng[http://web.utk.edu/~wfeng1/]. We try to use the detailed demo code and examples to show how to use pyspark for big data mining. **If you find your work wasn't cited in this note, please feel free to let us know.**
 
 ## Content
 
