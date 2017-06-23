@@ -1,6 +1,6 @@
 # Learning apache spark
 
-* Github website: [https://mingchen0919.github.io/learning-apache-spark/](https://mingchen0919.github.io/learning-apache-spark/)
+**Ming Chen & Wenqiang Feng**
 
 ### About
 
