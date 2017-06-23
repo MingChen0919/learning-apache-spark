@@ -14,7 +14,10 @@ In this repository, we try to use the detailed demo code and examples to show ho
     + [Entry Points to Spark](01_entry_points_to_spark.Rmd)
     + [RDD Object](02_rdd_object.Rmd)
     + [DataFrame Object](03_dataframe_object.Rmd)
+    + [RDD and DataFrame conversion](conversion-between-rdd-and-dataframe.ipynb)
     + [Categorical Data](categorical-data.Rmd)
+    + [Continuous to categorical data](continuous-to-categorical-variable.ipynb)
+    + [TF-IDF, HashingTF and CountVectorizer](TF-IDF.ipynb)
 
 * ***Machine Learning***
     + [Machine Learning Framework](machine-learning-framework.Rmd)
