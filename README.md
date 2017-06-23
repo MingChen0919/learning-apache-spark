@@ -22,9 +22,11 @@ In this repository, we try to use the detailed demo code and examples to show ho
 * ***Machine Learning***
     + [Machine Learning Framework](machine-learning-framework.Rmd)
     + **Regression**
+
         - [Linear regression](linear-regression.ipynb)
         - [Logistic regression](logistic-regression.ipynb)
     + **Classification**
+
 	- [Naive bayes classification](naive-bayes-classification.ipynb)
 	- [Decision tree](decision-tree-classification.ipynb)
     
