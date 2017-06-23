@@ -22,7 +22,7 @@ In this repository, we try to use the detailed demo code and examples to show ho
 * ***Machine Learning***
     + [Machine Learning Framework](machine-learning-framework.Rmd)
     + **Regression**
-        - [Linear Regression](linear-regression.Rmd)
+        - [Linear Regression](linear-regression.ipynb)
         - [Generalized Linear Regression](generalized-linear-regression.Rmd)
     + **Classification**
     
