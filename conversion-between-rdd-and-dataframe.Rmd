@@ -2,7 +2,14 @@
 title: "Conversion bewteen RDD and DataFrame"
 author: "Ming Chen"
 date: "6/17/2017"
-output: html_document
+output: 
+  html_document:
+    number_sections: true
+    toc: true
+    fig_width: 7
+    fig_height: 4.5
+    theme: cosmo
+    highlight: tango
 ---
 
 <style>
@@ -295,3 +302,5 @@ spark.createDataFrame(df_3_columns).show(5, truncate=False)
 +-----------------+----------------------+-------------------------------------------+
 only showing top 5 rows
 ```
+
+
