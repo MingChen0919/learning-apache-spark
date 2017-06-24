@@ -29,6 +29,7 @@ This repository contains mainly notes from learning Apache Spark by [Ming Chen](
 		- [Naive bayes classification](naive-bayes-classification.ipynb)
 		- [Decision tree](decision-tree-classification.ipynb)
 		- [Random forest classification](random-forest-classification.ipynb)
+		- [Gradient boost tree classification](gradient-boost-tree-classification.ipynb)
     
 * **Model Tuning**
     + [Regularization](regularization.ipynb)
