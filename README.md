@@ -16,6 +16,7 @@ This repository contains mainly notes from learning Apache Spark by [Ming Chen](
     + [Categorical Data](categorical-data.ipynb)
     + [Continuous variables to categorical variables](Continuous-variable-to-categorical-variable.ipynb)
     + [TF-IDF, HashingTF and CountVectorizer](TF-IDF.ipynb)
+    + [SQL functions](sql-functions.ipynb)
 
 * ***Machine Learning***
     + [Machine Learning Framework](machine-learning-framework.Rmd)
