@@ -36,8 +36,8 @@ This repository contains mainly notes from learning Apache Spark by [Ming Chen](
     + [Regularization](regularization.ipynb)
     + [Cross-validation](cross-validation.ipynb)
 
-* **Nutural Language Processing
-    + [NLP and NLTK Basics](nlp-nltk-basics.ipynb)
+* **Nutural Language Processing**
+    + [NLP and NLTK Basics](nlp-and-nltk-basics.ipynb)
     
 ### Acknowledgement
 
