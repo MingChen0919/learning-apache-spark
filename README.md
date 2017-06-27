@@ -38,6 +38,7 @@ This repository contains mainly notes from learning Apache Spark by [Ming Chen](
 
 * **Nutural Language Processing**
     + [NLP and NLTK Basics](nlp-and-nltk-basics.ipynb)
+    + [NLP Information Extraction](nlp-information-extraction.ipynb)
     
 ### Acknowledgement
 
