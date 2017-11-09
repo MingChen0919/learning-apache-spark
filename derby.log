@@ -1,13 +1,13 @@
 ----------------------------------------------------------------
-Thu Jun 22 21:56:21 EDT 2017:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.12.1.1 - (1704137): instance a816c00e-015c-d2aa-1624-00000cebb2e8 
-on database directory /Users/mingchen/GoogleDrive/R-projects/learning-apache-spark/metastore_db with class loader org.apache.spark.sql.hive.client.IsolatedClientLoader$$anon$1@51443e44 
+Wed Nov 08 23:16:54 EST 2017:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.12.1.1 - (1704137): instance a816c00e-015f-9efe-b77e-00000e6a79c8 
+on database directory /Users/mingchen/Desktop/learning-apache-spark/metastore_db with class loader org.apache.spark.sql.hive.client.IsolatedClientLoader$$anon$1@bdff52 
 Loaded from file:/usr/local/Cellar/apache-spark/2.1.1/libexec/jars/derby-10.12.1.1.jar
-java.vendor=Oracle Corporation
-java.runtime.version=1.8.0_51-b16
-user.dir=/Users/mingchen/GoogleDrive/R-projects/learning-apache-spark
+java.vendor=Azul Systems, Inc.
+java.runtime.version=1.8.0_92-b15
+user.dir=/Users/mingchen/Desktop/learning-apache-spark
 os.name=Mac OS X
 os.arch=x86_64
-os.version=10.12.5
+os.version=10.12.6
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
