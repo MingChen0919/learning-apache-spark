@@ -29,9 +29,13 @@ This repository contains mainly notes from learning Apache Spark by [Ming Chen](
     	- [First data check](first-data-check.ipynb)
     + [SQL functions](sql-functions.ipynb)
     + [Add py Files to cluster](add-py-files-to-spark-cluster.ipynb)
-    
-* ***How To***
-    + [import and export data](import-and-export-data.ipynb)    
+    + [import and export data](import-and-export-data.ipynb)   
+    + [Subset data](subset-data.ipynb), including:
+        * select rows by index
+        * select rows by lodical criteria
+        * select columns by index
+        * select columns by names
+        * select columns by regex pattern
 
 * ***Machine Learning***
     + [Machine Learning Framework](machine-learning-framework.Rmd)
