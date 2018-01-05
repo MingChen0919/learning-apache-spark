@@ -30,12 +30,15 @@ This repository contains mainly notes from learning Apache Spark by [Ming Chen](
     + [SQL functions](sql-functions.ipynb)
     + [Add py Files to cluster](add-py-files-to-spark-cluster.ipynb)
     + [Import and export data](import-and-export-data.ipynb)   
-    + [Subset data](subset-data.ipynb), including:
+    + [Subset data](subset-data.ipynb):
         * select rows by index
         * select rows by lodical criteria
         * select columns by index
         * select columns by names
         * select columns by regex pattern
+    + [`udf()` function and SQL data types](udf-and-sql-types.ipynb):
+        * use `udf()` function
+        * difference between `ArrayType` and `StructType`
 
 * ***Machine Learning***
     + [Machine Learning Framework](machine-learning-framework.Rmd)
