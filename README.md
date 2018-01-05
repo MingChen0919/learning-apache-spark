@@ -15,7 +15,7 @@ This repository contains mainly notes from learning Apache Spark by [Ming Chen](
     + [Scikit-Learn](http://datacamp-community.s3.amazonaws.com/5433fa18-9f43-44cc-b228-74672efcd116)
     + [RDD Basics](https://s3.amazonaws.com/assets.datacamp.com/blog_assets/PySpark_Cheat_Sheet_Python.pdf)
     + [DataFrame Basics](https://s3.amazonaws.com/assets.datacamp.com/blog_assets/PySpark_SQL_Cheat_Sheet_Python.pdf)
-
+    
 * ***Data Preparation***
     + [Entry Points to Spark](entry-points-to-spark.ipynb)
     + [RDD Object](rdd-object.ipynb)
@@ -29,6 +29,9 @@ This repository contains mainly notes from learning Apache Spark by [Ming Chen](
     	- [First data check](first-data-check.ipynb)
     + [SQL functions](sql-functions.ipynb)
     + [Add py Files to cluster](add-py-files-to-spark-cluster.ipynb)
+    
+* ***How To***
+    + [import and export data](import-and-export-data.ipynb)    
 
 * ***Machine Learning***
     + [Machine Learning Framework](machine-learning-framework.Rmd)
