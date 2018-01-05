@@ -28,6 +28,7 @@ This repository contains mainly notes from learning Apache Spark by [Ming Chen](
 
     	- [First data check](first-data-check.ipynb)
     + [SQL functions](sql-functions.ipynb)
+    + [Add py Files to cluster](add-py-files-to-spark-cluster.ipynb)
 
 * ***Machine Learning***
     + [Machine Learning Framework](machine-learning-framework.Rmd)
