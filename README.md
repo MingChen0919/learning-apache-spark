@@ -16,12 +16,12 @@ This repository contains mainly notes from learning Apache Spark by [Ming Chen](
     + [RDD Basics](https://s3.amazonaws.com/assets.datacamp.com/blog_assets/PySpark_Cheat_Sheet_Python.pdf)
     + [DataFrame Basics](https://s3.amazonaws.com/assets.datacamp.com/blog_assets/PySpark_SQL_Cheat_Sheet_Python.pdf)
     
-* ***Data Preparation***
+* ***Data Manipulation***
     + [Entry Points to Spark](entry-points-to-spark.ipynb)
     + [RDD Object](rdd-object.ipynb)
     + [DataFrame Object](dataframe-object.ipynb)
     + [RDD and DataFrame conversion](conversion-between-rdd-and-dataframe.ipynb)
-    + [Categorical Data](categorical-data.ipynb)
+    + [Categorical Data, `StringIndexer` and `OneHotEncoder`](stringindexer-and-onehotencoder.ipynb)
     + [Continuous variables to categorical variables](Continuous-variable-to-categorical-variable.ipynb)
     + [TF-IDF, HashingTF and CountVectorizer](TF-IDF.ipynb)
     + Feature processing:
