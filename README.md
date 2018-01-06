@@ -39,6 +39,7 @@ This repository contains mainly notes from learning Apache Spark by [Ming Chen](
     + [`udf()` function and SQL data types](udf-and-sql-types.ipynb):
         * use `udf()` function
         * difference between `ArrayType` and `StructType`
+    + [Dense and sparse vectors](dense-vs-sparse-vectors.ipynb)
 
 * ***Machine Learning***
     + [Machine Learning Framework](machine-learning-framework.Rmd)
