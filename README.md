@@ -23,12 +23,6 @@ This repository contains mainly notes from learning Apache Spark by [Ming Chen](
     + [RDD and DataFrame conversion](conversion-between-rdd-and-dataframe.ipynb)
     + [Categorical Data, `StringIndexer` and `OneHotEncoder`](stringindexer-and-onehotencoder.ipynb)
     + [Continuous variables to categorical variables](Continuous-variable-to-categorical-variable.ipynb)
-    + [TF-IDF, HashingTF and CountVectorizer](TF-IDF.ipynb)
-    + Feature processing:
-
-    	- [First data check](first-data-check.ipynb)
-    + [SQL functions](sql-functions.ipynb)
-    + [Add py Files to cluster](add-py-files-to-spark-cluster.ipynb)
     + [Import and export data](import-and-export-data.ipynb)   
     + [Subset data](subset-data.ipynb):
         * select rows by index
@@ -39,7 +33,13 @@ This repository contains mainly notes from learning Apache Spark by [Ming Chen](
     + [`udf()` function and SQL data types](udf-and-sql-types.ipynb):
         * use `udf()` function
         * difference between `ArrayType` and `StructType`
+    + [Pipeline](pipeline.ipynb)
     + [Dense and sparse vectors](dense-vs-sparse-vectors.ipynb)
+    + [TF-IDF, HashingTF and CountVectorizer](TF-IDF.ipynb)
+    + Feature processing:
+    	- [First data check](first-data-check.ipynb
+    + [SQL functions](sql-functions.ipynb)
+    + [Add py Files to cluster](add-py-files-to-spark-cluster.ipynb)
 
 * ***Machine Learning***
     + [Machine Learning Framework](machine-learning-framework.Rmd)
