@@ -26,7 +26,7 @@ This repository contains mainly notes from learning Apache Spark by [Ming Chen](
     + [Import and export data](import-and-export-data.ipynb)   
     + [Subset data](subset-data.ipynb):
         * select rows by index
-        * select rows by lodical criteria
+        * select rows by logical criteria
         * select columns by index
         * select columns by names
         * select columns by regex pattern
