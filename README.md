@@ -35,6 +35,7 @@ This repository contains mainly notes from learning Apache Spark by [Ming Chen](
         * difference between `ArrayType` and `StructType`
     + [Pipeline](pipeline.ipynb)
     + [Dense and sparse vectors](dense-vs-sparse-vectors.ipynb)
+    + [Assemble feature columns into a `featuresCol` column with `VectorAssembler`](vector-assembler.ipynb)
     + [TF-IDF, HashingTF and CountVectorizer](TF-IDF.ipynb)
     + Feature processing:
     	- [First data check](first-data-check.ipynb
