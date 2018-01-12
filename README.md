@@ -38,7 +38,7 @@ This repository contains mainly notes from learning Apache Spark by [Ming Chen](
     + [Assemble feature columns into a `featuresCol` column with `VectorAssembler`](vector-assembler.ipynb)
     + [TF-IDF, HashingTF and CountVectorizer](TF-IDF.ipynb)
     + Feature processing:
-    	- [First data check](first-data-check.ipynb
+    	- [First data check](first-data-check.ipynb)
     + [SQL functions](sql-functions.ipynb)
     + [Add py Files to cluster](add-py-files-to-spark-cluster.ipynb)
 
