@@ -55,12 +55,13 @@ file_tree = function(dir = '.'){
   # hide vakata-jstree-3.3.5 folder
   #jstree_index = grep(pattern = 'vakata-jstree-3.3.5', x = dirs)
   #dirs = dirs[-jstree_index]
+  github_repo_url = 'https://github.com/MingChen0919/learning-apache-spark/blob/master/'
   tags$ul(
     {
       if (length(files) > 0) {
         lapply(files, function(x){
           path_end = tail(strsplit(x, '/')[[1]],1)
-          li_item = tags$li(tags$a(path_end, href=x))
+          li_item = tags$li(tags$a(path_end, href=paste0(github_repo_url, x)))
           li_item$attribs = list('data-jstree'='{"icon":"jstree-file"}')
           li_item
         })
@@ -79,6 +80,7 @@ file_tree = function(dir = '.'){
   )
 }
 ```
+
 
 ```{r, echo=FALSE}
 # create a div container to store the file tree interface
