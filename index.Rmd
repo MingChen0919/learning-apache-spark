@@ -1,5 +1,5 @@
 ---
-title: 'Learning Apache Spark'
+title: '[Learning Apache Spark](https://github.com/MingChen0919/learning-apache-spark)'
 output:
     html_document:
       highlight: pygments
@@ -52,9 +52,9 @@ file_tree = function(dir = '.'){
   # files also include directorys, need to remove directorys
   files = files[!dir.exists(files)]
   dirs = list.dirs(path = dir, recursive = FALSE, full.names = TRUE)
-  # hide vakata-jstree-3.3.5 folder
-  #jstree_index = grep(pattern = 'vakata-jstree-3.3.5', x = dirs)
-  #dirs = dirs[-jstree_index]
+  # exclude .ipynb_checkpoints folder
+  ipynb_checkpoints = grep(pattern = 'ipynb_checkpoints', x = dirs)
+  dirs = dirs[-ipynb_checkpoints]
   github_repo_url = 'https://github.com/MingChen0919/learning-apache-spark/blob/master/'
   tags$ul(
     {
