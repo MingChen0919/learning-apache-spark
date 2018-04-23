@@ -1,0 +1,91 @@
+---
+title: 'Learning Apache Spark'
+output:
+    html_document:
+      highlight: pygments
+---
+
+```{r setup, include=FALSE, warning=FALSE, message=FALSE}
+knitr::opts_knit$set(progress = FALSE)
+knitr::opts_chunk$set(error = TRUE, echo = FALSE)
+library(htmltools)
+```
+
+```{r, echo=FALSE}
+# to make the css theme to work, <link></link> tags cannot be added directly 
+# as <script></script> tags as below.
+# it has to be added using a code chunk with the htmltool functions!!!
+css_link = tags$link()
+css_link$attribs = list(rel="stylesheet", href="vakata-jstree-3.3.5/dist/themes/default/style.min.css")
+css_link
+```
+
+```{r, eval=FALSE, echo=FALSE}
+# this code chunk is purely for adding comments
+# below is to add jQuery and jstree javascripts
+```
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="vakata-jstree-3.3.5/dist/jstree.min.js"></script>
+
+```{r, eval=FALSE, echo=FALSE}
+# this code chunk is purely for adding comments
+# javascript code below is to build the file tree interface
+# see this for how to implement opening hyperlink: https://stackoverflow.com/questions/18611317/how-to-get-i-get-leaf-nodes-in-jstree-to-open-their-hyperlink-when-clicked-when
+```
+<script>
+  $(function () {
+    // create an instance when the DOM is ready
+    $('#jstree').jstree().bind("select_node.jstree", function (e, data) {
+     window.open( data.node.a_attr.href, data.node.a_attr.target )
+    });
+  });
+</script>
+
+
+```{r}
+file_tree = function(dir = '.'){
+  # # get the OUTPUT_DIR folder data: dataset_NUMBER_files
+  # report_files_path = Sys.getenv('REPORT_FILES_PATH')
+  # output_dir = tail(strsplit(report_files_path, '/')[[1]], 1)
+  
+  files = list.files(path = dir, recursive = FALSE, full.names = TRUE)
+  # files also include directorys, need to remove directorys
+  files = files[!dir.exists(files)]
+  dirs = list.dirs(path = dir, recursive = FALSE, full.names = TRUE)
+  # hide vakata-jstree-3.3.5 folder
+  #jstree_index = grep(pattern = 'vakata-jstree-3.3.5', x = dirs)
+  #dirs = dirs[-jstree_index]
+  tags$ul(
+    {
+      if (length(files) > 0) {
+        lapply(files, function(x){
+          path_end = tail(strsplit(x, '/')[[1]],1)
+          li_item = tags$li(tags$a(path_end, href=x))
+          li_item$attribs = list('data-jstree'='{"icon":"jstree-file"}')
+          li_item
+        })
+      }
+    },
+    {
+      if (length(dirs) > 0) {
+        lapply(dirs, function(x){
+          x_path = strsplit(x, '/')[[1]][2]
+          li_item = tags$li(x_path, file_tree(x))
+          li_item$attribs = list('data-jstree'='{"icon":"jstree-folder"}')
+          li_item
+        })
+      }
+    }
+  )
+}
+```
+
+```{r, echo=FALSE}
+# create a div container to store the file tree interface
+tags$div(
+  id="jstree",
+  file_tree('notebooks')
+)
+```
+
+
