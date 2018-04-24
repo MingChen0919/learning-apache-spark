@@ -53,8 +53,8 @@ file_tree = function(dir = '.'){
   files = files[!dir.exists(files)]
   dirs = list.dirs(path = dir, recursive = FALSE, full.names = TRUE)
   # exclude .ipynb_checkpoints folder
-  ipynb_checkpoints = grep(pattern = 'ipynb_checkpoints', x = dirs)
-  dirs = dirs[-ipynb_checkpoints]
+  # ipynb_checkpoints = grep(pattern = 'ipynb_checkpoints', x = dirs)
+  # dirs = dirs[-ipynb_checkpoints]
   github_repo_url = 'https://github.com/MingChen0919/learning-apache-spark/blob/master/'
   tags$ul(
     {
