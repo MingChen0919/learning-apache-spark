@@ -70,8 +70,8 @@ file_tree = function(dir = '.'){
     {
       if (length(dirs) > 0) {
         lapply(dirs, function(x){
-          x_path = strsplit(x, '/')[[1]][2]
-          li_item = tags$li(x_path, file_tree(x))
+          path_end = tail(strsplit(x, '/')[[1]],1)
+          li_item = tags$li(path_end, file_tree(x))
           li_item$attribs = list('data-jstree'='{"icon":"jstree-folder"}')
           li_item
         })
