@@ -71,9 +71,11 @@ file_tree = function(dir = '.'){
       if (length(dirs) > 0) {
         lapply(dirs, function(x){
           path_end = tail(strsplit(x, '/')[[1]],1)
-          li_item = tags$li(path_end, file_tree(x))
-          li_item$attribs = list('data-jstree'='{"icon":"jstree-folder"}')
-          li_item
+          if (!(path_end %in% c('vakata-jstree-3.3.5', '.ipynb_checkpoints', 'spark-warehouse', 'ipynb'))) {
+            li_item = tags$li(path_end, file_tree(x))
+            li_item$attribs = list('data-jstree' = '{"icon":"jstree-folder"}')
+            li_item
+          }
         })
       }
     }
