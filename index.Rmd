@@ -73,7 +73,7 @@ file_tree = function(dir = '.'){
           path_end = tail(strsplit(x, '/')[[1]],1)
           if (!(path_end %in% c('vakata-jstree-3.3.5', '.ipynb_checkpoints', 'spark-warehouse', 'ipynb'))) {
             li_item = tags$li(path_end, file_tree(x))
-            li_item$attribs = list('data-jstree' = '{"icon":"jstree-folder"}')
+            li_item$attribs = list('data-jstree' = '{"icon":"jstree-folder"}', class=list('jstree-open'))
             li_item
           }
         })
@@ -84,6 +84,25 @@ file_tree = function(dir = '.'){
 ```
 
 
+**[Ming Chen](https://github.com/MingChen0919) & [Wenqiang Feng](http://web.utk.edu/~wfeng1/)**
+
+## Introduction
+
+This repository contains mainly notes from learning Apache Spark by [Ming Chen](https://github.com/MingChen0919) & [Wenqiang Feng](http://web.utk.edu/~wfeng1/). We try to use the detailed demo code and examples to show how to use pyspark for big data mining. **If you find your work wasn't cited in this note, please feel free to let us know.**
+
+
+## Cheat Sheets
+
++ [Python Basics](https://s3.amazonaws.com/assets.datacamp.com/blog_assets/PythonForDataScience.pdf)
++ [Pandas Basics](http://datacamp-community.s3.amazonaws.com/3857975e-e12f-406a-b3e8-7d627217e952)
++ [Numpy Basics](https://s3.amazonaws.com/assets.datacamp.com/blog_assets/Numpy_Python_Cheat_Sheet.pdf)
++ [Scikit-Learn](http://datacamp-community.s3.amazonaws.com/5433fa18-9f43-44cc-b228-74672efcd116)
++ [RDD Basics](https://s3.amazonaws.com/assets.datacamp.com/blog_assets/PySpark_Cheat_Sheet_Python.pdf)
++ [DataFrame Basics](https://s3.amazonaws.com/assets.datacamp.com/blog_assets/PySpark_SQL_Cheat_Sheet_Python.pdf)
++ [Apache Spark Cheat Sheet](https://hackr.io/tutorials/learn-apache-spark)
+    
+## Contents
+
 ```{r, echo=FALSE}
 # create a div container to store the file tree interface
 tags$div(
@@ -93,3 +112,6 @@ tags$div(
 ```
 
 
+## Feedback and suggestions
+
+Your comments and suggestions are highly appreciated. We are more than happy to receive corrections, suggestions or feedbacks for improvements.

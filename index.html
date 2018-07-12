@@ -73,6 +73,9 @@ img {
 .tabbed-pane {
   padding-top: 12px;
 }
+.html-widget {
+  margin-bottom: 20px;
+}
 button.code-folding-btn:focus {
   outline: none;
 }
@@ -116,9 +119,28 @@ $(document).ready(function () {
     });
   });
 </script>
+<p><strong><a href="https://github.com/MingChen0919">Ming Chen</a> &amp; <a href="http://web.utk.edu/~wfeng1/">Wenqiang Feng</a></strong></p>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>This repository contains mainly notes from learning Apache Spark by <a href="https://github.com/MingChen0919">Ming Chen</a> &amp; <a href="http://web.utk.edu/~wfeng1/">Wenqiang Feng</a>. We try to use the detailed demo code and examples to show how to use pyspark for big data mining. <strong>If you find your work wasn’t cited in this note, please feel free to let us know.</strong></p>
+</div>
+<div id="cheat-sheets" class="section level2">
+<h2>Cheat Sheets</h2>
+<ul>
+<li><a href="https://s3.amazonaws.com/assets.datacamp.com/blog_assets/PythonForDataScience.pdf">Python Basics</a></li>
+<li><a href="http://datacamp-community.s3.amazonaws.com/3857975e-e12f-406a-b3e8-7d627217e952">Pandas Basics</a></li>
+<li><a href="https://s3.amazonaws.com/assets.datacamp.com/blog_assets/Numpy_Python_Cheat_Sheet.pdf">Numpy Basics</a></li>
+<li><a href="http://datacamp-community.s3.amazonaws.com/5433fa18-9f43-44cc-b228-74672efcd116">Scikit-Learn</a></li>
+<li><a href="https://s3.amazonaws.com/assets.datacamp.com/blog_assets/PySpark_Cheat_Sheet_Python.pdf">RDD Basics</a></li>
+<li><a href="https://s3.amazonaws.com/assets.datacamp.com/blog_assets/PySpark_SQL_Cheat_Sheet_Python.pdf">DataFrame Basics</a></li>
+<li><a href="https://hackr.io/tutorials/learn-apache-spark">Apache Spark Cheat Sheet</a></li>
+</ul>
+</div>
+<div id="contents" class="section level2">
+<h2>Contents</h2>
 <div id="jstree">
 <ul>
-<li data-jstree="{&quot;icon&quot;:&quot;jstree-folder&quot;}">
+<li data-jstree="{&quot;icon&quot;:&quot;jstree-folder&quot;}" class="jstree-open">
 00-prerequisites
 <ul>
 <li data-jstree="{&quot;icon&quot;:&quot;jstree-file&quot;}">
@@ -126,7 +148,7 @@ $(document).ready(function () {
 </li>
 </ul>
 </li>
-<li data-jstree="{&quot;icon&quot;:&quot;jstree-folder&quot;}">
+<li data-jstree="{&quot;icon&quot;:&quot;jstree-folder&quot;}" class="jstree-open">
 01-data-strcture
 <ul>
 <li data-jstree="{&quot;icon&quot;:&quot;jstree-file&quot;}">
@@ -143,7 +165,7 @@ $(document).ready(function () {
 </li>
 </ul>
 </li>
-<li data-jstree="{&quot;icon&quot;:&quot;jstree-folder&quot;}">
+<li data-jstree="{&quot;icon&quot;:&quot;jstree-folder&quot;}" class="jstree-open">
 02-data-manipulation
 <ul>
 <li data-jstree="{&quot;icon&quot;:&quot;jstree-file&quot;}">
@@ -184,7 +206,7 @@ $(document).ready(function () {
 </li>
 </ul>
 </li>
-<li data-jstree="{&quot;icon&quot;:&quot;jstree-folder&quot;}">
+<li data-jstree="{&quot;icon&quot;:&quot;jstree-folder&quot;}" class="jstree-open">
 03-data-preparation
 <ul>
 <li data-jstree="{&quot;icon&quot;:&quot;jstree-file&quot;}">
@@ -195,7 +217,7 @@ $(document).ready(function () {
 </li>
 </ul>
 </li>
-<li data-jstree="{&quot;icon&quot;:&quot;jstree-folder&quot;}">
+<li data-jstree="{&quot;icon&quot;:&quot;jstree-folder&quot;}" class="jstree-open">
 04-miscellaneous
 <ul>
 <li data-jstree="{&quot;icon&quot;:&quot;jstree-file&quot;}">
@@ -218,7 +240,7 @@ $(document).ready(function () {
 </li>
 </ul>
 </li>
-<li data-jstree="{&quot;icon&quot;:&quot;jstree-folder&quot;}">
+<li data-jstree="{&quot;icon&quot;:&quot;jstree-folder&quot;}" class="jstree-open">
 05-module-turning
 <ul>
 <li data-jstree="{&quot;icon&quot;:&quot;jstree-file&quot;}">
@@ -229,10 +251,10 @@ $(document).ready(function () {
 </li>
 </ul>
 </li>
-<li data-jstree="{&quot;icon&quot;:&quot;jstree-folder&quot;}">
+<li data-jstree="{&quot;icon&quot;:&quot;jstree-folder&quot;}" class="jstree-open">
 06-machine-learning
 <ul>
-<li data-jstree="{&quot;icon&quot;:&quot;jstree-folder&quot;}">
+<li data-jstree="{&quot;icon&quot;:&quot;jstree-folder&quot;}" class="jstree-open">
 classification
 <ul>
 <li data-jstree="{&quot;icon&quot;:&quot;jstree-file&quot;}">
@@ -255,7 +277,7 @@ classification
 </li>
 </ul>
 </li>
-<li data-jstree="{&quot;icon&quot;:&quot;jstree-folder&quot;}">
+<li data-jstree="{&quot;icon&quot;:&quot;jstree-folder&quot;}" class="jstree-open">
 regression
 <ul>
 <li data-jstree="{&quot;icon&quot;:&quot;jstree-file&quot;}">
@@ -268,7 +290,7 @@ regression
 </li>
 </ul>
 </li>
-<li data-jstree="{&quot;icon&quot;:&quot;jstree-folder&quot;}">
+<li data-jstree="{&quot;icon&quot;:&quot;jstree-folder&quot;}" class="jstree-open">
 07-natural-language-processing
 <ul>
 <li data-jstree="{&quot;icon&quot;:&quot;jstree-file&quot;}">
@@ -283,6 +305,11 @@ regression
 </ul>
 </li>
 </ul>
+</div>
+</div>
+<div id="feedback-and-suggestions" class="section level2">
+<h2>Feedback and suggestions</h2>
+<p>Your comments and suggestions are highly appreciated. We are more than happy to receive corrections, suggestions or feedbacks for improvements.</p>
 </div>
 
 
